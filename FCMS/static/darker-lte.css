@@ -1,0 +1,17 @@
+.card, .card-body {
+    color: #876500;
+    background: #000b16;
+}
+
+.login-box, .register-box {
+  color: #1aa67d;
+  background: #000b16
+}
+
+.login-page, .register-page {
+  background: #000000;
+}
+
+.register-logo {
+  color: #876500;
+}

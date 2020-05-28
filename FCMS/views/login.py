@@ -21,6 +21,15 @@ class Login(deform.schema.CSRFSchema):
 
 
 @view_config(route_name='login', renderer='../templates/login.jinja2')
-def my_view(request):
+def login_view(request):
 
+    return {'project': 'Fleet Carrier Management System'}
+
+
+@view_config(route_name='register', renderer='../templates/register.jinja2')
+def register_view(request):
+    print(request.params)
+    if 'register' in request.params:
+        print("I got a form submission!")
+        return {'reg_success': True, 'project': 'Fleet Carrier Management System'}
     return {'project': 'Fleet Carrier Management System'}
