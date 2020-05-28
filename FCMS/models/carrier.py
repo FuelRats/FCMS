@@ -2,9 +2,9 @@ from sqlalchemy import (
     Column,
     Index,
     Integer,
-    Text, Boolean,
+    Text,
+    Boolean,
 )
-from sqlalchemy.dialects.postgresql import JSONB
 
 from .meta import Base
 
@@ -21,8 +21,6 @@ class Carrier(Base):
     theme = Column(Text)
     dockingAccess = Column(Text)
     notoriousAccess = Column(Boolean)
-    capacity = Column(JSONB)
-    itinerary = Column(JSONB)
     totalDistanceJumped = Column(Integer)
     currentJump = Column(Text)
     taxation = Column(Integer)

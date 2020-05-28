@@ -9,6 +9,8 @@
 {% elif reg_failure %}
     <h2><div style="text-align: center;">Registration failed!</div></h2>
     <h3>{{ reg_error }}</h3>
+{% elif reg_oauth %}
+    <h2><div style="text-align: center;">Please wait, redirecting for OAuth</div></h2>
 {% else %}
   <div class="card">
     <div class="card-body register-card-body">

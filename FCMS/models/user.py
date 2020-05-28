@@ -17,6 +17,7 @@ class User(Base):
     carrierid = Column(Integer)
     cmdr_name = Column(Text)
     access_token = Column(Text)
+    refresh_token = Column(Text)
     has_validated = Column(Boolean)
     public_carrier = Column(Boolean)
     banned = Column(Boolean)
