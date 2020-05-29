@@ -23,6 +23,11 @@ requires = [
     'bcrypt',
     'colander',
     'deform',
+    'passlib',
+    'argon2_cffi',
+    'psycopg2-binary',
+    'requests',
+    'authlib',
 ]
 
 tests_require = [

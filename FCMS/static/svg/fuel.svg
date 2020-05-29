@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1,0,0,1,-230,0)">
+        <g id="Fuel" transform="matrix(1,0,0,1,130,0)">
+            <rect x="100" y="0" width="100" height="100" style="fill:none;"/>
+            <g transform="matrix(1.01268,0,0,1.01268,-103.17,-0.634058)">
+                <circle cx="250" cy="50" r="46" style="fill:none;stroke:black;stroke-width:1.97px;"/>
+            </g>
+            <g transform="matrix(1.08333,0,0,1.08333,-94.2917,-41.5417)">
+                <circle cx="250" cy="49" r="5"/>
+            </g>
+            <g transform="matrix(2.16667,0,0,2.16667,-401.5,-50.125)">
+                <path d="M250,44C252.76,44 255,46.24 255,49C255,51.76 252.76,54 250,54C247.24,54 245,51.76 245,49C245,46.24 247.24,44 250,44ZM250,44.923C252.25,44.923 254.077,46.75 254.077,49C254.077,51.25 252.25,53.077 250,53.077C247.75,53.077 245.923,51.25 245.923,49C245.923,46.75 247.75,44.923 250,44.923Z"/>
+            </g>
+            <g transform="matrix(2.16667,0,0,2.16667,-391.667,-67.625)">
+                <path d="M250,44C252.76,44 255,46.24 255,49C255,51.76 252.76,54 250,54C247.24,54 245,51.76 245,49C245,46.24 247.24,44 250,44ZM250,44.923C252.25,44.923 254.077,46.75 254.077,49C254.077,51.25 252.25,53.077 250,53.077C247.75,53.077 245.923,51.25 245.923,49C245.923,46.75 247.75,44.923 250,44.923Z"/>
+            </g>
+            <g transform="matrix(2.16667,0,0,2.16667,-381.833,-50.125)">
+                <circle cx="250" cy="49" r="5"/>
+            </g>
+        </g>
+    </g>
+</svg>

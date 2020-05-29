@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-345,-345)">
+        <g id="Rearm" transform="matrix(1,0,0,1,245,345)">
+            <rect x="100" y="0" width="100" height="100" style="fill:none;"/>
+            <g transform="matrix(0.970173,0.970173,-0.970173,0.970173,157.646,-723.077)">
+                <rect x="381" y="434" width="27" height="4"/>
+            </g>
+            <g transform="matrix(0.970173,0.970173,-0.873156,0.873156,115.734,-681.166)">
+                <rect x="381" y="382" width="27" height="50"/>
+            </g>
+            <g transform="matrix(0.970173,0.970173,-0.970173,0.970173,157.646,-723.077)">
+                <path d="M381.032,385C381.756,367.996 394.5,354 394.5,354C394.5,354 407.244,367.996 407.968,385L381.032,385Z"/>
+            </g>
+        </g>
+    </g>
+</svg>

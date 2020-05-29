@@ -3,7 +3,7 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    Boolean,
+    Boolean, DateTime,
 )
 
 from .meta import Base
@@ -12,9 +12,10 @@ from .meta import Base
 class Carrier(Base):
     __tablename__ = 'carriers'
     id = Column(Integer, primary_key=True)
+    owner = Column(Integer)
     callsign = Column(Text)
     name = Column(Text)
-    currentStarSystem = Column(Integer)
+    currentStarSystem = Column(Text)
     balance = Column(Integer)
     fuel = Column(Integer)
     state = Column(Text)
@@ -38,6 +39,7 @@ class Carrier(Base):
     hasBlackMarket = Column(Boolean)
     hasVoucherRedemption = Column(Boolean)
     hasExploration = Column(Boolean)
+    lastUpdated = Column(DateTime)
 
 
 Index('carrier_index', Carrier.id, unique=True)

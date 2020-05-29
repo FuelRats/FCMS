@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1,0,0,1,-115,-345)">
+        <g id="Refuel" transform="matrix(1,0,0,1,115,345)">
+            <rect x="0" y="0" width="100" height="100" style="fill:none;"/>
+            <g transform="matrix(1.17949,0,0,1.17949,-142.256,-411.179)">
+                <path d="M163,352C163,352 139,389.8 139,406C139,419.246 149.754,430 163,430C176.246,430 187,419.246 187,406C187,389.8 163,352 163,352Z" style="stroke:black;stroke-width:3.39px;"/>
+            </g>
+        </g>
+    </g>
+</svg>

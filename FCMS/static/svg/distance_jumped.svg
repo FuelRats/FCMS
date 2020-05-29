@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,0,-230)">
+        <g id="Distance-Jumped" serif:id="Distance Jumped" transform="matrix(1,0,0,1,-100,230)">
+            <rect x="100" y="0" width="100" height="100" style="fill:none;"/>
+            <g transform="matrix(1.32804,-1.10376,0.271269,0.326389,2.15523,9.79183)">
+                <clipPath id="_clip1">
+                    <path d="M90.104,280.837L47.35,136.254L11.817,310.216L54.571,454.799L90.104,280.837ZM17.08,306.567L31.145,237.708L29.364,231.683L15.298,300.543L17.08,306.567ZM20.197,317.11L34.263,248.25L32.481,242.226L18.416,311.086L20.197,317.11ZM24.205,330.665L38.271,261.805L36.489,255.781L22.424,324.64L24.205,330.665Z"/>
+                </clipPath>
+                <g clip-path="url(#_clip1)">
+                    <g>
+                        <path d="M10,296.5L10,267.5L71.422,267.5L73.464,253L89,282L73.464,311L71.422,296.5L10,296.5Z"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-230,-115)">
+        <g id="Capacity" transform="matrix(1,0,0,1,130,115)">
+            <rect x="100" y="0" width="100" height="100" style="fill:none;"/>
+            <g transform="matrix(1,0,0,1,-130,-105.5)">
+                <path d="M328,196L232,196L256,141L304,141L328,196ZM259.273,146L239.637,191L320.363,191L300.727,146L259.273,146Z"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-130,-133.5)">
+                <path d="M280,143C288.279,143 295,149.721 295,158C295,166.279 288.279,173 280,173C271.721,173 265,166.279 265,158C265,149.721 271.721,143 280,143ZM280,148C285.519,148 290,152.481 290,158C290,163.519 285.519,168 280,168C274.481,168 270,163.519 270,158C270,152.481 274.481,148 280,148Z"/>
+            </g>
+        </g>
+    </g>
+</svg>

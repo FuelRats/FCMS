@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-230,-345)">
+        <g id="Repair" transform="matrix(1,0,0,1,130,345)">
+            <rect x="100" y="0" width="100" height="100" style="fill:none;"/>
+            <g transform="matrix(0.69268,-0.69268,0.57226,0.57226,-275.823,23.0435)">
+                <path d="M313,386L239.556,386L243.162,395.607L239.373,405L313,405L313,386Z"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-129,-345)">
+                <path d="M308.883,352.645L295.375,366.153L298.222,376.778L308.847,379.625L322.361,366.111L325.011,376L310,391.011L289.494,385.517L284,365.011L299.011,350L308.883,352.645Z"/>
+            </g>
+            <g transform="matrix(1.13382,-0.303806,0.303806,1.13382,-324.623,-276.003)">
+                <path d="M280,386L287.794,390.5L287.794,399.5L280,404L272.206,399.5L272.206,390.5L280,386ZM280,390L284.33,392.5L284.33,397.5L280,400L275.67,397.5L275.67,392.5L280,390Z"/>
+            </g>
+        </g>
+    </g>
+</svg>
