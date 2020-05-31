@@ -77,7 +77,7 @@ def capi(endpoint, user):
         print("Expired token!")
         newtoken = update_token(client.token, ref_token=refresh_token, user=user)
         client.token = newtoken
-        user.token = dict(client.token)
+        user.access_token = str(dict(client.token))
         user.refresh_token = client.token['refresh_token']
         user.token_expiration = client.token['expires_at']
         print(f"Updated token: {newtoken}")
@@ -92,7 +92,7 @@ def capi(endpoint, user):
             newtoken = update_token(client.token, ref_token=refresh_token, user=user)
             print(f"Newtoken: {newtoken}")
             client.token = newtoken
-            user.token = dict(client.token)
+            user.access_token = str(dict(client.token))
             user.refresh_token = client.token['refresh_token']
             user.token_expiration = client.token['expires_at']
 

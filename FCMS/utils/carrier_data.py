@@ -75,20 +75,22 @@ def update_carrier(request, cid, user):
         request.dbsession.query(Ship).filter(Ship.carrier_id
                                              == mycarrier.id).delete()
         print(jcarrier['ships']['shipyard_list'])
-        for item, it in jcarrier['ships']['shipyard_list'].items():
-            print(item)
-            print(it)
-            sp = Ship(carrier_id=mycarrier.id, name=it['name'],
-                      ship_id=it['id'], basevalue=it['basevalue'],
-                      stock=it['stock'])
-            request.dbsession.add(sp)
-        request.dbsession.query(Module).filter(Module.carrier_id
-                                               == mycarrier.id).delete()
+        if jcarrier['ships']['shipyard_list']:
+            for item, it in jcarrier['ships']['shipyard_list'].items():
+                print(item)
+                print(it)
+                sp = Ship(carrier_id=mycarrier.id, name=it['name'],
+                          ship_id=it['id'], basevalue=it['basevalue'],
+                          stock=it['stock'])
+                request.dbsession.add(sp)
+            request.dbsession.query(Module).filter(Module.carrier_id
+                                                   == mycarrier.id).delete()
         print(jcarrier['modules'])
-        for item, it in jcarrier['modules'].items():
-            md = Module(carrier_id=mycarrier.id, category=it['category'],
-                        name=it['name'], cost=it['cost'], stock=it['stock'],
-                        module_id=it['id'])
-            request.dbsession.add(md)
+        if jcarrier['modules']:
+            for item, it in jcarrier['modules'].items():
+                md = Module(carrier_id=mycarrier.id, category=it['category'],
+                            name=it['name'], cost=it['cost'], stock=it['stock'],
+                            module_id=it['id'])
+                request.dbsession.add(md)
         return jcarrier or None
     return None

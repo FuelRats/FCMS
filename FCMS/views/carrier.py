@@ -10,6 +10,11 @@ from ..utils import util
 from ..utils import carrier_data
 
 
+@view_config(route_name='carrier_subview', renderer='../templates/my_carrier.jinja2')
+def carrier_subview(request):
+    return
+
+
 @view_config(route_name='carrier', renderer='../templates/my_carrier.jinja2')
 def carrier_view(request):
     cid = request.matchdict['cid']
@@ -35,10 +40,10 @@ def carrier_view(request):
                     'fuel': mycarrier.fuel,
                     'current_system': mycarrier.currentStarSystem,
                     'last_updated': mycarrier.lastUpdated,
-                    'ships': jcarrier['ships']['shipyard_list'].items(),
-                    'itinerary': jcarrier['itinerary']['completed'],
-                    'market': jcarrier['market']['commodities'],
-                    'modules': jcarrier['modules'].items(),
+                    'ships': jcarrier['ships']['shipyard_list'].items() if jcarrier['ships']['shipyard_list'] else {},
+                    'itinerary': jcarrier['itinerary']['completed'] or {},
+                    'market': jcarrier['market']['commodities'] or {},
+                    'modules': jcarrier['modules'].items() if jcarrier['modules'] else {},
             }
         shp = request.dbsession.query(ship.Ship).filter(ship.Ship.carrier_id == mycarrier.id)
         ships = {}
