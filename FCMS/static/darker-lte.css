@@ -1,6 +1,10 @@
+body {
+  color: #e9e9e9;
+}
+
 .card, .card-body {
-    color: #876500;
-    background: #000b16;
+  color: #dddddd;
+  background: #1a1a1a;
 }
 
 .login-box, .register-box {
@@ -14,4 +18,68 @@
 
 .register-logo {
   color: #876500;
+}
+
+.table td {
+  border-top-color: #333333;
+}
+
+.table thead th {
+  border-bottom-color: #333333;
+}
+
+.content-wrapper {
+  background: #000000;
+}
+
+[class*='sidebar-dark-'] {
+  background-color: #1a1a1a;
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+.info-box {
+  background: #1a1a1a;
+}
+
+.info-box .info-box-icon {
+  padding: 0.5rem;
+}
+
+td i.icon {
+  display: inline-block;
+
+  width: 30px;
+  margin-right: 0.5em;
+}
+
+.content-header h1.text-dark {
+  color: #ffffff !important;
+}
+
+a {
+  color: #ab3f3f;
+}
+
+a:hover {
+  color: #d65050;
+}
+
+a.text-muted:hover {
+  color: #ab3f3f !important;
+}
+
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active, .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
+  background-color: #ab3f3f;
+}
+
+[class*='sidebar-dark-'] .nav-treeview > .nav-item > .nav-link.active, [class*='sidebar-dark-'] .nav-treeview > .nav-item > .nav-link.active:hover, [class*='sidebar-dark-'] .nav-treeview > .nav-item > .nav-link.active:focus {
+  background-color: rgba(43, 43, 43, 0.9);
+  color: #e9e9e9;
+}
+
+.btn-group.show .btn-tool, .btn-tool:hover {
+  color: #d65050;
 }
