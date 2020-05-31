@@ -4,9 +4,10 @@ from pyramid.view import view_config
 from pyramid.response import Response
 import pyramid.httpexceptions as exc
 from pyramid.security import remember, forget
-from ..models import user, carrier
+from ..models import user, carrier, itinerary, cargo, ship, module, market
 from ..utils import capi
 from ..utils import util
+from ..utils import carrier_data
 
 
 @view_config(route_name='carrier', renderer='../templates/my_carrier.jinja2')
@@ -18,46 +19,61 @@ def carrier_view(request):
         last = mycarrier.lastUpdated
         print(f"Last: {last}")
         print(f"Delta: {datetime.now() - timedelta(hours=2)}")
-        if last < datetime.now() - timedelta(hours=2):
+        if not last:
+            last = datetime.now() - timedelta(hours=3)  # Cheap hack to sort out missing lastUpdated.
+        if last < datetime.now() - timedelta(minutes=2):
             print("Old carrier data, refresh!")
-            owner = request.dbsession.query(user.User).filter(user.User.id == mycarrier.owner).one_or_none()
-            if owner:
-                jcarrier = capi.get_carrier(owner)
-                print(f"New carrier: {jcarrier}")
-                services = jcarrier['market']['services']
-                mycarrier.owner = owner.id
-                mycarrier.callsign = jcarrier['name']['callsign']
-                mycarrier.name = jcarrier['name']['vanityName']
-                mycarrier.currentStarSystem = jcarrier['currentStarSystem']
-                mycarrier.balance = jcarrier['balance']
-                mycarrier.fuel = jcarrier['fuel']
-                mycarrier.state = jcarrier['state']
-                mycarrier.theme = jcarrier['theme']
-                mycarrier.dockingAccess = jcarrier['dockingAccess']
-                mycarrier.notoriousAccess = jcarrier['notoriousAccess']
-                mycarrier.totalDistanceJumped = jcarrier['itinerary']['totalDistanceJumpedLY']
-                mycarrier.currentJump = jcarrier['itinerary']['currentJump']
-                mycarrier.taxation = jcarrier['finance']['taxation']
-                mycarrier.coreCost = jcarrier['finance']['coreCost']
-                mycarrier.servicesCost = jcarrier['finance']['servicesCost']
-                mycarrier.jumpsCost = jcarrier['finance']['jumpsCost']
-                mycarrier.numJumps = jcarrier['finance']['numJumps']
-                mycarrier.hasCommodities = True
-                mycarrier.hasCarrierFuel = True
-                mycarrier.hasRearm = True if services['rearm'] == 'ok' else False
-                mycarrier.hasShipyard = True if services['shipyard'] == 'ok' else False
-                mycarrier.hasOutfitting = True if services['outfitting'] == 'ok' else False
-                mycarrier.hasBlackMarket = True if services['blackmarket'] == 'ok' else False
-                mycarrier.hasVoucherRedemption = True if services['voucherredemption'] == 'ok' else False
-                mycarrier.hasExploration = True if services['exploration'] == 'ok' else False
-                mycarrier.lastUpdated = datetime.now()
+            jcarrier = carrier_data.update_carrier(request, mycarrier.id, user)
+            if not jcarrier:
+                print("Carrier update failed. Present old data.")
+            return {
+                    'sidebar_navlinks': True,
+                    'sidebar_treeview': True,
+                    'cmdr_name': 'Absolver',
+                    'callsign': mycarrier.callsign,
+                    'name': util.from_hex(mycarrier.name),
+                    'fuel': mycarrier.fuel,
+                    'current_system': mycarrier.currentStarSystem,
+                    'last_updated': mycarrier.lastUpdated,
+                    'ships': jcarrier['ships']['shipyard_list'].items(),
+                    'itinerary': jcarrier['itinerary']['completed'],
+                    'market': jcarrier['market']['commodities'],
+                    'modules': jcarrier['modules'].items(),
+            }
+        shp = request.dbsession.query(ship.Ship).filter(ship.Ship.carrier_id == mycarrier.id)
+        ships = {}
+        for sp in shp:
+            ships[sp.name] = {'name': sp.name, 'ship_id': sp.ship_id, 'basevalue': sp.basevalue,
+                                'stock': sp.stock}
+        iti = request.dbsession.query(itinerary.Itinerary).filter(itinerary.Itinerary.carrier_id == mycarrier.id)
+        its = []
+        for it in iti:
+            its.append({"departureTime": it.departureTime, 'arrivalTime': it.arrivalTime,
+                          'visitDurationSeconds': it.visitDurationSeconds,
+                          'starsystem': it.starsystem})
+        mkq = request.dbsession.query(market.Market).filter(market.Market.carrier_id == mycarrier.id)
+        mkt = []
+        for it in mkq:
+            mkt.append({'id': it.commodity_id, 'categoryname': it.categoryname, 'name': it.name,
+                        'stock': it.stock, 'buyPrice': it.buyPrice, 'sellPrice': it.sellPrice,
+                        'demand': it.demand})
+
+        mdq = request.dbsession.query(module.Module).filter(module.Module.carrier_id == mycarrier.id)
+        mods = {}
+        for md in mdq:
+            mods[md.id] = {'id': md.module_id, 'category': md.category, 'name': md.name,
+                           'cost': md.cost, 'stock': md.stock}
 
         return {
             'callsign': mycarrier.callsign,
             'name': util.from_hex(mycarrier.name),
             'fuel': mycarrier.fuel,
             'current_system': mycarrier.currentStarSystem,
-            'last_updated': mycarrier.lastUpdated
+            'last_updated': mycarrier.lastUpdated,
+            'ships': ships.items(),
+            'itinerary': iti,
+            'market': mkt,
+            'modules': mods.items()
         }
 
     else:

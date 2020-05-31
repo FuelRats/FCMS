@@ -5,7 +5,10 @@
       <a href="../../index2.html"><b>{{ project }}</b></a>
   </div>
 {% if reg_success %}
-    <h2><div style="text-align: center;">Registration successful</div></h2>
+    <h2><div style="text-align: center;">
+        Registration successful.
+        Click <a href="{{ request.route_url('login') }}">here/<a> to log in
+    </div></h2>
 {% elif reg_failure %}
     <h2><div style="text-align: center;">Registration failed!</div></h2>
     <h3>{{ reg_error }}</h3>

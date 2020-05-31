@@ -8,6 +8,11 @@ import zope.sqlalchemy
 from .mymodel import MyModel  # flake8: noqa
 from .user import User
 from .carrier import Carrier
+from .itinerary import Itinerary
+from .cargo import Cargo
+from .module import Module
+from .ship import Ship
+from .market import Market
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

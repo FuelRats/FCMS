@@ -2,18 +2,52 @@ import ast
 import json
 from urllib.parse import urljoin
 import requests
+from authlib.integrations.base_client import UnsupportedTokenTypeError
 from authlib.integrations.requests_client import OAuth2Session
 from pyramid import threadlocal
 
 
 settings = threadlocal.get_current_registry().settings
-capiURL = settings['capiURL'] or 'https://pcompanion.orerve.net'
+capiURL = settings['capiURL'] or 'https://pts-companion.orerve.net'
 authURL = settings['authURL'] or 'https://auth.frontierstore.net'
 redirectURL = settings['redirectURL'] or 'https://fleetcarrier.space/oauth/callback'
 client_id = settings['client_id']
 client_secret = settings['client_secret']
 token_endpoint = authURL+'/token'
 auth_endpoint = authURL+'/auth'
+
+
+def update_token(token, ref_token=None, user=None):
+    print(f"update_token called! User: {user}")
+    print(f"Token: {token}")
+    print(f"Refresh: {ref_token}")
+    client.token = token
+    try:
+        new_token = client.refresh_token(token_endpoint, ref_token)
+        if 'message' in new_token:
+            print(f"Failed! {new_token}: Retry with request...")
+            data = {'grant_type': 'refresh_token', 'refresh_token': ref_token,
+                    'client_id': client_id, }
+            r = requests.post(urljoin(authURL, token_endpoint), data=data)
+            if r.status_code == requests.codes.ok:
+                new_token = r.json()
+                print(f"Manual refresh: {new_token}")
+                return new_token
+            else:
+                print(f"Not OK! {r.status_code}: {r.content}")
+        else:
+            print(f"Success? {new_token}")
+            return new_token
+    except UnsupportedTokenTypeError:
+        # Failed, let's do it manually.
+        data = {'grant_type': 'refresh_token', 'refresh_token': ref_token,
+                'client_id': client_id}
+        r = requests.post(urljoin(authURL,token_endpoint), data=data)
+        if r.status_code == requests.codes.ok:
+            new_token = r.json()
+            print(f"Manual refresh: {new_token}")
+            return new_token
+
 
 client = OAuth2Session(client_id=client_id, client_secret=client_secret, scope='auth capi',
                        token_endpoint_auth_method='client_secret_post',
@@ -27,13 +61,43 @@ def capi(endpoint, user):
     :param user: The user object
     :return: A string containing the response from CAPI
     """
-    client.token = ast.literal_eval(user.access_token)
+    # Do a bloody song and dance, because can't be sure if the token passed with the user is a stored db string,
+    # a dict fresh from the initial OAuth request, or an authlib token object...
+    if isinstance(user.access_token, str):
+        client.token = ast.literal_eval(user.access_token)
+        refresh_token = ast.literal_eval(user.access_token)['refresh_token']
+    elif isinstance(user.access_token, dict):
+        client.token = user.access_token
+        refresh_token = None
+    else:
+        refresh_token = None
+    print(f"CAPI Refresh token: {refresh_token}")
+    print(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
+    if client.token.is_expired():
+        print("Expired token!")
+        newtoken = update_token(client.token, ref_token=refresh_token, user=user)
+        client.token = newtoken
+        user.token = dict(client.token)
+        user.refresh_token = client.token['refresh_token']
+        user.token_expiration = client.token['expires_at']
+        print(f"Updated token: {newtoken}")
+
     try:
         res = client.get(urljoin(capiURL, endpoint))
         res.raise_for_status()
         return res.content
     except requests.HTTPError as err:
+        if res.status_code == 401:
+            print("Unauthorized? Try a refresh.")
+            newtoken = update_token(client.token, ref_token=refresh_token, user=user)
+            print(f"Newtoken: {newtoken}")
+            client.token = newtoken
+            user.token = dict(client.token)
+            user.refresh_token = client.token['refresh_token']
+            user.token_expiration = client.token['expires_at']
+
         print(f"Failed to get CAPI resource! {err}")
+        return None
 
 
 def get_carrier(user):
@@ -42,7 +106,10 @@ def get_carrier(user):
     :param user: The user owning the carrier we're fetching.
     :return: A dict with carrier information.
     """
-    return json.loads(capi('/fleetcarrier', user))
+    try:
+        return json.loads(capi('/fleetcarrier', user))
+    except TypeError:
+        return None
 
 
 def get_cmdr(user):
@@ -51,7 +118,10 @@ def get_cmdr(user):
     :param user: The user object for whom we're fetching data
     :return: A dict with player information.
     """
-    return json.loads(capi('/profile', user))
+    try:
+        return json.loads(capi('/profile', user))
+    except TypeError:
+        return None
 
 
 def get_auth_url():

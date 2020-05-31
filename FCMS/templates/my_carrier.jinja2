@@ -1,4 +1,5 @@
 {% include "header.jinja2" %}
+{% include "sidebar.jinja2" %}
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -19,6 +20,40 @@
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content-header -->
+{% if error  %}
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">No carrier registered!</h5>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <p class="text-center">
+                      <strong>Register your carrier</strong>
+                        You don't have a carrier registered. Click <a href="{{ request.route_url('oauth') }}">here to Oauth with FDev.</a>
+                    </p>
+
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+          <!-- Temp close -->
+      </div>
+    </section>
+  </div>
+{% else %}
 
       <!-- Main content -->
     <section class="content">
@@ -91,10 +126,193 @@
           <!-- /.col -->
         </div>
         <!-- /.row -->
+      <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header border-0">
+                <h3 class="card-title">Ships</h3>
+                <div class="card-tools">
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-bars"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-striped table-valign-middle">
+                  <thead>
+                  <tr>
+                    <th>Ship</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Coriolis</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for ship, it in ships %}
+                  <tr>
+                    <td>
+                      <img src="{{ request.static_url('FCMS:static/svg/shipyard.svg') }}" alt="Ship" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                        {{ it.name|e }}
+                    </td>
+                    <td>{{ it.basevalue }}</td>
+                    <td>
+                        {{ it.stock }}
+                    </td>
+                    <td>
+                      <a href="#" class="text-muted">
+                        <i class="fas fa-search"></i>
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- /.card -->
+      </div>
+      <div class="col-lg-6">
+
+            <div class="card">
+              <div class="card-header border-0">
+                <h3 class="card-title">Itinerary</h3>
+                <div class="card-tools">
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-bars"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-striped table-valign-middle">
+                  <thead>
+                  <tr>
+                    <th>System</th>
+                    <th>Arrival</th>
+                    <th>Duration</th>
+                    <th>Departure</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for it in itinerary %}
+                  <tr>
+                    <td>
+                      <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                        {{ it.starsystem|e }}
+                    </td>
+                    <td>{{ it.arrivalTime }}</td>
+                    <td>
+                        {{ it.visitDurationSeconds }}
+                    </td>
+                    <td>
+                        {{ it.departureTime }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- /.card -->
+
+
+            <div class="card">
+              <div class="card-header border-0">
+                <h3 class="card-title">Market</h3>
+                <div class="card-tools">
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-bars"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-striped table-valign-middle">
+                  <thead>
+                  <tr>
+                    <th>Stock/Demand</th>
+                    <th>Item</th>
+                    <th>Buy price</th>
+                    <th>Sell Price</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for it in market %}
+                  <tr>
+                    <td>
+                      <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                        {{ it.stock if it.stock > 0 else it.demand }}
+                    </td>
+                    <td>{{ it.name }}</td>
+                    <td>
+                        {{ it.buyPrice }}
+                    </td>
+                    <td>
+                        {{ it.sellPrice }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- /.card -->
+
+
+
+            <div class="card">
+              <div class="card-header border-0">
+                <h3 class="card-title">Modules</h3>
+                <div class="card-tools">
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-bars"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-striped table-valign-middle">
+                  <thead>
+                  <tr>
+                    <th>Stock</th>
+                    <th>Category</th>
+                    <th>Item</th>
+                    <th>Price</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for void, it in modules %}
+                  <tr>
+                    <td>
+                      <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                        {{ it.stock }}
+                    </td>
+                    <td>{{ it.category }}</td>
+                    <td>
+                        {{ it.name }}
+                    </td>
+                    <td>
+                        {{ it.cost }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- /.card -->
+
+
           <!-- Temp close -->
       </div>
     </section>
-  </div>
-<object type="image/svg+xml" data="{{ request.static_url('FCMS:static/Frog-Sillhouette.svg') }}" alt="Croak!">
-    No SVG support!</object>
+{% endif %}
 {% include "footer.jinja2" %}

@@ -1,28 +1,11 @@
 from datetime import datetime
 
-import colander as colander
-import deform as deform
-from deform import widget
 from pyramid.view import view_config
-from pyramid.response import Response
 import pyramid.httpexceptions as exc
 from pyramid.security import remember, forget
 from ..models import user, carrier
 from ..utils import capi
 from ..utils.encryption import pwd_context
-
-
-class Login(deform.schema.CSRFSchema):
-
-    name = colander.SchemaNode(
-        colander.String(),
-        title="Username")
-
-    age = colander.SchemaNode(
-        colander.String(),
-        title="Password",
-        widget=widget.PasswordWidget,
-        description="Your password")
 
 
 @view_config(route_name='login', renderer='../templates/login.jinja2')
@@ -37,7 +20,7 @@ def login_view(request):
             if pwd_context.verify(request.params['pass'], res.password):
                 print("Valid password!")
                 headers = remember(request, res.id)
-                return exc.HTTPFound(location=request.route_url('home'), headers=headers)
+                return exc.HTTPFound(location=request.route_url('my_carrier'), headers=headers)
             else:
                 print("Wrong password!")
         else:
@@ -66,14 +49,14 @@ def register_view(request):
         cryptpass = pwd_context.hash(request.params['pass'])
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1, cmdr_name=request.params['cmdr_name'], has_validated=False, public_carrier=True, banned=False)
         request.dbsession.add(newuser)
-        return {'reg_success': True, 'project': 'Fleet Carrier Management System'}
+        return exc.HTTPFound(location=request.route_url('login'))
     return {'project': 'Fleet Carrier Management System'}
 
 
 @view_config(route_name='oauth', renderer='../templates/register.jinja2')
 def oauth(request):
     url, state = capi.get_auth_url()
-    raise exc.HTTPFound(location=url)
+    return exc.HTTPFound(location=url)
 
 
 @view_config(route_name='oauth_callback', renderer='../templates/register.jinja2')
@@ -86,26 +69,39 @@ def oauth_callback(request):
     state = request.params['state']
     token = capi.get_token(request.url, state=state)
     print(token)
-    user.token = token
+    user.access_token = str(dict(token))
     user.refresh_token = token['refresh_token']
     user.token_expiration = token['expires_at']
-    request.dbsession.add(user)
-    jcarrier = capi.get_carrier(user)
-    print(jcarrier)
-    services = jcarrier['market']['services']
-    newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'], name=jcarrier['name']['vanityName'],
-                                 currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
-                                 fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],
-                                 dockingAccess=jcarrier['dockingAccess'], notoriousAccess=jcarrier['notoriousAccess'],
-                                 totalDistanceJumped=jcarrier['itinerary']['totalDistanceJumpedLY'], currentJump=jcarrier['itinerary']['currentJump'],
-                                 taxation=jcarrier['finance']['taxation'], coreCost=jcarrier['finance']['coreCost'], servicesCost=jcarrier['finance']['servicesCost'],
-                                 jumpsCost=jcarrier['finance']['jumpsCost'], numJumps=jcarrier['finance']['numJumps'], hasCommodities=True,
-                                 hasCarrierFuel=True, hasRearm=True if services['rearm']=='ok' else False,
-                                 hasShipyard=True if services['shipyard']=='ok' else False,
-                                 hasOutfitting=True if services['outfitting']=='ok' else False,
-                                 hasBlackMarket=True if services['blackmarket']=='ok' else False,
-                                 hasVoucherRedemption=True if services['voucherredemption']=='ok' else False,
-                                 hasExploration=True if services['exploration']=='ok' else False,
-                                 lastUpdated=datetime.now())
-    request.dbsession.add(newcarrier)
-    return {'project': 'Got a callback!'}
+    print(f"User token ({type(user.access_token)}): {user.access_token}")
+    return exc.HTTPFound(location=request.route_url('oauth_finalize'))
+
+
+@view_config(route_name='oauth_finalize', renderer='../templates/register.jinja2')
+def oauth_finalize(request):
+    user = request.user
+    try:
+        jcarrier = capi.get_carrier(user)
+        print(jcarrier)
+        services = jcarrier['market']['services']
+        oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
+        if oc:
+            print("Already have their carrier! No need for further shenanigans.")
+            return {'project': 'Got a callback, updated existing user oauth keys.'}
+        newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'], name=jcarrier['name']['vanityName'],
+                                     currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
+                                     fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],
+                                     dockingAccess=jcarrier['dockingAccess'], notoriousAccess=jcarrier['notoriousAccess'],
+                                     totalDistanceJumped=jcarrier['itinerary']['totalDistanceJumpedLY'], currentJump=jcarrier['itinerary']['currentJump'],
+                                     taxation=jcarrier['finance']['taxation'], coreCost=jcarrier['finance']['coreCost'], servicesCost=jcarrier['finance']['servicesCost'],
+                                     jumpsCost=jcarrier['finance']['jumpsCost'], numJumps=jcarrier['finance']['numJumps'], hasCommodities=True,
+                                     hasCarrierFuel=True, hasRearm=True if services['rearm']=='ok' else False,
+                                     hasShipyard=True if services['shipyard']=='ok' else False,
+                                     hasOutfitting=True if services['outfitting']=='ok' else False,
+                                     hasBlackMarket=True if services['blackmarket']=='ok' else False,
+                                     hasVoucherRedemption=True if services['voucherredemption']=='ok' else False,
+                                     hasExploration=True if services['exploration']=='ok' else False,
+                                     lastUpdated=datetime.now())
+        request.dbsession.add(newcarrier)
+    except:
+        return {'project': 'Failed to retrieve your carrier. Did you buy one?'}
+    return {'project': 'OAuth flow completed. Carrier added.'}

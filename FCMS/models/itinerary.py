@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column,
     Index,
     Integer,
-    Text, Boolean, DateTime,
+    Text, Boolean, DateTime, ForeignKey,
 )
 
 from .meta import Base
@@ -11,7 +11,7 @@ from .meta import Base
 class Itinerary(Base):
     __tablename__ = 'itinerary'
     id = Column(Integer, primary_key=True)
-    carrier_id = Column(Integer)
+    carrier_id = Column(Integer, ForeignKey('carriers.id'))
     starsystem = Column(Text)
     departureTime = Column(DateTime)
     arrivalTime = Column(DateTime)

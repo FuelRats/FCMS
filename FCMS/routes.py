@@ -8,3 +8,4 @@ def includeme(config):
     config.add_route('oauth', '/oauth')
     config.add_route('my_carrier', '/my_carrier')
     config.add_route('carrier', '/carrier/{cid}')
+    config.add_route('oauth_finalize', '/oauth/finalize')

@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column,
     Index,
     Integer,
-    Text, Boolean, DateTime,
+    Text, Boolean, DateTime, ForeignKey,
 )
 
 from .meta import Base
@@ -12,7 +12,7 @@ class Module(Base):
     __tablename__ = 'modules'
     id = Column(Integer, primary_key=True)
     category = Column(Text)
-    carrier_id = Column(Integer)
+    carrier_id = Column(Integer, ForeignKey('carriers.id'))
     module_id = Column(Integer)
     name = Column(Text)
     cost = Column(Integer)
