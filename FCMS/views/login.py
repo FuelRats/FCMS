@@ -41,6 +41,10 @@ def register_view(request):
     if 'register' in request.params:
         print("I got a form submission!")
         print(request.params)
+        if not request.params['email']:
+            return {'reg_failure': True, 'message': 'No email set.'}
+        if not request.params['cmdr_name']:
+            return {'reg_failure': True, 'message': 'No CMDR name set.'}
         if request.params['pass'] != request.params['pass_verify']:
             return {'reg_failure': True, 'message': 'Passwords do not match.'}
         res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()

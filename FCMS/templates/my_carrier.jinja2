@@ -68,7 +68,7 @@
 
               <div class="info-box-content">
                 <span class="info-box-text">{{ callsign }}</span>
-                <span class="info-box-text">
+                <span class="info-box-number">
                   {{ name }}
                 </span>
               </div>
@@ -126,6 +126,296 @@
           <!-- /.col -->
         </div>
         <!-- /.row -->
+
+              <!-- Info boxes -->
+        <div class="row">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/balance.svg') }}" alt="Balance">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Balance</span>
+                <span class="info-box-text">
+                  {{ balance }}
+                </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/blackmarket.svg') }}" alt="Taxation">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Taxation</span>
+                <span class="info-box-number">{{ taxation }} %</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+
+          <!-- fix for small devices only -->
+          <div class="clearfix hidden-md-up"></div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/completed_jumps.svg') }}" alt="Jumps">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Total distance jumped</span>
+                <span class="info-box-number">{{ distance_jumped }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-warning elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/capacity.svg') }}" alt="Capacity">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Capacity</span>
+                <span class="info-box-number">{{ capacity }} / 25 000 </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+
+
+
+              <!-- Info boxes -->
+        <div class="row">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/docking_access.svg') }}" alt="Docking access">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Docking access</span>
+                <span class="info-box-number">
+                  {{ docking_access }}
+                </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/notorious_access.svg') }}" alt="Notorious access">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Notorious Access</span>
+                <span class="info-box-number">{{ "Yes" if notorious_access else "No" }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+
+          <!-- fix for small devices only -->
+          <div class="clearfix hidden-md-up"></div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/shipyard.svg') }}" alt="Shipyard">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Shipyard Status</span>
+                <span class="info-box-number">{{ "Enabled" if shipyard else "Unavailable" }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-warning elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/outfitting.svg') }}" alt="Outfitting">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Outfitting Status</span>
+                <span class="info-box-number">{{ "Enabled" if outfitting else "Unavailable"  }}  </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+
+
+              <!-- Info boxes -->
+        <div class="row">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/refuel.svg') }}" alt="Refuel">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Refueling</span>
+                <span class="info-box-text">
+                  {{ "Available" if refuel else "Unavailable" }}
+                </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/repair.svg') }}" alt="Repair">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Repair</span>
+                <span class="info-box-number">{{ "Available" if repair else "Unavailable" }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+
+          <!-- fix for small devices only -->
+          <div class="clearfix hidden-md-up"></div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/rearm.svg') }}" alt="Rearm">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Rearm</span>
+                <span class="info-box-number">{{ "Available" if rearm else "Unavailable" }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-warning elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/exploration.svg') }}" alt="Exploration">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Universal Cartographics</span>
+                <span class="info-box-number">{{ "Available" if exploration else "Unavailable" }} </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+
+
+              <!-- Info boxes -->
+        <div class="row">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/commodities.svg') }}" alt="Commodities">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Commodities market</span>
+                <span class="info-box-text">
+                  {{ "Available" if commodities else "Unavailable" }}
+                </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/blackmarket.svg') }}" alt="Black market">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Black market</span>
+                <span class="info-box-number">{{ "Available" if black_market else "Unavailable" }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+
+          <!-- fix for small devices only -->
+          <div class="clearfix hidden-md-up"></div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-info elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/voucher_redemption.svg') }}" alt="Vouchers">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Voucher redemption</span>
+                <span class="info-box-number">{{ "Available" if voucher_redemption else "Unavailable" }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box mb-3">
+              <span class="info-box-icon bg-warning elevation-1">
+                  <img src="{{ request.static_url('FCMS:static/svg/balance.svg') }}" alt="Maintenance">
+              </span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Weekly maintenance</span>
+                <span class="info-box-number">{{ maintenance }}</span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+
+
       <div class="col-lg-6">
             <div class="card">
               <div class="card-header border-0">
