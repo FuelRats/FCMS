@@ -5,9 +5,65 @@ from datetime import datetime
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo
 import pyramid.httpexceptions as exc
+from ..utils import util
+
+
+def populate_view(request, cid, user):
+    """
+    Populates a dict with carrier data usable in the carrier views. Note: this does NOT fire a
+    update request if the data is old, it populates ONLY from DB.
+    :param request: The request object (For DB access)
+    :param cid: Carrier ID to populate
+    :param user: User executing the request.
+    :return:
+    """
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    ships = request.dbsession.query(Ship).filter(Carrier.id == cid)
+    itinerary = request.dbsession.query(Itinerary).filter(Carrier.id == cid)
+    market = request.dbsession.query(Market).filter(Carrier.id == cid)
+    modules = request.dbsession.query(Module).filter(Carrier.id == cid)
+    sps = {}
+    for sp in ships:
+        sps[sp.name] = {'name': sp.name, 'ship_id': sp.ship_id, 'basevalue': sp.basevalue,
+                          'stock': sp.stock}
+    its = []
+    for it in itinerary:
+        its.append({"departureTime": it.departureTime, 'arrivalTime': it.arrivalTime,
+                    'visitDurationSeconds': it.visitDurationSeconds,
+                    'starsystem': it.starsystem})
+    mkt = []
+    for it in market:
+        mkt.append({'id': it.commodity_id, 'categoryname': it.categoryname, 'name': it.name,
+                    'stock': it.stock, 'buyPrice': it.buyPrice, 'sellPrice': it.sellPrice,
+                    'demand': it.demand})
+
+    mods = {}
+    for md in modules:
+        mods[md.id] = {'id': md.module_id, 'category': md.category, 'name': md.name,
+                       'cost': md.cost, 'stock': md.stock}
+
+    return {
+        'callsign': mycarrier.callsign,
+        'name': util.from_hex(mycarrier.name),
+        'fuel': mycarrier.fuel,
+        'current_system': mycarrier.currentStarSystem,
+        'last_updated': mycarrier.lastUpdated,
+        'ships': sps.items() if sps else {},
+        'itinerary': its or {},
+        'market': mkt or {},
+        'modules': modules.items() if sps else {},
+    }
 
 
 def update_carrier(request, cid, user):
+    """
+    Updates carrier data. If carrier update fails and the user owns the carrier in question, a new
+    OAuth2 flow is initiated.
+    :param request: The request object (For DB access)
+    :param cid: Carrier ID to be updated
+    :param user: The user executing the request
+    :return: Updated carrier JSON (from CAPI) or None if failed and not same user.
+    """
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     if owner:
