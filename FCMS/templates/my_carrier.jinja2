@@ -63,7 +63,7 @@
           <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
               <span class="info-box-icon bg-info elevation-1">
-                  <img src="{{ request.static_url('FCMS:static/svg/state.svg') }}" alt="Carrier">
+                  <i class="icon state">{% include "inline_svgs/state.jinja2" %}</i>
               </span>
 
               <div class="info-box-content">
@@ -80,7 +80,7 @@
           <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box mb-3">
               <span class="info-box-icon bg-info elevation-1">
-                  <img src="{{ request.static_url('FCMS:static/svg/fuel.svg') }}" alt="Fuel">
+                  <i class="icon fuel">{% include "inline_svgs/fuel.jinja2" %}</i>
               </span>
 
               <div class="info-box-content">
@@ -99,7 +99,7 @@
           <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box mb-3">
               <span class="info-box-icon bg-info elevation-1">
-                  <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem">
+                  <i class="icon starsystem">{% include "inline_svgs/starsystem.jinja2" %}</i>
               </span>
 
               <div class="info-box-content">
@@ -153,7 +153,7 @@
                   {% for ship, it in ships %}
                   <tr>
                     <td>
-                      <img src="{{ request.static_url('FCMS:static/svg/shipyard.svg') }}" alt="Ship" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                      <i class="icon shipyard">{% include "inline_svgs/shipyard.jinja2" %}</i>
                         {{ it.name|e }}
                     </td>
                     <td>{{ it.basevalue }}</td>
@@ -201,7 +201,7 @@
                   {% for it in itinerary %}
                   <tr>
                     <td>
-                      <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                      <i class="icon itinery">{% include "inline_svgs/itinery.jinja2" %}</i>
                         {{ it.starsystem|e }}
                     </td>
                     <td>{{ it.arrivalTime }}</td>
@@ -246,7 +246,7 @@
                   {% for it in market %}
                   <tr>
                     <td>
-                      <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                      <i class="icon commodities">{% include "inline_svgs/commodities.jinja2" %}</i>
                         {{ it.stock if it.stock > 0 else it.demand }}
                     </td>
                     <td>{{ it.name }}</td>
@@ -292,7 +292,7 @@
                   {% for void, it in modules %}
                   <tr>
                     <td>
-                      <img src="{{ request.static_url('FCMS:static/svg/starsystem.svg') }}" alt="Starsystem" class="img-circle img-size-32 mr-2" style="fill: #ffffff;">
+                      <i class="icon outfitting">{% include "inline_svgs/outfitting.jinja2" %}</i>
                         {{ it.stock }}
                     </td>
                     <td>{{ it.category }}</td>
