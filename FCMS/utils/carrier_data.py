@@ -110,6 +110,9 @@ def update_carrier(request, cid, user):
         jcarrier = capi.get_carrier(owner)
         if not jcarrier:
             print("CAPI update call failed, retry OAuth if owner.")
+            if not request.user.id:
+                print("Not logged in, can't refresh.")
+                return None
             if mycarrier.owner == request.user.id:
                 print("Same user, ask for OAuth refresh.")
                 url, state = capi.get_auth_url()
