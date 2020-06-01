@@ -33,13 +33,14 @@
               <h3 class="card-title">Services</h3>
             </div>
             <div class="card-body">
-              <input type="checkbox" id="repair" name="repair"><label for="repair">Repair</label>
-              <input type="checkbox" id="refuel" name="refuel"><label for="refuel">Refuel</label>
-              <input type="checkbox" id="rearm" name="rearm"><label for="rearm">Rearm</label>
-              <input type="checkbox" id="outfitting" name="outfitting"><label for="outfitting">Outfitting</label>
-              <input type="checkbox" id="shipyard" name="shipyard"><label for="shipyard">Shipyard</label>
-              <input type="checkbox" id="cartographics" name="cartographics"><label for="cartographics">Cartographics</label>
-              <input type="checkbox" id="blackmarket" name="blackmarket"><label for="blackmarket">Black Market</label>
+              <input type="checkbox" name="my-checkbox" checked data-bootstrap-switch>
+              <input type="checkbox" id="repair" name="repair" data-bootstrap-switch><label for="repair">Repair</label>
+              <input type="checkbox" id="refuel" name="refuel" data-bootstrap-switch><label for="refuel">Refuel</label>
+              <input type="checkbox" id="rearm" name="rearm" data-bootstrap-switch><label for="rearm">Rearm</label>
+              <input type="checkbox" id="outfitting" name="outfitting" data-bootstrap-switch><label for="outfitting">Outfitting</label>
+              <input type="checkbox" id="shipyard" name="shipyard" data-bootstrap-switch><label for="shipyard">Shipyard</label>
+              <input type="checkbox" id="cartographics" name="cartographics" data-bootstrap-switch><label for="cartographics">Cartographics</label>
+              <input type="checkbox" id="blackmarket" name="blackmarket" data-bootstrap-switch><label for="blackmarket">Black Market</label>
             </div>
           </div>
           <!-- /.card -->
@@ -52,11 +53,6 @@
               <h3 class="card-title">Outfitting</h3>
             </div>
             <div class="card-body">
-              <script type="text/javascript">
-                $(document).ready(function() {
-                  $('.outfitting-multiple').select2();
-                });
-              </script>
               <select class="outfitting-multiple" name="states[]" multiple="multiple">
                 <option value="something">Something</option>
                 <option value="somethingelse">Something Else</option>
@@ -75,11 +71,6 @@
               <h3 class="card-title">Shipyard</h3>
             </div>
             <div class="card-body">
-              <script type="text/javascript">
-                $(document).ready(function() {
-                  $('.shipyard-multiple').select2();
-                });
-              </script>
               <select class="shipyard-multiple" name="states[]" multiple="multiple">
                 <option value="something">Something</option>
                 <option value="somethingelse">Something Else</option>
@@ -106,3 +97,17 @@
   </section>
 </div>
 {% include "footer.jinja2" %}
+
+<script type="text/javascript">
+  $("input[data-bootstrap-switch]").each(function(){
+    $(this).bootstrapSwitch('state', $(this).prop('checked'));
+  });
+
+  $(document).ready(function() {
+    $('.outfitting-multiple').select2();
+  });
+
+  $(document).ready(function() {
+    $('.shipyard-multiple').select2();
+  });
+</script>
