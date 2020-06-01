@@ -1,0 +1,11 @@
+{% if select2 %}
+<div class="form-group">
+  <label>{{ select2.label or "Not set!" }}</label>
+  <select class="{{ select2.class or 'select2' }}" disabled="{{ select2.disabled }}" multiple="multiple"
+          data-placeholder="{{ select2.placeholder }}" style="{{ select2.style or 'width: 100%;'}}">
+  {% for option in select2.options %}
+    <option disabled="{{ option.disabled }}">{{ option.name }}</option>
+  {% endfor %}
+  </select>
+</div>
+{% endif %}

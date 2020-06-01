@@ -10,3 +10,5 @@ def includeme(config):
     config.add_route('carrier', '/carrier/{cid}')
     config.add_route('carrier_subview', '/carrier/{cid}/{subview}')
     config.add_route('oauth_finalize', '/oauth/finalize')
+    config.add_route('loadout', '/loadout')
+    config.add_route('search', '/search')

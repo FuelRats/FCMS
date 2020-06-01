@@ -4,6 +4,19 @@ body {
   color: #e9e9e9;
 }
 
+.navbar {
+  color: #f29aba;
+  background: #876500;
+}
+
+.nav-item {
+  color: #dddddd;
+}
+
+.nav-link {
+  color: #dddddd;
+}
+
 .card, .card-body {
   color: #dddddd;
   background: #1a1a1a;

@@ -5,7 +5,7 @@ from datetime import datetime
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo
 import pyramid.httpexceptions as exc
-from ..utils import util
+from ..utils import util, sapi
 from humanfriendly import format_timespan
 
 
@@ -66,6 +66,7 @@ def populate_view(request, cid, user):
     """
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
+    print(f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     return {
         'callsign': mycarrier.callsign or "XXX-XXX",
         'name': util.from_hex(mycarrier.name) or "Unknown",
@@ -88,6 +89,9 @@ def populate_view(request, cid, user):
         'black_market': mycarrier.hasBlackMarket or False,
         'voucher_redemption': mycarrier.hasVoucherRedemption or False,
         'maintenance': int(mycarrier.coreCost + mycarrier.servicesCost) or 0,
+        'x': mycarrier.x,
+        'y': mycarrier.y,
+        'z': mycarrier.z,
         'sidebar_treeview': True,
         'cmdr_name': owner.cmdr_name or "Unknown",
         'current_view': 'summary',
@@ -116,11 +120,12 @@ def update_carrier(request, cid, user):
             if mycarrier.owner == request.user.id:
                 print("Same user, ask for OAuth refresh.")
                 url, state = capi.get_auth_url()
-                return exc.HTTPFound(location=url)
+                raise exc.HTTPFound(location=url)
             else:
                 print(f"Not same user! {mycarrier.owner} vs {request.user.id}.")
                 return None
         print(f"New carrier: {jcarrier}")
+        coords = sapi.get_coords(jcarrier['currentStarSystem'])
         services = jcarrier['market']['services']
         mycarrier.owner = owner.id
         mycarrier.callsign = jcarrier['name']['callsign']
@@ -147,6 +152,10 @@ def update_carrier(request, cid, user):
         mycarrier.hasBlackMarket = True if services['blackmarket'] == 'ok' else False
         mycarrier.hasVoucherRedemption = True if services['voucherredemption'] == 'ok' else False
         mycarrier.hasExploration = True if services['exploration'] == 'ok' else False
+        mycarrier.hasRepair = True if services['repair'] == 'ok' else False
+        mycarrier.x = coords['x']
+        mycarrier.y = coords['y']
+        mycarrier.z = coords['z']
         mycarrier.lastUpdated = datetime.now()
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
@@ -173,18 +182,18 @@ def update_carrier(request, cid, user):
             request.dbsession.add(mk)
         request.dbsession.query(Ship).filter(Ship.carrier_id
                                              == mycarrier.id).delete()
-        print(jcarrier['ships']['shipyard_list'])
-        if jcarrier['ships']['shipyard_list']:
-            for item, it in jcarrier['ships']['shipyard_list'].items():
-                print(item)
-                print(it)
-                sp = Ship(carrier_id=mycarrier.id, name=it['name'],
-                          ship_id=it['id'], basevalue=it['basevalue'],
-                          stock=it['stock'])
-                request.dbsession.add(sp)
-            request.dbsession.query(Module).filter(Module.carrier_id
-                                                   == mycarrier.id).delete()
-        print(jcarrier['modules'])
+        if 'ships' in jcarrier:
+            if jcarrier['ships']['shipyard_list']:
+                for item, it in jcarrier['ships']['shipyard_list'].items():
+                    print(item)
+                    print(it)
+                    sp = Ship(carrier_id=mycarrier.id, name=it['name'],
+                              ship_id=it['id'], basevalue=it['basevalue'],
+                              stock=it['stock'])
+                    request.dbsession.add(sp)
+                request.dbsession.query(Module).filter(Module.carrier_id
+                                                       == mycarrier.id).delete()
+            print(jcarrier['modules'])
         if jcarrier['modules']:
             for item, it in jcarrier['modules'].items():
                 md = Module(carrier_id=mycarrier.id, category=it['category'],
