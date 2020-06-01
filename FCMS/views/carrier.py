@@ -16,7 +16,7 @@ def carrier_subview(request):
         filter(carrier.Carrier.callsign == request.matchdict['cid']).one_or_none()
     view = request.matchdict['subview']
     data = []
-    if view in ['shipyard', 'itinerary', 'market', 'outfitting']:
+    if view in ['shipyard', 'itinerary', 'market', 'outfitting', 'calendar']:
         headers, data = carrier_data.populate_subview(request, cid.id, view)
     print(f"data: {data}")
     return {'callsign': cid.callsign,

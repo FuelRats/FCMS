@@ -48,7 +48,10 @@ def populate_subview(request, cid, subview):
                         'col3': md.name, 'col4': md.cost})
         headers = {'col1_header': 'Stock', 'col2_header': 'Category', 'col3_header': 'Name',
                    'col4_header': 'Cost'}
-
+    if subview == 'calendar':
+        headers = {'col1_header': "Not yet", 'col2_header': "Not yet", 'col3_header': 'Not yet', 'col4_header': "Not yet"}
+        res.append({"col1_svg": 'inline_svgs/completed_jumps.jinja2', 'col1': 'Not yet', 'col2': 'Not yet',
+                    'col3': 'Not yet', 'col4': 'But soon!'})
     return headers, res
 
 
