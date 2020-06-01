@@ -10,9 +10,34 @@ from ..utils import util
 from ..utils import carrier_data
 
 
-@view_config(route_name='carrier_subview', renderer='../templates/my_carrier.jinja2')
+@view_config(route_name='carrier_subview', renderer='../templates/carrier_subview.jinja2')
 def carrier_subview(request):
-    return
+    cid = request.dbsession.query(carrier.Carrier). \
+        filter(carrier.Carrier.callsign == request.matchdict['cid']).one_or_none()
+    view = request.matchdict['subview']
+    data = []
+    if view in ['shipyard', 'itinerary', 'market', 'outfitting', 'calendar']:
+        headers, data = carrier_data.populate_subview(request, cid.id, view)
+    print(f"data: {data}")
+    return {'callsign': cid.callsign,
+            'name': util.from_hex(cid.name),
+            'sidebar_treeview': True,
+            'current_view': view,
+            'cmdr_image': '/static/dist/img/avatar.png',
+            'shipyard': cid.hasShipyard,
+            'outfitting': cid.hasOutfitting,
+            'refuel': cid.hasRefuel,
+            'rearm': cid.hasRearm,
+            'repair': cid.hasRepair,
+            'exploration': cid.hasExploration,
+            'commodities': cid.hasCommodities,
+            'black_market': cid.hasBlackMarket,
+            'voucher_redemption': cid.hasVoucherRedemption,
+            'col1_header': headers['col1_header'],
+            'col2_header': headers['col2_header'],
+            'col3_header': headers['col3_header'],
+            'col4_header': headers['col4_header'],
+            'items': data}
 
 
 @view_config(route_name='carrier', renderer='../templates/my_carrier.jinja2')
@@ -31,55 +56,8 @@ def carrier_view(request):
             jcarrier = carrier_data.update_carrier(request, mycarrier.id, user)
             if not jcarrier:
                 print("Carrier update failed. Present old data.")
-            return {
-                    'sidebar_navlinks': True,
-                    'sidebar_treeview': True,
-                    'cmdr_name': 'Absolver',
-                    'callsign': mycarrier.callsign,
-                    'name': util.from_hex(mycarrier.name),
-                    'fuel': mycarrier.fuel,
-                    'current_system': mycarrier.currentStarSystem,
-                    'last_updated': mycarrier.lastUpdated,
-                    'ships': jcarrier['ships']['shipyard_list'].items() if jcarrier['ships']['shipyard_list'] else {},
-                    'itinerary': jcarrier['itinerary']['completed'] or {},
-                    'market': jcarrier['market']['commodities'] or {},
-                    'modules': jcarrier['modules'].items() if jcarrier['modules'] else {},
-            }
-        shp = request.dbsession.query(ship.Ship).filter(ship.Ship.carrier_id == mycarrier.id)
-        ships = {}
-        for sp in shp:
-            ships[sp.name] = {'name': sp.name, 'ship_id': sp.ship_id, 'basevalue': sp.basevalue,
-                                'stock': sp.stock}
-        iti = request.dbsession.query(itinerary.Itinerary).filter(itinerary.Itinerary.carrier_id == mycarrier.id)
-        its = []
-        for it in iti:
-            its.append({"departureTime": it.departureTime, 'arrivalTime': it.arrivalTime,
-                          'visitDurationSeconds': it.visitDurationSeconds,
-                          'starsystem': it.starsystem})
-        mkq = request.dbsession.query(market.Market).filter(market.Market.carrier_id == mycarrier.id)
-        mkt = []
-        for it in mkq:
-            mkt.append({'id': it.commodity_id, 'categoryname': it.categoryname, 'name': it.name,
-                        'stock': it.stock, 'buyPrice': it.buyPrice, 'sellPrice': it.sellPrice,
-                        'demand': it.demand})
-
-        mdq = request.dbsession.query(module.Module).filter(module.Module.carrier_id == mycarrier.id)
-        mods = {}
-        for md in mdq:
-            mods[md.id] = {'id': md.module_id, 'category': md.category, 'name': md.name,
-                           'cost': md.cost, 'stock': md.stock}
-
-        return {
-            'callsign': mycarrier.callsign,
-            'name': util.from_hex(mycarrier.name),
-            'fuel': mycarrier.fuel,
-            'current_system': mycarrier.currentStarSystem,
-            'last_updated': mycarrier.lastUpdated,
-            'ships': ships.items(),
-            'itinerary': iti,
-            'market': mkt,
-            'modules': mods.items()
-        }
+                return carrier_data.populate_view(request, mycarrier.id, user)
+        return carrier_data.populate_view(request, mycarrier.id, user)
 
     else:
         print("No such carrier!")

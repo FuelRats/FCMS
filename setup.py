@@ -28,6 +28,7 @@ requires = [
     'psycopg2-binary',
     'requests',
     'authlib',
+    'humanfriendly',
 ]
 
 tests_require = [

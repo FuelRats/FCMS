@@ -34,17 +34,48 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link active">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Status</p>
+                <a href="/carrier/{{ callsign }}" class="nav-link {{ "active" if current_view == 'summary' }}">
+                  <i class="far {{ 'fa-dot-circle' if current_view == 'summary' else 'fa-circle' }} nav-icon"></i>
+                  <p>Status Summary</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
+                <a href="/carrier/{{ callsign }}/calendar" class="nav-link {{ "active" if current_view == 'calendar' }}">
+                  <i class="far {{ 'fa-dot-circle' if current_view == 'calendar' else 'fa-circle' }} nav-icon"></i>
                   <p>Calendar</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="/carrier/{{ callsign }}/itinerary" class="nav-link {{ "active" if current_view == 'itinerary' }}">
+                  <i class="far {{ 'fa-dot-circle' if current_view == 'itinerary' else 'fa-circle' }} nav-icon"></i>
+                  <p>Itinerary</p>
+                </a>
+              </li>
+            {% if shipyard %}
+              <li class="nav-item">
+                <a href="/carrier/{{ callsign }}/shipyard" class="nav-link {{ "active" if current_view == 'shipyard' }}">
+                  <i class="far {{ 'fa-dot-circle' if current_view == 'shipyard' else 'fa-circle' }} nav-icon"></i>
+                  <p>Shipyard</p>
+                </a>
+              </li>
+            {% endif %}
+            {% if outfitting %}
+              <li class="nav-item">
+                <a href="/carrier/{{ callsign }}/outfitting" class="nav-link {{ "active" if current_view == 'outfitting' }}">
+                  <i class="far {{ 'fa-dot-circle' if current_view == 'outfitting' else 'fa-circle' }} nav-icon"></i>
+                  <p>Outfitting</p>
+                </a>
+              </li>
+            {% endif %}
+            {% if commodities %}
+              <li class="nav-item">
+                <a href="/carrier/{{ callsign }}/market" class="nav-link {{ "active" if current_view == 'market' }}">
+                  <i class="far {{ 'fa-dot-circle' if current_view == 'market' else 'fa-circle' }} nav-icon"></i>
+                  <p>Market</p>
+                </a>
+              </li>
+            {% endif %}
+
             </ul>
           </li>
           <li class="nav-item">
@@ -52,7 +83,6 @@
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Fleet Carrier Index
-                <span class="right badge badge-danger">New</span>
               </p>
             </a>
           </li>

@@ -42,6 +42,7 @@ class Carrier(Base):
     hasBlackMarket = Column(Boolean)
     hasVoucherRedemption = Column(Boolean)
     hasExploration = Column(Boolean)
+    capacity = Column(Integer)
     lastUpdated = Column(DateTime)
 
 
