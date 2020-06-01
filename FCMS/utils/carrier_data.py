@@ -62,41 +62,13 @@ def populate_view(request, cid, user):
     :return:
     """
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
-    ships = request.dbsession.query(Ship).filter(Carrier.id == cid)
-    itinerary = request.dbsession.query(Itinerary).filter(Carrier.id == cid)
-    market = request.dbsession.query(Market).filter(Carrier.id == cid)
-    modules = request.dbsession.query(Module).filter(Carrier.id == cid)
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
-    sps = {}
-    for sp in ships:
-        sps[sp.name] = {'name': sp.name, 'ship_id': sp.ship_id, 'basevalue': sp.basevalue,
-                          'stock': sp.stock}
-    its = []
-    for it in itinerary:
-        its.append({"departureTime": it.departureTime, 'arrivalTime': it.arrivalTime,
-                    'visitDurationSeconds': it.visitDurationSeconds,
-                    'starsystem': it.starsystem})
-    mkt = []
-    for it in market:
-        mkt.append({'id': it.commodity_id, 'categoryname': it.categoryname, 'name': it.name,
-                    'stock': it.stock, 'buyPrice': it.buyPrice, 'sellPrice': it.sellPrice,
-                    'demand': it.demand})
-
-    mods = {}
-    for md in modules:
-        mods[md.id] = {'id': md.module_id, 'category': md.category, 'name': md.name,
-                       'cost': md.cost, 'stock': md.stock}
-
     return {
         'callsign': mycarrier.callsign,
         'name': util.from_hex(mycarrier.name),
         'fuel': mycarrier.fuel,
         'current_system': mycarrier.currentStarSystem,
         'last_updated': mycarrier.lastUpdated,
-        'ships': sps.items() if sps else {},
-        'itinerary': its or {},
-        'market': mkt or {},
-        'modules': mods.items() if sps else {},
         'balance': mycarrier.balance,
         'taxation': mycarrier.taxation,
         'distance_jumped': mycarrier.totalDistanceJumped,
