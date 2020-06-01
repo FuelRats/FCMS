@@ -1,0 +1,108 @@
+{% include "header.jinja2" %}
+{% include "sidebar.jinja2" %}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0 text-dark">Loadout calculator</h1>
+        </div><!-- /.col -->
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">My Carrier</a></li>
+            <li class="breadcrumb-item active">Loadout Calculator</li>
+          </ol>
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </div>
+  <!-- /.content-header -->
+
+    <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <form class="row-mb-2" role="form">
+        <div class="col-lg-6">
+          <!-- .card -->
+          <div class="card services">
+            <div class="card-header border-0">
+              <h3 class="card-title">Services</h3>
+            </div>
+            <div class="card-body">
+              <input type="checkbox" id="repair" name="repair"><label for="repair">Repair</label>
+              <input type="checkbox" id="refuel" name="refuel"><label for="refuel">Refuel</label>
+              <input type="checkbox" id="rearm" name="rearm"><label for="rearm">Rearm</label>
+              <input type="checkbox" id="outfitting" name="outfitting"><label for="outfitting">Outfitting</label>
+              <input type="checkbox" id="shipyard" name="shipyard"><label for="shipyard">Shipyard</label>
+              <input type="checkbox" id="cartographics" name="cartographics"><label for="cartographics">Cartographics</label>
+              <input type="checkbox" id="blackmarket" name="blackmarket"><label for="blackmarket">Black Market</label>
+            </div>
+          </div>
+          <!-- /.card -->
+        </div>
+
+        <div class="col-lg-6">
+          <!-- .card | TODO: disabled if outfitting not checked -->
+          <div class="card outfitting">
+            <div class="card-header border-0">
+              <h3 class="card-title">Outfitting</h3>
+            </div>
+            <div class="card-body">
+              <script type="text/javascript">
+                $(document).ready(function() {
+                  $('.outfitting-multiple').select2();
+                });
+              </script>
+              <select class="outfitting-multiple" name="states[]" multiple="multiple">
+                <option value="something">Something</option>
+                <option value="somethingelse">Something Else</option>
+                <optgroup label="Group Name">
+                  <option value="somethingnested">Something Nested</option>
+                  <option value="somethingelsenested">Something Else Nested</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+          <!-- /.card -->
+
+          <!-- .card | TODO: disabled if shipyard not checked -->
+          <div class="card shipyard">
+            <div class="card-header border-0">
+              <h3 class="card-title">Shipyard</h3>
+            </div>
+            <div class="card-body">
+              <script type="text/javascript">
+                $(document).ready(function() {
+                  $('.shipyard-multiple').select2();
+                });
+              </script>
+              <select class="shipyard-multiple" name="states[]" multiple="multiple">
+                <option value="something">Something</option>
+                <option value="somethingelse">Something Else</option>
+              </select>
+            </div>
+          </div>
+          <!-- /.card -->
+        </div>
+      </form>
+
+      <div class="row">
+        <!-- .card | TODO: fill options -->
+        <div class="card result">
+            <div class="card-header border-0">
+              <h3 class="card-title">Result</h3>
+            </div>
+            <div class="card-body">
+              ?
+            </div>
+          </div>
+          <!-- /.card -->
+      </div>
+    </div>
+  </section>
+</div>
+{% include "footer.jinja2" %}
