@@ -8,12 +8,18 @@ from ..models import user, carrier, itinerary, cargo, ship, module, market
 from ..utils import capi
 from ..utils import util
 from ..utils import carrier_data
+from ..utils import menu
 
 
 @view_config(route_name='carrier_subview', renderer='../templates/carrier_subview.jinja2')
 def carrier_subview(request):
     cid = request.dbsession.query(carrier.Carrier). \
         filter(carrier.Carrier.callsign == request.matchdict['cid']).one_or_none()
+    print(menu.populate_sidebar(request))
+    owner = request.dbsession.query(user.User).filter(user.User.id == cid.owner).one_or_none()
+    if not owner:
+        print("No owner for carrier. Fake it.")
+        owner = user.User(cmdr_name='Unknown CMDR')
     view = request.matchdict['subview']
     data = []
     userdata = {}
@@ -25,6 +31,7 @@ def carrier_subview(request):
     else:
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
     return {'user': userdata,
+            'owner': owner.cmdr_name or "Unknown",
             'callsign': cid.callsign,
             'name': util.from_hex(cid.name),
             'sidebar_treeview': True,
@@ -46,9 +53,10 @@ def carrier_subview(request):
             'items': data}
 
 
-@view_config(route_name='carrier', renderer='../templates/my_carrier.jinja2')
+@view_config(route_name='carrier', renderer='../templates/carrier.jinja2')
 def carrier_view(request):
     cid = request.matchdict['cid']
+    print(menu.populate_sidebar(request))
     mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.callsign == cid).one_or_none()
     if mycarrier:
         print("Yep, I have a carrier like that.")

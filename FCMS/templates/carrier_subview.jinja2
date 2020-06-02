@@ -1,5 +1,32 @@
 {% include "header.jinja2" %}
 {% include "sidebar.jinja2" %}
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-darker">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav navbar-darker">
+      <li class="nav-item navbar-darker">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="../../index3.html" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="#" class="nav-link">Profile</a>
+      </li>
+    </ul>
+
+    <!-- SEARCH FORM -->
+    <form class="form-inline ml-3" action="/search">
+      <div class="input-group input-group-sm">
+        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" name="term">
+        <div class="input-group-append">
+          <button class="btn btn-navbar" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </nav>
 
  <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -7,12 +34,13 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">My Carrier</h1>
+            <h1 class="m-0 text-dark">{{ owner }}'s Carrier</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">My Carrier</li>
+              <li class="breadcrumb-item active">
+                  <a href="{{ request.route_url('carrier',cid=callsign) }}">Carrier View </a>/ {{ current_view.title() }}</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -51,12 +79,12 @@
                       <i class="icon shipyard">{% include it.col1_svg %}</i>
                         {{ it.col1|e }}
                     </td>
-                    <td>{{ it.col2|e }}</td>
+                    <td>{{ it.col2 }}</td>
                     <td>
-                        {{ it.col3|e }}
+                        {{ it.col3 }}
                     </td>
                     <td>
-                        {{ it.col4|e }}
+                        {{ it.col4|safe }}
                     </td>
                   </tr>
                   {% endfor %}

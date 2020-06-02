@@ -90,7 +90,7 @@
                             </a>
                             <td>
                             {% for service in it.services %}
-                                <i class="icon shipyard" style="color: {{ service.color }}">{% include service.svg %}</i>
+                                <i class="icon shipyard" title="{{ service.title }}" style="color: {{ service.color }}">{% include service.svg %}</i>
                             {% endfor %}
                             </td>
                         {% else %}

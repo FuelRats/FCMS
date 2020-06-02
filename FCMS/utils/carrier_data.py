@@ -70,6 +70,7 @@ def populate_view(request, cid, user):
     print(f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     return {
         'user': userdata,
+        'owner': owner.cmdr_name,
         'callsign': mycarrier.callsign or "XXX-XXX",
         'name': util.from_hex(mycarrier.name) or "Unknown",
         'fuel': mycarrier.fuel or 0,
