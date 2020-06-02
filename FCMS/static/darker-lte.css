@@ -3,10 +3,14 @@ body {
 
   color: #e9e9e9;
 }
-
 .navbar {
-  color: #f29aba;
-  background: #876500;
+  color: #dddddd;
+  background: #000000;
+}
+
+.navbar-darker {
+  color: #dddddd;
+  background: #000000;
 }
 
 .nav-item {
@@ -14,6 +18,9 @@ body {
 }
 
 .nav-link {
+  color: #dddddd;
+}
+.btn-navbar {
   color: #dddddd;
 }
 
@@ -24,7 +31,7 @@ body {
 
 .login-box, .register-box {
   color: #1aa67d;
-  background: #000b16
+  background: #000b16;
 }
 
 .login-page, .register-page {

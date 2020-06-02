@@ -29,6 +29,7 @@ requires = [
     'requests',
     'authlib',
     'humanfriendly',
+    'numpy',
 ]
 
 tests_require = [

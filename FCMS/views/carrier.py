@@ -16,10 +16,16 @@ def carrier_subview(request):
         filter(carrier.Carrier.callsign == request.matchdict['cid']).one_or_none()
     view = request.matchdict['subview']
     data = []
+    userdata = {}
     if view in ['shipyard', 'itinerary', 'market', 'outfitting', 'calendar']:
         headers, data = carrier_data.populate_subview(request, cid.id, view)
     print(f"data: {data}")
-    return {'callsign': cid.callsign,
+    if request.user:
+        userdata = {'cmdr_name': request.user.cmdr_name, 'cmdr_image': '/static/dist/img/avatar.png'}
+    else:
+        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
+    return {'user': userdata,
+            'callsign': cid.callsign,
             'name': util.from_hex(cid.name),
             'sidebar_treeview': True,
             'current_view': view,

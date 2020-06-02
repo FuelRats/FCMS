@@ -5,7 +5,7 @@ from datetime import datetime
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo
 import pyramid.httpexceptions as exc
-from ..utils import util, sapi
+from ..utils import util, sapi, user as usr
 from humanfriendly import format_timespan
 
 
@@ -64,10 +64,12 @@ def populate_view(request, cid, user):
     :param user: User executing the request.
     :return:
     """
+    userdata = usr.populate_user(request)
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     print(f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     return {
+        'user': userdata,
         'callsign': mycarrier.callsign or "XXX-XXX",
         'name': util.from_hex(mycarrier.name) or "Unknown",
         'fuel': mycarrier.fuel or 0,
