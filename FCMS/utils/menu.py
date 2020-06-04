@@ -21,6 +21,10 @@ def populate_sidebar(request):
         else:
             root, path, cid = view.split('/')
             subview = 'summary'
+    elif 'my_carrier' in view:
+        path='my_carrier'
+        cid =request.user.carrierid
+        subview='summary'
         sidebar_treeview = {
             'icon': 'fa-list',
             'title': 'Carrier Information',
