@@ -41,6 +41,15 @@ def search_view(request):
             for row in candidates:
                 b = numpy.array((row.x, row.y, row.z))
                 dist = numpy.linalg.norm(a - b)
+                taxcolor = None
+                if row.taxation == 0:
+                    taxcolor = "#00A000"
+                elif 25 > row.taxation > 1:
+                    taxcolor = "#DAD55E"
+                elif 50 > row.taxation > 26:
+                    taxcolor = "FFC4505F"
+                else:
+                    taxcolor = "#FF0000"
                 items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': util.from_hex(row.name),
                               'col2': row.callsign,
                               'col3': row.currentStarSystem, 'col4': round(dist, 2),
@@ -74,6 +83,8 @@ def search_view(request):
                                            {'color': '#00A000' if row.dockingAccess =='all' else '#dad55e',
                                             'svg': 'inline_svgs/docking_access.jinja2',
                                             'title': f'Docking available for {row.dockingAccess}'},
+                                           {'color': taxcolor, 'svg': 'inline_svgs/taxation.jinja2',
+                                            'title': f'Taxation is {row.taxation}%'}
                                            ]})
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',

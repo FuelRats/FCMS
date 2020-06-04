@@ -10,8 +10,10 @@ def populate_user(request):
     userdata = {}
     if request.user:
         userdata = {'cmdr_name': request.user.cmdr_name,
-                    'cmdr_image': '/static/dist/img/avatar.png'}
+                    'cmdr_image': '/static/dist/img/avatar.png',
+                    'logged_in': True}
     else:
         userdata = {'cmdr_name': "Not logged in",
-                    'cmdr_image': '/static/dist/img/avatar.png'}
+                    'cmdr_image': '/static/dist/img/avatar.png',
+                    'logged_in': False}
     return userdata

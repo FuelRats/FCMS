@@ -5,7 +5,7 @@ from datetime import datetime
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo
 import pyramid.httpexceptions as exc
-from ..utils import util, sapi, user as usr
+from ..utils import util, sapi, user as usr, menu
 from humanfriendly import format_timespan
 
 
@@ -67,8 +67,9 @@ def populate_view(request, cid, user):
     userdata = usr.populate_user(request)
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
+    mymenu = menu.populate_sidebar(request)
     print(f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
-    return {
+    data = {
         'user': userdata,
         'owner': owner.cmdr_name,
         'callsign': mycarrier.callsign or "XXX-XXX",
@@ -95,11 +96,11 @@ def populate_view(request, cid, user):
         'x': mycarrier.x,
         'y': mycarrier.y,
         'z': mycarrier.z,
-        'sidebar_treeview': True,
-        'cmdr_name': owner.cmdr_name or "Unknown",
-        'current_view': 'summary',
-        'cmdr_image': '/static/dist/img/avatar.png'
+        'sidebar': mymenu
     }
+    print(data)
+    return data
+
 
 
 def update_carrier(request, cid, user):

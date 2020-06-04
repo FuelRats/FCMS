@@ -21,23 +21,37 @@
 {% endif %}
       <!-- Sidebar Menu -->
       <nav class="mt-2">
-        {% if sidebar_treeview %}
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        {% if user.logged_in %}
+          <li class="nav-header">EXAMPLES</li>
+
+              <li class="nav-item">
+                <a href="/my_carrier" class="nav-link">
+                  <i class="nav-icon fas house-user"></i>
+                  <p>
+                      My Carrier
+                  </p>
+                </a>
+              </li>
+        {% endif %}
+        {% if sidebar.sidebar_treeview %}
+            <!-- I've got a jar of dirt! -->
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item has-treeview menu-open">
             <a href="#" class="nav-link active">
-              <i class="nav-icon fas {{ sidebar_treeview.icon }}"></i>
+              <i class="nav-icon fas {{ sidebar.sidebar_treeview.icon }}"></i>
               <p>
-                  {{ sidebar_treeview.title }}
+                  {{ sidebar.sidebar_treeview.title }}
                 <i class="right fas fa-angle-left"></i>
               </p>
             </a>
             <ul class="nav nav-treeview">
-            {% for item in sidebar_treeview.items %}
+            {% for item in sidebar.sidebar_treeview.menuitems %}
+                <!-- Iterator -->
               <li class="nav-item">
                 <a href="{{ item.linktarget }}" class="nav-link {{ 'active' if current_view == item.view  }}">
-                  <i class="far {{ item.selected_icon if current_view == item.view else item.unselected_icon }} nav-icon"></i>
+                  <i class="far fas {{ item.selected_icon if current_view == item.view else item.unselected_icon }} nav-icon"></i>
                   <p>{{ item.name }}</p>
                 </a>
               </li>
@@ -47,8 +61,8 @@
         </ul>
         {% endif %}
       </nav>
-    {% if sidebar_menuitems %}
-        {% for item in sidebar_menuitems %}
+    {% if sidebar.sidebar_menuitems %}
+        {% for item in sidebar.sidebar_menuitems %}
               <li class="nav-item">
                 <a href="{{ item.link }}" class="nav-link">
                   <i class="nav-icon fas {{ item.icon }}"></i>

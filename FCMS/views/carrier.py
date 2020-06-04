@@ -8,7 +8,7 @@ from ..models import user, carrier, itinerary, cargo, ship, module, market
 from ..utils import capi
 from ..utils import util
 from ..utils import carrier_data
-from ..utils import menu
+from ..utils import menu, user as usr
 
 
 @view_config(route_name='carrier_subview', renderer='../templates/carrier_subview.jinja2')
@@ -22,19 +22,15 @@ def carrier_subview(request):
         owner = user.User(cmdr_name='Unknown CMDR')
     view = request.matchdict['subview']
     data = []
-    userdata = {}
+    userdata = usr.populate_user(request)
+    mymenu = menu.populate_sidebar(request)
     if view in ['shipyard', 'itinerary', 'market', 'outfitting', 'calendar']:
         headers, data = carrier_data.populate_subview(request, cid.id, view)
     print(f"data: {data}")
-    if request.user:
-        userdata = {'cmdr_name': request.user.cmdr_name, 'cmdr_image': '/static/dist/img/avatar.png'}
-    else:
-        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
     return {'user': userdata,
             'owner': owner.cmdr_name or "Unknown",
             'callsign': cid.callsign,
             'name': util.from_hex(cid.name),
-            'sidebar_treeview': True,
             'current_view': view,
             'cmdr_image': '/static/dist/img/avatar.png',
             'shipyard': cid.hasShipyard,
@@ -50,22 +46,22 @@ def carrier_subview(request):
             'col2_header': headers['col2_header'],
             'col3_header': headers['col3_header'],
             'col4_header': headers['col4_header'],
-            'items': data}
+            'items': data,
+            'sidebar': mymenu}
 
 
 @view_config(route_name='carrier', renderer='../templates/carrier.jinja2')
 def carrier_view(request):
     cid = request.matchdict['cid']
-    print(menu.populate_sidebar(request))
+    userdata = usr.populate_user(request)
+    mymenu = menu.populate_sidebar(request)
     mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.callsign == cid).one_or_none()
     if mycarrier:
-        print("Yep, I have a carrier like that.")
         last = mycarrier.lastUpdated
         print(f"Last: {last}")
-        print(f"Delta: {datetime.now() - timedelta(hours=2)}")
         if not last:
-            last = datetime.now() - timedelta(hours=3)  # Cheap hack to sort out missing lastUpdated.
-        if last < datetime.now() - timedelta(minutes=2):
+            last = datetime.now() - timedelta(minutes=20)  # Cheap hack to sort out missing lastUpdated.
+        if last < datetime.now() - timedelta(minutes=15):
             print("Old carrier data, refresh!")
             jcarrier = carrier_data.update_carrier(request, mycarrier.id, user)
             if not jcarrier:
@@ -74,4 +70,9 @@ def carrier_view(request):
         return carrier_data.populate_view(request, mycarrier.id, user)
 
     else:
-        print("No such carrier!")
+        return {
+            'user': userdata,
+            'error': "No such carrier!",
+            'sidebar': mymenu
+        }
+
