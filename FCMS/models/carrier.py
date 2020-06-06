@@ -3,7 +3,7 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    BLOB,
+    Binary,
     Boolean,
     DateTime,
     ForeignKey,
@@ -16,7 +16,7 @@ class CarrierExtra(Base):
     __tablename__ = 'carrier_extras'
     id = Column(Integer, primary_key=True)
     cid = Column(Integer, ForeignKey('carriers.id'))
-    carrier_image = Column(BLOB)
+    carrier_image = Column(Binary)
     carrier_motd = Column(Text)
 
 
