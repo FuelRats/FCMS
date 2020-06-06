@@ -15,6 +15,7 @@ def populate_sidebar(request):
     print(f"Splits: {view.split('/')}")
     print(f"Matched view: {view}")
     print(f"User: {user}")
+    sidebar_treeview = None
     if 'carrier' in view.split('/'):
         if len(view.split('/')) > 3:
             root, path, cid, subview = view.split('/')

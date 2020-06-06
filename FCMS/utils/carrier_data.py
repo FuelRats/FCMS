@@ -1,12 +1,117 @@
 # Various carrier data update convenience functions.
 # AKA "Get all the ugly shit out of the views."
+import json
 from datetime import datetime
 
 from . import capi
-from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo
+from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar
 import pyramid.httpexceptions as exc
 from ..utils import util, sapi, user as usr, menu
-from humanfriendly import format_timespan
+from humanfriendly import format_timespan, format_number
+
+
+def populate_calendar(request, cid):
+    """
+    Populates an event list for the calendar.
+    :param request: The request object
+    :param cid: Carrier ID
+    :return: A dict of events.
+    """
+    carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    if carrier:
+        data = []
+        calendar = request.dbsession.query(Calendar).filter(Calendar.carrier_id == cid
+                                                            or Calendar.is_global).all()
+        for event in calendar:
+            if event.url:
+                data.append({'title': event.title,
+                             'start': event.start,
+                             'end': event.end,
+                             'backgroundColor': event.bgcolor,
+                             'borderColor': event.fgcolor,
+                             'allday': event.allday,
+                             'url': event.url
+                             })
+            else:
+                data.append({'title': event.title,
+                             'start': event.start,
+                             'end': event.end,
+                             'backgroundColor': event.bgcolor,
+                             'borderColor': event.fgcolor,
+                             'allday': event.allday,
+                             })
+        return data
+
+
+def get_finances(request, cid):
+    """
+    Gets the financial information for a carrier.
+    :param request: The request object
+    :param cid: Carrier ID
+    :return: A dict of financial information
+    """
+    carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    if carrier:
+        cdata = json.loads(carrier.cachedJson)
+        data = {}
+        for key, val in cdata['finance'].items():
+            data[key] = format_number(val)
+        return data
+    else:
+        return None
+
+
+def get_crew(request, cid):
+    """
+    Get crew information for a carrier.
+    :param request: The request object
+    :param cid: Carrier ID
+    :return: A dict of crew info
+    """
+    carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    if carrier:
+        cdata = json.loads(carrier.cachedJson)
+        return cdata['servicesCrew']
+    else:
+        return None
+
+
+def get_cargo(request, cid):
+    """
+    Gets a carrier's cargo.
+    :param request: Request object
+    :param cid: Carrier ID
+    :return: A list of dicts containing cargo info.
+    """
+    carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    if carrier:
+        clean_cargo = {}
+        stolen_cargo = {}
+        result = request.dbsession.query(Cargo).filter(Cargo.carrier_id == cid)
+        for cg in result:
+            if cg.stolen:
+                if cg.commodity in stolen_cargo.keys():
+                    stolen_cargo[cg.commodity]['quantity'] = stolen_cargo[cg.commodity]['quantity'] + cg.quantity
+                else:
+                    stolen_cargo[cg.commodity] = {'commodity': cg.commodity,
+                                                  'quantity': cg.quantity,
+                                                  'value': cg.value,
+                                                  'stolen': cg.stolen,
+                                                  'locname': cg.locName
+                                                  }
+            else:
+                if cg.commodity in clean_cargo.keys():
+                    clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
+                else:
+                    clean_cargo[cg.commodity] = {'commodity': cg.commodity,
+                                                   'quantity': cg.quantity,
+                                                   'value': cg.value,
+                                                   'stolen': cg.stolen,
+                                                   'locname': cg.locName
+                                                   }
+        data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
+        print(data)
+        return data
 
 
 def populate_subview(request, cid, subview):
@@ -22,8 +127,8 @@ def populate_subview(request, cid, subview):
     if subview == 'shipyard':
         ships = request.dbsession.query(Ship).filter(Ship.carrier_id == cid)
         for sp in ships:
-           res.append({'col1_svg': 'inline_svgs/shipyard.jinja2', 'col1': sp.name, 'col2': sp.basevalue,
-                       'col3': sp.stock, 'col4': '<i class="fas fa-search"></i>'})
+            res.append({'col1_svg': 'inline_svgs/shipyard.jinja2', 'col1': sp.name, 'col2': sp.basevalue,
+                        'col3': sp.stock, 'col4': '<i class="fas fa-search"></i>'})
         headers = {'col1_header': 'Name', 'col2_header': 'Value', 'col3_header': 'stock',
                    'col4_header': 'Coriolis'}
     if subview == 'itinerary':
@@ -38,7 +143,7 @@ def populate_subview(request, cid, subview):
         market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
         for mk in market:
             res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                        'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice })
+                        'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
@@ -49,7 +154,8 @@ def populate_subview(request, cid, subview):
         headers = {'col1_header': 'Stock', 'col2_header': 'Category', 'col3_header': 'Name',
                    'col4_header': 'Cost'}
     if subview == 'calendar':
-        headers = {'col1_header': "Not yet", 'col2_header': "Not yet", 'col3_header': 'Not yet', 'col4_header': "Not yet"}
+        headers = {'col1_header': "Not yet", 'col2_header': "Not yet", 'col3_header': 'Not yet',
+                   'col4_header': "Not yet"}
         res.append({"col1_svg": 'inline_svgs/completed_jumps.jinja2', 'col1': 'Not yet', 'col2': 'Not yet',
                     'col3': 'Not yet', 'col4': 'But soon!'})
     return headers, res
@@ -68,7 +174,8 @@ def populate_view(request, cid, user):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     mymenu = menu.populate_sidebar(request)
-    print(f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
+    print(
+        f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     data = {
         'user': userdata,
         'owner': owner.cmdr_name,
@@ -100,7 +207,6 @@ def populate_view(request, cid, user):
     }
     print(data)
     return data
-
 
 
 def update_carrier(request, cid, user):
@@ -157,9 +263,11 @@ def update_carrier(request, cid, user):
         mycarrier.hasVoucherRedemption = True if services['voucherredemption'] == 'ok' else False
         mycarrier.hasExploration = True if services['exploration'] == 'ok' else False
         mycarrier.hasRepair = True if services['repair'] == 'ok' else False
+        mycarrier.hasRefuel = True if services['refuel'] == 'ok' else False
         mycarrier.x = coords['x']
         mycarrier.y = coords['y']
         mycarrier.z = coords['z']
+        mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
@@ -173,7 +281,7 @@ def update_carrier(request, cid, user):
                                               == mycarrier.id).delete()
         for item in jcarrier['cargo']:
             cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
-                       quantity=item['qty'], stolen=item['stolen'], locName=item['locName'])
+                       quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
             request.dbsession.add(cg)
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()

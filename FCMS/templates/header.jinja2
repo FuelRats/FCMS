@@ -6,7 +6,13 @@
   <title>{{ project }} | {{ title }}</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+{% if meta %}
+    <!-- Meta -->
+    {% if meta.refresh %}
+        <!-- Refresh -->
+        <meta http-equiv="refresh" content="{{ meta.delay }};url={{ meta.target }}" />
+    {% endif %}
+{% endif %}
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{{request.static_url('FCMS:static/plugins/fontawesome-free/css/all.min.css')}}">
   <!-- Ionicons -->
@@ -19,5 +25,10 @@
   <link rel="stylesheet" href="{{ request.static_url('FCMS:static/darker-lte.css')}}">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-
+{% if calendar %}
+  <link rel="stylesheet" href="/static/plugins/fullcalendar/main.min.css">
+  <link rel="stylesheet" href="/static/plugins/fullcalendar-daygrid/main.min.css">
+  <link rel="stylesheet" href="/static/plugins/fullcalendar-timegrid/main.min.css">
+  <link rel="stylesheet" href="/static/plugins/fullcalendar-bootstrap/main.min.css">
+{% endif %}
 </head>

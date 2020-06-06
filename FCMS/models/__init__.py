@@ -7,12 +7,13 @@ import zope.sqlalchemy
 # Base.metadata prior to any initialization routines
 from .mymodel import MyModel  # flake8: noqa
 from .user import User
-from .carrier import Carrier
+from .carrier import Carrier, CarrierExtra
 from .itinerary import Itinerary
 from .cargo import Cargo
 from .module import Module
 from .ship import Ship
 from .market import Market
+from .calendar import Calendar
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

@@ -28,7 +28,7 @@ def login_view(request):
     return {'project': 'Fleet Carrier Management System'}
 
 
-@view_config(route_name='logout', renderer='../templates.login.jinja2')
+@view_config(route_name='logout', renderer='../templates/login.jinja2')
 def logout_view(request):
     headers = forget(request)
     next = request.route_url('home')
@@ -80,7 +80,7 @@ def oauth_callback(request):
     return exc.HTTPFound(location=request.route_url('oauth_finalize'))
 
 
-@view_config(route_name='oauth_finalize', renderer='../templates/register.jinja2')
+@view_config(route_name='oauth_finalize', renderer='../templates/login.jinja2')
 def oauth_finalize(request):
     user = request.user
     try:
@@ -90,7 +90,8 @@ def oauth_finalize(request):
         oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
         if oc:
             print("Already have their carrier! No need for further shenanigans.")
-            return {'project': 'Got a callback, updated existing user oauth keys.'}
+            return {'project': 'Got a callback, updated existing user oauth keys.',
+                    'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
         newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'], name=jcarrier['name']['vanityName'],
                                      currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
                                      fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],
@@ -106,6 +107,9 @@ def oauth_finalize(request):
                                      hasExploration=True if services['exploration']=='ok' else False,
                                      lastUpdated=datetime.now())
         request.dbsession.add(newcarrier)
+        #TODO: Inject rest of the data too.
+        #TODO: Redirect to my_carrier after delay.
     except:
         return {'project': 'Failed to retrieve your carrier. Did you buy one?'}
-    return {'project': 'OAuth flow completed. Carrier added.'}
+    return {'project': 'OAuth flow completed. Carrier added. You are being redirected in 5 seconds.',
+            'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5 }}

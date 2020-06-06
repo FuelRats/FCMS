@@ -3,10 +3,25 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    Boolean, DateTime, ForeignKey,
+    BLOB,
+    Boolean,
+    DateTime,
+    ForeignKey,
 )
 
 from .meta import Base
+
+
+class CarrierExtra(Base):
+    __tablename__ = 'carrier_extras'
+    id = Column(Integer, primary_key=True)
+    cid = Column(Integer, ForeignKey('carriers.id'))
+    carrier_image = Column(BLOB)
+    carrier_motd = Column(Text)
+
+
+Index('carrier_extra_index', CarrierExtra.id)
+Index('carrier_extra_cid_index', CarrierExtra.cid)
 
 
 class Carrier(Base):
@@ -44,6 +59,7 @@ class Carrier(Base):
     hasExploration = Column(Boolean)
     capacity = Column(Integer)
     lastUpdated = Column(DateTime)
+    cachedJson = Column(Text)
 
 
 Index('carrier_index', Carrier.id, unique=True)

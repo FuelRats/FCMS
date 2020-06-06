@@ -6,9 +6,43 @@ body {
 .main-footer {
   color: #dddddd;
   background: #000000;
-  color: #c4505f;
 }
 
+.crew {
+  color: #dddddd;
+  background: #000000;
+}
+
+.i.img-crew {
+  width: 30px;
+  margin-right: 0.5em;
+}
+
+.status {
+  display: flex;
+}
+.status .icon {
+  flex: 0 0 auto;
+}
+
+.status .label {
+  flex: 1 1 auto;
+}
+
+.status .status_text {
+  flex: 0 1 auto;
+  text-align: right;
+}
+
+.list-group {
+  color: #dddddd;
+  background: #000000;
+}
+
+.list-group-item {
+  color: #dddddd;
+  background: #000000;
+}
 .navbar {
   color: #dddddd;
   background: #000000;
@@ -80,6 +114,12 @@ body {
 
 .info-box .info-box-icon i.icon {
   min-height: 30px;
+}
+
+i.icon {
+  display: inline-block;
+  width: 30px;
+  margin-right: 0.5em;
 }
 
 td i.icon {

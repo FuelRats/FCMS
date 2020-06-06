@@ -16,6 +16,7 @@ class Cargo(Base):
     locName = Column(Text)
     quantity = Column(Integer)
     stolen = Column(Boolean)
+    value = Column(Integer)
 
 
 Index('cargo_index', Cargo.id, unique=True)

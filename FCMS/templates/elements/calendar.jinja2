@@ -1,0 +1,95 @@
+<script src="/static/dist/js/demo.js"></script>
+<script src="/static/plugins/moment/moment.min.js"></script>
+<script src="/static/plugins/fullcalendar/main.min.js"></script>
+<script src="/static/plugins/fullcalendar-daygrid/main.min.js"></script>
+<script src="/static/plugins/fullcalendar-timegrid/main.min.js"></script>
+<script src="/static/plugins/fullcalendar-interaction/main.min.js"></script>
+<script src="/static/plugins/fullcalendar-bootstrap/main.min.js"></script>
+<script>
+  $(function () {
+
+    /* initialize the calendar
+     -----------------------------------------------------------------*/
+    //Date for the calendar events (dummy data)
+    var date = new Date()
+    var d    = date.getDate(),
+        m    = date.getMonth(),
+        y    = date.getFullYear()
+
+    var Calendar = FullCalendar.Calendar;
+
+    var checkbox = document.getElementById('drop-remove');
+    var calendarEl = document.getElementById('calendar');
+
+
+    var calendar = new Calendar(calendarEl, {
+      plugins: [ 'bootstrap', 'interaction', 'dayGrid', 'timeGrid' ],
+      header    : {
+        left  : 'prev,next today',
+        center: 'title',
+        right : 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      'themeSystem': 'bootstrap',
+      //Random default events
+      events    : [
+          {% for event in events %}
+              {
+                  title             : '{{ event.title }}',
+                  start             : '{{ event.start }}',
+                  end               : '{{ event.end }}',
+                  allDay            : {{ 'false' if not event.allday else 'true' }},
+                  backgroundColor   : '{{ event.bgcolor }}',
+                  borderColor       : '{{ event.fgcolor }}',
+          {% if event.url %}
+                  url               : '{{ event.url }}'
+          {% endif %}
+              },
+          {% endfor %}
+      ],
+      editable  : false,
+      droppable : false, // this allows things to be dropped onto the calendar !!!
+    });
+
+    calendar.render();
+    // $('#calendar').fullCalendar()
+
+    /* ADDING EVENTS */
+    var currColor = '#3c8dbc' //Red by default
+    //Color chooser button
+    var colorChooser = $('#color-chooser-btn')
+    $('#color-chooser > li > a').click(function (e) {
+      e.preventDefault()
+      //Save color
+      currColor = $(this).css('color')
+      //Add color effect to button
+      $('#add-new-event').css({
+        'background-color': currColor,
+        'border-color'    : currColor
+      })
+    })
+    $('#add-new-event').click(function (e) {
+      e.preventDefault()
+      //Get value and make sure it is not null
+      var val = $('#new-event').val()
+      if (val.length == 0) {
+        return
+      }
+
+      //Create events
+      var event = $('<div />')
+      event.css({
+        'background-color': currColor,
+        'border-color'    : currColor,
+        'color'           : '#fff'
+      }).addClass('external-event')
+      event.html(val)
+      $('#external-events').prepend(event)
+
+      //Add draggable funtionality
+      ini_events(event)
+
+      //Remove event from text input
+      $('#new-event').val('')
+    })
+  })
+</script>

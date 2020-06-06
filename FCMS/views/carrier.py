@@ -1,14 +1,7 @@
 from datetime import datetime, timedelta
-
 from pyramid.view import view_config
-from pyramid.response import Response
-import pyramid.httpexceptions as exc
-from pyramid.security import remember, forget
-from ..models import user, carrier, itinerary, cargo, ship, module, market
-from ..utils import capi
-from ..utils import util
-from ..utils import carrier_data
-from ..utils import menu, user as usr
+from ..models import user, carrier
+from ..utils import util, carrier_data, menu, user as usr
 
 
 @view_config(route_name='carrier_subview', renderer='../templates/carrier_subview.jinja2')
