@@ -175,6 +175,7 @@ def populate_view(request, cid, user):
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     mymenu = menu.populate_sidebar(request)
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    events = populate_calendar(request, cid)
     print(f"\n\n\nExtra: {extra}\n\n")
     print(
         f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
@@ -207,7 +208,10 @@ def populate_view(request, cid, user):
         'x': mycarrier.x,
         'y': mycarrier.y,
         'z': mycarrier.z,
-        'sidebar': mymenu
+        'sidebar': mymenu,
+        'events': events,
+        'calendar': True,
+
     }
     print(data)
     return data

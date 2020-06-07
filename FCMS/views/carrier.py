@@ -20,6 +20,7 @@ def carrier_subview(request):
     if view in ['shipyard', 'itinerary', 'market', 'outfitting', 'calendar']:
         headers, data = carrier_data.populate_subview(request, cid.id, view)
     print(f"data: {data}")
+    events = carrier_data.populate_calendar(request, cid.id)
     return {'user': userdata,
             'owner': owner.cmdr_name or "Unknown",
             'callsign': cid.callsign,

@@ -13,6 +13,7 @@ import re
 def fill_data(candidates, source):
     items=[]
     for row in candidates:
+        print(f"Row proc: {row.callsign}")
         target = numpy.array((row.x, row.y, row.z))
         dist = numpy.linalg.norm(source - target)
         taxcolor = None
@@ -61,7 +62,7 @@ def fill_data(candidates, source):
                                    {'color': taxcolor, 'svg': 'inline_svgs/taxation.jinja2',
                                     'title': f'Taxation is {row.taxation}%'}
                                    ]})
-        return items
+    return items
 
 
 @view_config(route_name='search', renderer='../templates/search.jinja2')
@@ -84,6 +85,7 @@ def search_view(request):
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
 
     if 'dssa' in request.params:
+        print("In top DSSA search.")
         candidates = request.dbsession.query(carrier.Carrier).from_statement(
             text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                  f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -97,6 +99,31 @@ def search_view(request):
         return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
                     'carrier_search': True, 'sidebar': mymenu}
+    if 'type' in request.params:
+        if request.params['type'].lower() == 'closest':
+            usr = capi.get_cmdr(request.user)
+            sys = usr['lastSystem']['name']
+            coords = sapi.get_coords(sys)
+            print(f"Got coords {coords} for {sys}")
+            x = coords['x']
+            y = coords['y']
+            z = coords['z']
+            source = numpy.array((x, y, z))
+            candidates = request.dbsession.query(carrier.Carrier).from_statement(
+                    text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
+                         f")^2 + (cast(carriers.y AS FLOAT) - {y}"
+                         f")^2 + (cast(carriers.z AS FLOAT) - {z}"
+                         f")^2)) as Distance from carriers where cast(carriers.x AS FLOAT) BETWEEN "
+                         f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
+                         f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
+                         f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
+                         f" order by Distance LIMIT 25"))
+            items = fill_data(candidates, source)
+            print(f"Items: {items}")
+            return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
+                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {sys}',
+                    'carrier_search': True, 'sidebar': mymenu}
+
     if 'system' in request.params:
         # We're asking for a system name, so do a distance search.
         coords = sapi.get_coords(term)
@@ -108,9 +135,9 @@ def search_view(request):
         cube = 5000
         if coords:
             candidates = None
-
             if 'DSSA' in request.params:
-                candidates = request.dbsession.query(carrier.Carrier).from_statement(
+                print("In DSSA system search.")
+                cand = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                          f")^2 + (cast(carriers.y AS FLOAT) - {y}"
                          f")^2 + (cast(carriers.z AS FLOAT) - {z}"
@@ -119,9 +146,10 @@ def search_view(request):
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
-
+                print(f"Candidates: {cand}")
             else:
-                candidates = request.dbsession.query(carrier.Carrier).from_statement(
+                print("In main system search.")
+                cand = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                          f")^2 + (cast(carriers.y AS FLOAT) - {y}"
                          f")^2 + (cast(carriers.z AS FLOAT) - {z}"
@@ -129,8 +157,9 @@ def search_view(request):
                          f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
-                         f" order by Distance LIMIT 25"))
-            items = fill_data(candidates, source)
+                         f" order by Distance LIMIT 25")).all()
+                print(f"Candidates: {cand}")
+            items = fill_data(cand, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
                     'carrier_search': True, 'sidebar': mymenu}
