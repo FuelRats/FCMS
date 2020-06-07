@@ -33,7 +33,6 @@ def mycarrier_view(request):
             except FileNotAllowed:
                 request.session.flash('Sorry, this file is not allowed.')
                 return exc.HTTPSeeOther(request.route_url('my_carrier'))
-        return {'upload_complete': True}
     user = request.user
     userdata = usr.populate_user(request)
     mycarrier = None
