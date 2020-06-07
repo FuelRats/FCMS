@@ -205,6 +205,8 @@ def populate_view(request, cid, user):
         'maintenance': int(mycarrier.coreCost + mycarrier.servicesCost) or 0,
         'carrier_image': extra.carrier_image if extra else "/static/img/abs-carrier-fuelrats.jpg",
         'carrier_motd': extra.carrier_motd if extra else "No MOTD set",
+        'system': mycarrier.currentStarSystem,
+        'arrived_at': mycarrier.lastUpdated,
         'x': mycarrier.x,
         'y': mycarrier.y,
         'z': mycarrier.z,
