@@ -13,6 +13,16 @@ body {
   bottom: 0;
   left: 0;
   position: page;
+  margin-left: 0 !important;
+  z-index: 1039;
+}
+
+.login-page .main-footer {
+  position: absolute;
+}
+
+.sidebar-open .main-sidebar {
+  z-index: 1040;
 }
 
 .login-logo{
