@@ -6,7 +6,7 @@ from sqlalchemy import (
     Binary,
     Boolean,
     DateTime,
-    ForeignKey,
+    ForeignKey, Float,
 )
 
 from .meta import Base
@@ -31,9 +31,9 @@ class Carrier(Base):
     callsign = Column(Text)
     name = Column(Text)
     currentStarSystem = Column(Text)
-    x = Column(Integer)
-    y = Column(Integer)
-    z = Column(Integer)
+    x = Column(Float)
+    y = Column(Float)
+    z = Column(Float)
     balance = Column(Integer)
     fuel = Column(Integer)
     state = Column(Text)
