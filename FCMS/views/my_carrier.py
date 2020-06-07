@@ -14,11 +14,13 @@ from humanfriendly import format_timespan
 @view_config(route_name='my_carrier', renderer='../templates/my_carrier.jinja2')
 def mycarrier_view(request):
     if request.POST:
+        print("\n\n\n\n\nPERFORM EXCESSIVE DEBUGGING!\n\n\n")
         if request.POST['myfile'].file:
             mycarrier = request.dbsession.query(carrier.Carrier).\
                 filter(carrier.Carrier.owner == request.user.id).one_or_none()
             try:
                 filename = request.storage.save(request.POST['myfile'], folder=f'carrier-{mycarrier.id}', randomize=True)
+                print(f"Filename pre storage: {filename}")
                 cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
                 if not cex:
                     print(f"Filename: {filename} Will store: {request.storage.url(filename)}")
