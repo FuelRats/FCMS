@@ -174,8 +174,8 @@ def populate_view(request, cid, user):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     mymenu = menu.populate_sidebar(request)
-    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.id == cid).one_or_none()
-
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    print(f"\n\n\nExtra: {extra}\n\n")
     print(
         f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     data = {
