@@ -1,5 +1,7 @@
 {% include "header.jinja2" %}
+{% if not upload_complete %}
 {% include "dynamic_sidebar.jinja2" %}
+{% endif %}
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 {% include "navbar.jinja2" %}
@@ -57,8 +59,42 @@
   </div>
     </div>
     </body>
-{% else %}
+{% elif upload_complete %}
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">Upload complete</h5>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <p class="text-center">
+                        Click <a href="{{ request.route_url('my_carrier') }}">
+                        here </a>to return to your carrier.
+                    </p>
 
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+          <!-- Temp close -->
+      </div>
+    </section>
+  </div>
+    </div>
+    </body>
+{% else %}
     <section class="content">
       <div class="container-fluid">
         <div class="row">
