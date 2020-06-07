@@ -12,7 +12,7 @@ body {
 .main-footer{
   bottom: 0;
   left: 0;
-  position: page;
+  position: sticky;
   margin-left: 0 !important;
   z-index: 1039;
 }
