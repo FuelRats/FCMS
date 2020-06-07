@@ -66,8 +66,11 @@ def fill_data(candidates, source):
 
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search_view(request):
-    term = request.params['term']
+    term = None
+    if 'term' in request.params:
+        term = request.params['term']
     userdata = {}
+    mymenu = menu.populate_sidebar(request)
     coords = sapi.get_coords(term)
     x = coords['x']
     y = coords['y']
@@ -80,7 +83,7 @@ def search_view(request):
     else:
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
 
-    if 'DSSA' in request.params:
+    if 'dssa' in request.params:
         candidates = request.dbsession.query(carrier.Carrier).from_statement(
             text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                  f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -91,6 +94,9 @@ def search_view(request):
                  f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                  f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
         items = fill_data(candidates, source)
+        return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
+                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
+                    'carrier_search': True, 'sidebar': mymenu}
     if 'system' in request.params:
         # We're asking for a system name, so do a distance search.
         coords = sapi.get_coords(term)
@@ -102,7 +108,7 @@ def search_view(request):
         cube = 5000
         if coords:
             candidates = None
-            mymenu = menu.populate_sidebar(request)
+
             if 'DSSA' in request.params:
                 candidates = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
