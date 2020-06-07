@@ -23,13 +23,13 @@ def mycarrier_view(request):
                 print(f"Filename pre storage: {filename}")
                 cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
                 if not cex:
-                    print(f"Filename: {filename} Will store: {request.storage.url(filename)}")
-                    nc = CarrierExtra(cid=mycarrier.id, carrier_image=str(request.storage.url(filename)))
+                    print(f"Filename: {filename} Will store: {filename}")
+                    nc = CarrierExtra(cid=mycarrier.id, carrier_image=filename)
                     request.dbsession.add(nc)
                 else:
                     request.storage.delete(cex.carrier_image)
-                    print(f"Will store new filename: {filename} with url {request.storage.url(filename)}")
-                    cex.carrier_image = str(request.storage.url(filename))
+                    print(f"Will store new filename: {filename} with url {filename}")
+                    cex.carrier_image = filename
             except FileNotAllowed:
                 request.session.flash('Sorry, this file is not allowed.')
                 return exc.HTTPSeeOther(request.route_url('my_carrier'))
