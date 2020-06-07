@@ -16,15 +16,8 @@ def fill_data(candidates, source):
         print(f"Row proc: {row.callsign}")
         target = numpy.array((row.x, row.y, row.z))
         dist = numpy.linalg.norm(source - target)
-        taxcolor = None
-        if row.taxation == 0:
-            taxcolor = "#00A000"
-        elif 25 > row.taxation > 1:
-            taxcolor = "#DAD55E"
-        elif 50 > row.taxation > 26:
-            taxcolor = "FFC4505F"
-        else:
-            taxcolor = "#FF0000"
+        taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 1 \
+            else "#FFC4505F" if 50 > row.taxaation > 26 else "#FF0000"
         items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': util.from_hex(row.name),
                       'col2': row.callsign,
                       'is_DSSA': row.isDSSA,
@@ -65,11 +58,10 @@ def fill_data(candidates, source):
     return items
 
 
+# TODO: This shit is nuts and needs to die in a fire. FIX IT!
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search_view(request):
-    term = None
-    if 'term' in request.params:
-        term = request.params['term']
+    term = request.params['term'] if 'term' in request.params else None
     userdata = {}
     mymenu = menu.populate_sidebar(request)
     coords = sapi.get_coords(term)
@@ -176,7 +168,10 @@ def search_view(request):
             # Single CMDR name hit, go to their carrier.
             row = res.one()
             cx = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == row.id).one_or_none()
-            raise exc.HTTPFound(request.route_url(f'carrier', cid=cx.callsign))
+            if cx:
+                raise exc.HTTPFound(request.route_url(f'carrier', cid=cx.callsign))
+            else:
+                return {'error': 'Player does not have a carrier.'}
         elif res.count() > 1:
             print(f"Multiple CMDR name matches, present list. {res.count()}")
             for row in res:

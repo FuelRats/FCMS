@@ -10,9 +10,9 @@ body {
 }
 
 .main-footer{
-  position: sticky;
   bottom: 0;
   left: 0;
+  position: page;
 }
 
 .login-logo{

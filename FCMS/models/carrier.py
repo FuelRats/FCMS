@@ -6,7 +6,7 @@ from sqlalchemy import (
     Binary,
     Boolean,
     DateTime,
-    ForeignKey, Float,
+    ForeignKey, Float, BigInteger,
 )
 
 from .meta import Base
@@ -34,7 +34,7 @@ class Carrier(Base):
     x = Column(Float)
     y = Column(Float)
     z = Column(Float)
-    balance = Column(Integer)
+    balance = Column(BigInteger)
     fuel = Column(Integer)
     state = Column(Text)
     theme = Column(Text)

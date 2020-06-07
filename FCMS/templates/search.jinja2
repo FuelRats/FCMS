@@ -51,6 +51,26 @@
     </div>
     <!-- /.content-header -->
       <!-- Main content -->
+  {% if error %}
+
+    <section class="content">
+      <div class="container-fluid">
+          <!-- .card -->
+          <div class="card services">
+            <div class="card-header border-0">
+              <h3 class="card-title">Search Results - Error!</h3>
+                <div class="card-tools">
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-bars"></i>
+                  </a>
+                </div>
+              <div class="card-body table-responsive p-0">
+              <p>Error during search: {{ error }}</p>
+  {% else %}
+
     <section class="content">
       <div class="container-fluid">
           <!-- .card -->
@@ -113,10 +133,12 @@
               </div>
             </div>
             <!-- /.card -->
+      {% endif %}
       </div>
     </section>
   </div>
 </div>
+
 <!-- JIRA issue reporter -->
 <script type="text/javascript" src="https://jira.fuelrats.com/s/d41d8cd98f00b204e9800998ecf8427e-CDN/f689ip/804002/6150ae68746ae40172da9594bd8ff2bb/2.2.4.7/_/download/batch/com.atlassian.plugins.jquery:jquery/com.atlassian.plugins.jquery:jquery.js?collectorId=d7fb8795"></script><script type="text/javascript" src="https://jira.fuelrats.com/s/3ec581e51898860e1adb2d5c6851a9a5-T/f689ip/804002/6150ae68746ae40172da9594bd8ff2bb/3.1.0/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-UK&collectorId=d7fb8795"></script>
 
