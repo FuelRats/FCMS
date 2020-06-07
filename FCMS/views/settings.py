@@ -3,17 +3,26 @@
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.view import view_config
 from pyramid_storage.exceptions import FileNotAllowed
+from ..models import Carrier, CarrierExtra
 
 
 @view_config(route_name='settings', renderer='../templates/mytemplate.jinja2')
 def settings_view(request):
-    cid = 1
-    if request.POST['myfile'].file:
-        try:
-            request.storage.save(request.POST['myfile'], folder=f'carrier-{cid}', randomize=True)
-        except FileNotAllowed:
-            request.session.flash('Sorry, this file is not allowed.')
-            return HTTPSeeOther(request.route_url('home'))
+    carrier = request.dbsession.query(Carrier).filter(Carrier.owner == request.user.id).one_or_none()
+    if carrier:
+        if request.POST['myfile'].file:
+            try:
+                filename = request.storage.save(request.POST['myfile'], folder=f'carrier-{carrier.id}', randomize=True)
+                cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == carrier.id).one_or_none()
+                if not cex:
+                    nc = CarrierExtra(cid=carrier.id, carrier_image=request.storage.url(filename))
+                    request.dbsession.add(nc)
+                else:
+                    request.storage.delete(cex.carrier_image)
+                    cex.carrier_image = request.storage.url(filename)
+            except FileNotAllowed:
+                request.session.flash('Sorry, this file is not allowed.')
+                return HTTPSeeOther(request.route_url('my_carrier'))
     return {}
 
 

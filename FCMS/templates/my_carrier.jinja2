@@ -163,8 +163,8 @@
                   <li class="nav-item"><a class="nav-link" href="#finances" data-toggle="tab">Finances</a></li>
                     <li class="nav-item"><a class="nav-link" href="#crew" data-toggle="tab">Crew</a></li>
                     <li class="nav-item"><a class="nav-link" href="#cargo" data-toggle="tab">Cargo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Settings</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Your profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#profile" data-toggle="tab">Your profile</a></li>
                 </ul>
               </div><!-- /.card-header -->
                               <div class="card-body">
@@ -350,12 +350,28 @@
 
 
 
-                  <div class="tab-pane" id="timeline">
-                      <p>Your settings aren't here yet!</p>
-                  </div>
+                  <div class="tab-pane" id="settings">
+                    <form action="/my_carrier" method="post" enctype="multipart/form-data">
+                        <div class="card-body">
+                          <div class="form-group">
+                            <label for="exampleInputFile">Carrier image</label>
+                            <div class="input-group">
+                              <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="myfile" id="exampleInputFile">
+                                <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <div class="card-footer">
+                          <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                      </form>
+
+                    </div>
                   <!-- /.tab-pane -->
 
-                  <div class="tab-pane" id="settings">
+                  <div class="tab-pane" id="profile">
                     <form class="form-horizontal">
                       <div class="form-group row">
                         <label for="inputName" class="col-sm-2 col-form-label">Nothing here</label>

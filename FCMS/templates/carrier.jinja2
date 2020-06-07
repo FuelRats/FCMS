@@ -63,369 +63,94 @@
       <div class="container-fluid">
         <!-- Info boxes -->
           <!-- Header box -->
-        <div class="row">
-            <div class="col-1" style="height:300px; width:100%"><img style="object-fit: contain" src="{{carrier_image}}" alt=""/>
-            </div>
-        </div>
-        <div class="row">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon state">{% include "inline_svgs/state.jinja2" %}</i>
-              </span>
 
-              <div class="info-box-content" >
-                <span class="info-box-text">{{ callsign }}</span>
-                <span class="info-box-number">
-                  {{ name }}
-                </span>
+                  <div class="row">
+          <div class="col-md-3">
+          <div class="card card-primary card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <img class="img-responsive"
+                       src="{{ carrier_image }}"
+                       alt="User profile picture"
+                       style="object-fit: contain; height:250px; width:100%">
+                </div>
+
+                <h3 class="profile-username text-center">{{ name }}</h3>
+
+                <p class="text-muted text-center">{{ callsign }}</p>
+                                  <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <b>System</b> <a class="float-right">{{ system or "Unknown" }}</a>
+                  </li>
+                  <li class="list-group-item">
+                    <b>Arrived at</b> <a class="float-right">{{ arrival or "Unknown" }}</a>
+                  </li>
+                  <li class="list-group-item">
+                    <b>Squadron</b> <a class="float-right">{{ squadron or "Unknown" }}</a>
+                  </li>
+                </ul>
               </div>
-              <!-- /.info-box-content -->
+              <!-- /.card-body -->
             </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon fuel">{% include "inline_svgs/fuel.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Fuel Level</span>
-                <span class="info-box-number">{{ fuel }} / 1000</span>
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Services</h3>
               </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="status">
+                <strong><i class="icon shipyard" style="color: {{ '#00A000' if shipyard else '#FF0000' }}" title="Shipyard">{% include 'inline_svgs/shipyard.jinja2' %}</i></strong>
+                      <span class="label">Shipyard</span><span class="status-text">{{  "Available" if shipyard else "Personal Only" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if outfitting else '#FF0000' }}">{% include 'inline_svgs/outfitting.jinja2' %}</i></strong>
+                <span class="label">Outfitting</span><span class="status-text">{{  "Available" if outfitting else "Personal Only" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if repair else '#FF0000' }}">{% include 'inline_svgs/repair.jinja2' %}</i></strong>
+                <span class="label">Repair</span><span class="status-text">{{  "Available" if repair else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if refuel else '#FF0000' }}">{% include 'inline_svgs/refuel.jinja2' %}</i></strong>
+                <span class="label">Refuel</span><span class="status-text">{{  "Available" if refuel else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if rearm else '#FF0000' }}">{% include 'inline_svgs/rearm.jinja2' %}</i></strong>
+                <span class="label">Rearm</span><span class="status-text">{{  "Available" if rearm else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if exploration else '#FF0000' }}">{% include 'inline_svgs/exploration.jinja2' %}</i></strong>
+                <span class="label">Interstellar Cartographics</span><span class="status-text">{{ "Available" if exploration else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if voucher_redemption else '#FF0000' }}">{% include 'inline_svgs/voucher_redemption.jinja2' %}</i></strong>
+                <span class="label">Interstellar Factor</span><span class="status-text">{{ "Available" if voucher_redemption else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if black_market else '#FF0000' }}">{% include 'inline_svgs/blackmarket.jinja2' %}</i></strong>
+                <span class="label">Black Market</span><span class="status-text">{{ "Available" if black_market else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if notorious_access else '#FF0000' }}">{% include 'inline_svgs/notorious_access.jinja2' %}</i></strong>
+                <span class="label">Notorious Access</span><span class="status-text">{{ "Allowed" if notorious_access else "Not Allowed" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if docking_access == 'all' else '#FF0000' }}">{% include 'inline_svgs/docking_access.jinja2' %}</i></strong>
+                <span class="label">Docking Access</span><span class="status-text">{{ "Squadron and Friends" if docking_access == "squadronfriends" else docking_access|title }}</span>
+                      </div>
 
-          <!-- fix for small devices only -->
-          <div class="clearfix hidden-md-up"></div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon starsystem">{% include "inline_svgs/starsystem.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Current System</span>
-                <span class="info-box-number">{{ current_system }}</span>
               </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Last Updated</span>
-                <span class="info-box-number">{{ last_updated }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-
-              <!-- Info boxes -->
-        <div class="row">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon balance">{% include "inline_svgs/balance.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Balance</span>
-                <span class="info-box-text">
-                  {{ balance }}
-                </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon taxation">{% include "inline_svgs/taxation.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Taxation</span>
-                <span class="info-box-number">{{ taxation }} %</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-
-          <!-- fix for small devices only -->
-          <div class="clearfix hidden-md-up"></div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon completed_jumps">{% include "inline_svgs/completed_jumps.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Total distance jumped</span>
-                <span class="info-box-number">{{ distance_jumped }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-warning elevation-1">
-                  <i class="icon capacity">{% include "inline_svgs/capacity.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Capacity</span>
-                <span class="info-box-number">{{ capacity }} / 25 000 </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-
-
-
-              <!-- Info boxes -->
-        <div class="row">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon docking_access">{% include "inline_svgs/docking_access.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Docking access</span>
-                <span class="info-box-number">
-                  {{ "Squadron and Friends" if docking_access == 'squadronfriends' else docking_access|title }}
-                </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon notorious_access">{% include "inline_svgs/notorious_access.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Notorious Access</span>
-                <span class="info-box-number">{{ "Yes" if notorious_access else "No" }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-
-          <!-- fix for small devices only -->
-          <div class="clearfix hidden-md-up"></div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon shipyard">{% include "inline_svgs/shipyard.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Shipyard Status</span>
-                <span class="info-box-number">{{ "Enabled" if shipyard else "Unavailable" }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-warning elevation-1">
-                  <i class="icon outfitting">{% include "inline_svgs/outfitting.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Outfitting Status</span>
-                <span class="info-box-number">{{ "Enabled" if outfitting else "Unavailable"  }}  </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-
-
-              <!-- Info boxes -->
-        <div class="row">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon refuel">{% include "inline_svgs/refuel.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Refueling</span>
-                <span class="info-box-text">
-                  {{ "Available" if refuel else "Unavailable" }}
-                </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon repair">{% include "inline_svgs/repair.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Repair</span>
-                <span class="info-box-number">{{ "Available" if repair else "Unavailable" }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-
-          <!-- fix for small devices only -->
-          <div class="clearfix hidden-md-up"></div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon rearm">{% include "inline_svgs/rearm.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Rearm</span>
-                <span class="info-box-number">{{ "Available" if rearm else "Unavailable" }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-warning elevation-1">
-                  <i class="icon exploration">{% include "inline_svgs/exploration.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Universal Cartographics</span>
-                <span class="info-box-number">{{ "Available" if exploration else "Unavailable" }} </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-
-
-              <!-- Info boxes -->
-        <div class="row">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon commodities">{% include "inline_svgs/commodities.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Commodities market</span>
-                <span class="info-box-text">
-                  {{ "Available" if commodities else "Unavailable" }}
-                </span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon blackmarket">{% include "inline_svgs/blackmarket.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Black market</span>
-                <span class="info-box-number">{{ "Available" if black_market else "Unavailable" }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-
-          <!-- fix for small devices only -->
-          <div class="clearfix hidden-md-up"></div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-info elevation-1">
-                  <i class="icon voucher_redemption">{% include "inline_svgs/voucher_redemption.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Voucher redemption</span>
-                <span class="info-box-number">{{ "Available" if voucher_redemption else "Unavailable" }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-warning elevation-1">
-                  <i class="icon balance">{% include "inline_svgs/balance.jinja2" %}</i>
-              </span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Weekly maintenance</span>
-                <span class="info-box-number">{{ maintenance }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-
-          <!-- Temp close -->
-      </div>
-    </section>
+              <!-- /.card-body -->
+            </div></div></div></div></section>
             <!-- JIRA reporter -->
 {% endif %}
 </div>
