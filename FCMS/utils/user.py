@@ -1,4 +1,5 @@
 # User data handler, as well as sidebar menu builder.
+import json
 from datetime import datetime
 
 from FCMS.utils.capi import capi, get_cmdr
@@ -27,7 +28,7 @@ def update_profile(request):
     if request.user:
         ud = get_cmdr(request.user)
         user = request.dbsession.query(User).filter(User.id == request.user.id).one_or_none()
-        user.cachedJson = ud
+        user.cachedJson = json.dumps(ud)
         user.lastUpdated = datetime.now()
 
 
