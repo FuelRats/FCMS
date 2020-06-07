@@ -1,5 +1,5 @@
 {% include "header.jinja2" %}
-{% include "sidebar.jinja2" %}
+{% include "dynamic_sidebar.jinja2" %}
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
   <!-- Navbar -->
@@ -29,7 +29,7 @@
       </div>
     </form>
   </nav>
-{% include "sidebar.jinja2" %}
+
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -83,7 +83,7 @@
                   {% for it in items %}
                   <tr>
                     <td>
-                      <i class="icon shipyard">{% include it.col1_svg %}</i>
+                      <i class="icon shipyard">{%- if it.is_DSSA -%}{% include 'inline_svgs/dssa.jinja2' %}{%- else -%}{% include it.col1_svg %}{%- endif -%}</i>
                         {% if carrier_search %}
                             <a href="/carrier/{{ it.col2 }}">
                             {{ it.col1|e }}

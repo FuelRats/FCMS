@@ -1,4 +1,8 @@
 # User data handler, as well as sidebar menu builder.
+from datetime import datetime
+
+from FCMS.utils.capi import capi, get_cmdr
+from ..models import User
 
 
 def populate_user(request):
@@ -17,3 +21,13 @@ def populate_user(request):
                     'cmdr_image': '/static/dist/img/avatar.png',
                     'logged_in': False}
     return userdata
+
+
+def update_profile(request):
+    if request.user:
+        ud = get_cmdr(request.user)
+        user = request.dbsession.query(User).filter(User.id == request.user.id).one_or_none()
+        user.cachedJson = ud
+        user.lastUpdated = datetime.now()
+
+

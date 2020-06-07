@@ -14,6 +14,7 @@ def mycarrier_view(request):
     user = request.user
     userdata = usr.populate_user(request)
     mycarrier = None
+    print(usr.update_profile(request))
     if user:
         # Debugging backdoor to other CMDRs my_carrier view.
         if user.userlevel > 4 and 'emulate' in request.params:
@@ -35,6 +36,7 @@ def mycarrier_view(request):
         data['events'] = events
         data['crew'] = crew
         data['cargo'] = cargo
+        data['sidebar'] = menu.populate_sidebar(request)
         data['funding_time'] = format_timespan(int(mycarrier.balance /
                                                    int(mycarrier.servicesCost + mycarrier.coreCost) * 604800)) \
             if mycarrier.balance > 0 else f'DEBT DECOMMISSION IN {format_timespan(int(300000000 / int(mycarrier.servicesCost + mycarrier.coreCost) * 604800))}'

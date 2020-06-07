@@ -14,11 +14,9 @@ def login_view(request):
     if 'test' not in request.session:
         request.session['test'] = True
     if 'email' in request.params:
-        print(f"Got a submit! {request.params}")
         res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()
         if res:
             if pwd_context.verify(request.params['pass'], res.password):
-                print("Valid password!")
                 headers = remember(request, res.id)
                 return exc.HTTPFound(location=request.route_url('my_carrier'), headers=headers)
             else:
@@ -31,8 +29,7 @@ def login_view(request):
 @view_config(route_name='logout', renderer='../templates/login.jinja2')
 def logout_view(request):
     headers = forget(request)
-    next = request.route_url('home')
-    return exc.HTTPFound(location=next, headers=headers)
+    return exc.HTTPFound(location=request.route_url('home'), headers=headers)
 
 
 @view_config(route_name='register', renderer='../templates/register.jinja2')
@@ -59,8 +56,7 @@ def register_view(request):
 
 @view_config(route_name='oauth', renderer='../templates/register.jinja2')
 def oauth(request):
-    url, state = capi.get_auth_url()
-    return exc.HTTPFound(location=url)
+    return exc.HTTPFound(location=capi.get_auth_url())
 
 
 @view_config(route_name='oauth_callback', renderer='../templates/register.jinja2')
@@ -111,5 +107,5 @@ def oauth_finalize(request):
         #TODO: Redirect to my_carrier after delay.
     except:
         return {'project': 'Failed to retrieve your carrier. Did you buy one?'}
-    return {'project': 'OAuth flow completed. Carrier added. You are being redirected in 5 seconds.',
-            'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5 }}
+    return {'project': 'OAuth flow completed. Carrier added.',
+            'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5}}

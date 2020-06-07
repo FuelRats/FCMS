@@ -16,7 +16,7 @@ class CarrierExtra(Base):
     __tablename__ = 'carrier_extras'
     id = Column(Integer, primary_key=True)
     cid = Column(Integer, ForeignKey('carriers.id'))
-    carrier_image = Column(Binary)
+    carrier_image = Column(Text)
     carrier_motd = Column(Text)
 
 
@@ -58,6 +58,7 @@ class Carrier(Base):
     hasVoucherRedemption = Column(Boolean)
     hasExploration = Column(Boolean)
     capacity = Column(Integer)
+    isDSSA = Column(Boolean)
     lastUpdated = Column(DateTime)
     cachedJson = Column(Text)
 

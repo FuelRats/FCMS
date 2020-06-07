@@ -62,6 +62,11 @@
     <section class="content">
       <div class="container-fluid">
         <!-- Info boxes -->
+          <!-- Header box -->
+        <div class="row">
+            <div class="col-1" style="height:300px; width:100%"><img style="object-fit: contain" src="{{carrier_image}}" alt=""/>
+            </div>
+        </div>
         <div class="row">
           <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
@@ -69,7 +74,7 @@
                   <i class="icon state">{% include "inline_svgs/state.jinja2" %}</i>
               </span>
 
-              <div class="info-box-content">
+              <div class="info-box-content" >
                 <span class="info-box-text">{{ callsign }}</span>
                 <span class="info-box-number">
                   {{ name }}
@@ -214,7 +219,7 @@
               <div class="info-box-content">
                 <span class="info-box-text">Docking access</span>
                 <span class="info-box-number">
-                  {{ docking_access }}
+                  {{ "Squadron and Friends" if docking_access == 'squadronfriends' else docking_access|title }}
                 </span>
               </div>
               <!-- /.info-box-content -->

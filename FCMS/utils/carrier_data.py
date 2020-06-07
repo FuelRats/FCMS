@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 from . import capi
-from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar
+from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar, CarrierExtra
 import pyramid.httpexceptions as exc
 from ..utils import util, sapi, user as usr, menu
 from humanfriendly import format_timespan, format_number
@@ -174,6 +174,8 @@ def populate_view(request, cid, user):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     mymenu = menu.populate_sidebar(request)
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.id == cid).one_or_none()
+
     print(
         f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     data = {
@@ -200,6 +202,8 @@ def populate_view(request, cid, user):
         'black_market': mycarrier.hasBlackMarket or False,
         'voucher_redemption': mycarrier.hasVoucherRedemption or False,
         'maintenance': int(mycarrier.coreCost + mycarrier.servicesCost) or 0,
+        'carrier_image': extra.carrier_image if extra else "/static/img/abs-carrier-fuelrats.jpg",
+        'carrier_motd': extra.carrier_motd if extra else "No MOTD set",
         'x': mycarrier.x,
         'y': mycarrier.y,
         'z': mycarrier.z,

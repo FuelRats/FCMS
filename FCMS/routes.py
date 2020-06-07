@@ -12,3 +12,5 @@ def includeme(config):
     config.add_route('oauth_finalize', '/oauth/finalize')
     config.add_route('loadout', '/loadout')
     config.add_route('search', '/search')
+    config.add_route('uploadtest', '/uploadtest')
+    config.add_route('settings', '/settings')

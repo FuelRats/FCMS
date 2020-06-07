@@ -13,6 +13,7 @@ requires = [
     'pyramid',
     'pyramid_jinja2',
     'pyramid_debugtoolbar',
+    'pyramid_storage',
     'waitress',
     'alembic',
     'pyramid_retry',
@@ -40,7 +41,7 @@ tests_require = [
 
 setup(
     name='FCMS',
-    version='0.0',
+    version='0.5',
     description='FCMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[

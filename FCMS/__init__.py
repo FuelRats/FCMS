@@ -12,6 +12,8 @@ def main(global_config, **settings):
         config.include('.models')
         config.include('pyramid_jinja2')
         config.include('.routes')
+        config.include('pyramid_storage')
+        config.add_static_view('storage', 'storage')
         config.set_session_factory(my_session_factory)
         config.scan()
     return config.make_wsgi_app()

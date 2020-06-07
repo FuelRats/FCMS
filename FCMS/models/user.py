@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column,
     Index,
     Integer,
-    Text, Boolean,
+    Text, Boolean, DateTime,
 )
 
 from .meta import Base
@@ -22,6 +22,8 @@ class User(Base):
     has_validated = Column(Boolean)
     public_carrier = Column(Boolean)
     banned = Column(Boolean)
+    cachedJson = Column(Text)
+    lastUpdated = Column(DateTime)
 
 
 Index('user_index', User.username, unique=True)

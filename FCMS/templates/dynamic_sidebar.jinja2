@@ -1,9 +1,8 @@
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
-      <i class="icon logo">{% include "inline_svgs/logo.jinja2" %}</i>
-      <span class="brand-text font-weight-light">{{ sidebar_logo_title or "FCMS" }}</span>
+    <a href="/my_carrier" class="brand-link">
+      <i class="logo">{% include "inline_svgs/logo.jinja2" %}</i>
     </a>
 
     <!-- Sidebar -->
@@ -22,57 +21,57 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-        {% if user.logged_in %}
-          <li class="nav-header">EXAMPLES</li>
-
-              <li class="nav-item">
-                <a href="/my_carrier" class="nav-link">
-                  <i class="nav-icon fas house-user"></i>
+        {% if user %}
+            {% if user.logged_in %}
+                  <li class="nav-item">
+                    <a href="/my_carrier" class="nav-link">
+                        <i class="icon shipyard">{% include 'inline_svgs/state.jinja2' %}</i>
+                        <p>My Carrier</p>
+                    </a>
+                  </li>
+            {% endif %}
+        {% endif %}
+        {% if sidebar %}
+            {% if sidebar.sidebar_treeview %}
+                <!-- I've got a jar of dirt! -->
+              <!-- Add icons to the links using the .nav-icon class
+                   with font-awesome or any other icon font library -->
+              <li class="nav-item has-treeview menu-open">
+                <a href="#" class="nav-link active">
+                  <i class="nav-icon fas {{ sidebar.sidebar_treeview.icon }}"></i>
                   <p>
-                      My Carrier
+                      {{ sidebar.sidebar_treeview.title }}
+                    <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
+                <ul class="nav nav-treeview">
+                {% for item in sidebar.sidebar_treeview.menuitems %}
+                    <!-- Iterator -->
+                  <li class="nav-item">
+                    <a href="{{ item.linktarget }}" class="nav-link {{ 'active' if current_view == item.view  }}">
+                      <i class="far fas {{ item.selected_icon if current_view == item.view else item.unselected_icon }} nav-icon"></i>
+                      <p>{{ item.name }}</p>
+                    </a>
+                  </li>
+                {% endfor %}
+                </ul>
               </li>
-        {% endif %}
-        {% if sidebar.sidebar_treeview %}
-            <!-- I've got a jar of dirt! -->
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-          <li class="nav-item has-treeview menu-open">
-            <a href="#" class="nav-link active">
-              <i class="nav-icon fas {{ sidebar.sidebar_treeview.icon }}"></i>
-              <p>
-                  {{ sidebar.sidebar_treeview.title }}
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-            {% for item in sidebar.sidebar_treeview.menuitems %}
-                <!-- Iterator -->
+            {% endif %}
+        {% if sidebar.sidebar_menuitems %}
+            {% for item in sidebar.sidebar_menuitems %}
               <li class="nav-item">
-                <a href="{{ item.linktarget }}" class="nav-link {{ 'active' if current_view == item.view  }}">
-                  <i class="far fas {{ item.selected_icon if current_view == item.view else item.unselected_icon }} nav-icon"></i>
+                <a href="{{ item.link }}" class="nav-link">
+                  <i class="icon shipyard">{% include item.icon %}</i>
                   <p>{{ item.name }}</p>
                 </a>
               </li>
             {% endfor %}
-            </ul>
-          </li>
-        </ul>
         {% endif %}
-      </nav>
-    {% if sidebar.sidebar_menuitems %}
-        {% for item in sidebar.sidebar_menuitems %}
-              <li class="nav-item">
-                <a href="{{ item.link }}" class="nav-link">
-                  <i class="nav-icon fas {{ item.icon }}"></i>
-                  <p>
-                      {{ item.name }}
-                  </p>
-                </a>
-              </li>
-        {% endfor %}
     {% endif %}
+        </ul>
+
+      </nav>
+
       <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->

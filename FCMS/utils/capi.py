@@ -72,29 +72,30 @@ def capi(endpoint, user):
     else:
         refresh_token = None
     print(f"CAPI Refresh token: {refresh_token}")
-    print(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
-    if client.token.is_expired():
-        print("Expired token!")
-        newtoken = update_token(client.token, ref_token=refresh_token, user=user)
-        client.token = newtoken
-        user.access_token = str(dict(client.token))
-        user.refresh_token = client.token['refresh_token']
-        user.token_expiration = client.token['expires_at']
-        print(f"Updated token: {newtoken}")
-
-    try:
-        res = client.get(urljoin(capiURL, endpoint))
-        res.raise_for_status()
-        return res.content
-    except requests.HTTPError as err:
-        if res.status_code == 401:
-            print("Unauthorized? Try a refresh.")
+    if client.token:
+        print(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
+        if client.token.is_expired():
+            print("Expired token!")
             newtoken = update_token(client.token, ref_token=refresh_token, user=user)
-            print(f"Newtoken: {newtoken}")
             client.token = newtoken
             user.access_token = str(dict(client.token))
             user.refresh_token = client.token['refresh_token']
             user.token_expiration = client.token['expires_at']
+            print(f"Updated token: {newtoken}")
+
+        try:
+            res = client.get(urljoin(capiURL, endpoint))
+            res.raise_for_status()
+            return res.content
+        except requests.HTTPError as err:
+            if res.status_code == 401:
+                print("Unauthorized? Try a refresh.")
+                newtoken = update_token(client.token, ref_token=refresh_token, user=user)
+                print(f"Newtoken: {newtoken}")
+                client.token = newtoken
+                user.access_token = str(dict(client.token))
+                user.refresh_token = client.token['refresh_token']
+                user.token_expiration = client.token['expires_at']
 
         print(f"Failed to get CAPI resource! {err}")
         return None

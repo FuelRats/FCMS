@@ -1,5 +1,5 @@
 {% include "header.jinja2" %}
-{% include "sidebar.jinja2" %}
+{% include "dynamic_sidebar.jinja2" %}
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 {% include "navbar.jinja2" %}
@@ -36,7 +36,6 @@
                 <div class="row">
                   <div class="col-md-8">
                     <p class="text-center">
-                      <strong>Register your carrier</strong>
                         You don't have a carrier registered. Click <a href="{{ request.route_url('oauth') }}">
                         here </a>to Oauth with FDev and attempt to retrieve it.
                     </p>
@@ -67,9 +66,10 @@
           <div class="card card-primary card-outline">
               <div class="card-body box-profile">
                 <div class="text-center">
-                  <img class="img-responsive img-size-64"
-                       src="/static/img/abs-carier-fuelrats.jpg"
-                       alt="User profile picture">
+                  <img class="img-responsive"
+                       src="{{ carrier_image }}"
+                       alt="User profile picture"
+                       style="object-fit: contain">
                 </div>
 
                 <h3 class="profile-username text-center">{{ name }}</h3>
@@ -127,7 +127,7 @@
                 <hr>
                   <div class="status">
                 <strong><i class="icon outfitting" style="color: {{ '#00A000' if voucher_redemption else '#FF0000' }}">{% include 'inline_svgs/voucher_redemption.jinja2' %}</i></strong>
-                <span class="label">Interstellar Factor</span><span class="status-text">{{ "Available" if voucher_redemption else "Unavilable" }}</span>
+                <span class="label">Interstellar Factor</span><span class="status-text">{{ "Available" if voucher_redemption else "Unavailable" }}</span>
                       </div>
                 <hr>
                   <div class="status">
@@ -142,7 +142,7 @@
                 <hr>
                   <div class="status">
                 <strong><i class="icon outfitting" style="color: {{ '#00A000' if docking_access == 'all' else '#FF0000' }}">{% include 'inline_svgs/docking_access.jinja2' %}</i></strong>
-                <span class="label">Docking Access</span><span class="status-text">{{ docking_access }}</span>
+                <span class="label">Docking Access</span><span class="status-text">{{ "Squadron and Friends" if docking_access == "squadronfriends" else docking_access|title }}</span>
                       </div>
 
               </div>

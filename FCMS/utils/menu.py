@@ -60,9 +60,27 @@ def populate_sidebar(request):
                      },
                 ]
         }
+    sidebar_menuitems=[
+        {
+            'name': 'DSSA Carriers',
+            'link': '/search?dssa=True',
+            'icon': 'inline_svgs/dssa.jinja2'
+        },
+        {
+            'name': 'Nearest Carriers',
+            'link': '/search?type=Closest',
+            'icon': 'inline_svgs/starsystem.jinja2'
+        },
+        {
+            'name': 'System Search',
+            'link': '/search?dssa=True?system=Fuelum',
+            'icon': 'inline_svgs/itinerary.jinja2'
+        }
+    ]
     sidebar = {
         'sidebar_logo_title': 'FCMS',
         'sidebar_treeview': sidebar_treeview,
+        'sidebar_menuitems': sidebar_menuitems
 
                }
     return sidebar

@@ -1,8 +1,8 @@
 {% include "header.jinja2" %}
-<body class="hold-transition register-page">
-<div class="register-box">
+<body class="hold-transition register-page" style="background-image: url(/static/img/abs-carrier-fuelrats.jpg)">
+<div class="register-box" style="width:500px">
   <div class="register-logo">
-      <a href="../../index2.html"><b>{{ project }}</b></a>
+      <b>{{ project }}</b>
   </div>
 {% if reg_success %}
     <h2><div style="text-align: center;">
@@ -57,7 +57,7 @@
             <div class="icheck-primary">
               <input type="checkbox" id="agreeTerms" name="terms" value="agree">
               <label for="agreeTerms">
-               I agree to the <a href="#">terms</a>
+               I agree to the <a href="/terms">terms</a>
               </label>
             </div>
           </div>
