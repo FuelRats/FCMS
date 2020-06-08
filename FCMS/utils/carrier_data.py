@@ -225,7 +225,6 @@ def populate_view(request, cid, user):
         'calendar': True,
 
     }
-    print(data)
     return data
 
 
