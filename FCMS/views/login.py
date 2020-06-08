@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from pyramid.view import view_config
@@ -114,7 +115,7 @@ def oauth_finalize(request):
                                      hasBlackMarket=True if services['blackmarket'] == 'ok' else False,
                                      hasVoucherRedemption=True if services['voucherredemption'] == 'ok' else False,
                                      hasExploration=True if services['exploration'] == 'ok' else False,
-                                     cachedJson=jcarrier,
+                                     cachedJson=json.dumps(jcarrier),
                                      x=coords['x'],
                                      y=coords['y'],
                                      z=coords['z'],
