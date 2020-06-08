@@ -53,7 +53,7 @@ def fill_data(candidates, source):
                                     'title': f'Notorious Commanders can {"" if row.notoriousAccess else "NOT"} dock'},
                                    {'color': '#00A000' if row.dockingAccess == 'all' else '#dad55e',
                                     'svg': 'inline_svgs/docking_access.jinja2',
-                                    'title': f'Docking available for {row.dockingAccess}'},
+                                    'title': f'Docking available for {"Squadron and Friends" if row.dockingAccess == "squadronfriends" else row.dockingAccess}'},
                                    {'color': taxcolor, 'svg': 'inline_svgs/taxation.jinja2',
                                     'title': f'Taxation is {row.taxation}%'}
                                    ]})
