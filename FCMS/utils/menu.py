@@ -76,7 +76,7 @@ def populate_sidebar(request):
         },
         {
             'name': 'System Search',
-            'link': '/search?dssa=True&term=Fuelum',
+            'link': '/search?searchform=True',
             'icon': 'inline_svgs/itinerary.jinja2'
         }
     ]

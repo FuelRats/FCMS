@@ -63,6 +63,8 @@ def fill_data(candidates, source):
 # TODO: This shit is nuts and needs to die in a fire. FIX IT!
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search_view(request):
+    if 'searchform' in request.params:
+        return { 'searchform': True }
     term = request.params['term'] if 'term' in request.params else None
     userdata = {}
     mymenu = menu.populate_sidebar(request)
