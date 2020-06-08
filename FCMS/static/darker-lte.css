@@ -17,7 +17,7 @@ body {
   z-index: 1039;
 }
 
-.login-page .main-footer {
+.login-page .main-footer, .register-oage .main-footer {
   position: absolute;
 }
 
