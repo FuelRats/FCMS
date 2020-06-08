@@ -95,7 +95,10 @@ def search_view(request):
     if 'type' in request.params:
         if request.params['type'].lower() == 'closest':
             usr = capi.get_cmdr(request.user)
-            sys = usr['lastSystem']['name']
+            if not usr:
+                sys = 'Sol'
+            else:
+                sys = usr['lastSystem']['name']
             coords = sapi.get_coords(sys)
             x = coords['x']
             y = coords['y']
