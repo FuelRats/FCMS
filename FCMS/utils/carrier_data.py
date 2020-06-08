@@ -55,9 +55,11 @@ def get_finances(request, cid):
     """
     carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     if carrier:
-        cdata = json.loads(carrier.cachedJson)
-        if not cdata:
+        cdata = None
+        if not carrier.cachedJson:
             cdata = update_carrier(request, cid, request.user)
+        else:
+            cdata = json.loads(carrier.cachedJson)
         data = {}
         for key, val in cdata['finance'].items():
             data[key] = format_number(val)
@@ -76,9 +78,11 @@ def get_crew(request, cid):
     """
     carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     if carrier:
-        cdata = json.loads(carrier.cachedJson)
-        if not cdata:
+        cdata = None
+        if not carrier.cachedJson:
             cdata = update_carrier(request, cid, request.user)
+        else:
+            cdata = json.loads(carrier.cachedJson)
         return cdata['servicesCrew']
     else:
         log.error("Attempt to get crew for non-existant carrier!")
