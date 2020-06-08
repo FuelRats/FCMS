@@ -6,11 +6,13 @@ from pyramid.security import remember, forget
 from ..models import user, carrier
 from ..utils import capi
 from ..utils.encryption import pwd_context
+import logging
+
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='login', renderer='../templates/login.jinja2')
 def login_view(request):
-    print(f"Session: {request.session}")
     if 'test' not in request.session:
         request.session['test'] = True
     if 'email' in request.params:
@@ -20,9 +22,9 @@ def login_view(request):
                 headers = remember(request, res.id)
                 return exc.HTTPFound(location=request.route_url('my_carrier'), headers=headers)
             else:
-                print("Wrong password!")
+                log.warning(f"Failed login for {request.params['email']} from {request.client_addr}.")
         else:
-            print("No user!")
+            log.warning(f"Attempt to log in to non-existing user {request.params['email']} from {request.client_addr}")
     return {'project': 'Fleet Carrier Management System'}
 
 
@@ -36,8 +38,6 @@ def logout_view(request):
 def register_view(request):
     print(request.params)
     if 'register' in request.params:
-        print("I got a form submission!")
-        print(request.params)
         if not request.params['email']:
             return {'reg_failure': True, 'message': 'No email set.'}
         if not request.params['cmdr_name']:
@@ -52,13 +52,13 @@ def register_view(request):
                             cmdr_name=request.params['cmdr_name'], has_validated=False, public_carrier=True,
                             banned=False)
         request.dbsession.add(newuser)
+        log.info(f"Registered new user {request.params['email']} from {request.client_addr}.")
         return exc.HTTPFound(location=request.route_url('login'))
     return {'project': 'Fleet Carrier Management System'}
 
 
 @view_config(route_name='oauth', renderer='../templates/register.jinja2')
 def oauth_view(request):
-    print("In Oauth request.")
     url, state = capi.get_auth_url()
     return exc.HTTPFound(location=url)
 
@@ -67,16 +67,15 @@ def oauth_view(request):
 def oauth_callback(request):
     user = request.user
     if not user:
+        log.warning(f"Attempt to call Oauth flow without login from {request.client_addr}")
         return {'project': 'Error: You should be logged in before completing Oauth!'}
-    print(request.params)
-    print(request.url)
     state = request.params['state']
     token = capi.get_token(request.url, state=state)
     print(token)
     user.access_token = str(dict(token))
     user.refresh_token = token['refresh_token']
     user.token_expiration = token['expires_at']
-    print(f"User token ({type(user.access_token)}): {user.access_token}")
+    log.info(f"User {user.username} has completed OAuth authentication.")
     return exc.HTTPFound(location=request.route_url('oauth_finalize'))
 
 
@@ -85,12 +84,14 @@ def oauth_finalize(request):
     user = request.user
     try:
         jcarrier = capi.get_carrier(user)
-        print(jcarrier)
         services = jcarrier['market']['services']
         oc = request.dbsession.query(carrier.Carrier).filter(
             carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
         if oc:
-            print("Already have their carrier! No need for further shenanigans.")
+            log.warning(f"User {user.username} completed OAuth, but we already have their carrier. Update it.")
+            if oc.owner != user.id:
+                log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
+                oc.owner = user.id
             return {'project': 'Got a callback, updated existing user oauth keys.',
                     'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
         newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'],

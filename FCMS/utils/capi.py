@@ -5,7 +5,9 @@ import requests
 from authlib.integrations.base_client import UnsupportedTokenTypeError
 from authlib.integrations.requests_client import OAuth2Session
 from pyramid import threadlocal
+import logging
 
+log = logging.getLogger(__name__)
 
 settings = threadlocal.get_current_registry().settings
 capiURL = settings['capiURL'] or 'https://pts-companion.orerve.net'
@@ -18,34 +20,33 @@ auth_endpoint = authURL+'/auth'
 
 
 def update_token(token, ref_token=None, user=None):
-    print(f"update_token called! User: {user}")
-    print(f"Token: {token}")
-    print(f"Refresh: {ref_token}")
+    log.info(f"update_token called! User: {user}")
+    log.debug(f"Token: {token}")
     client.token = token
     try:
         new_token = client.refresh_token(token_endpoint, ref_token)
         if 'message' in new_token:
-            print(f"Failed! {new_token}: Retry with request...")
+            log.warning(f"Authlib refresh token Failed! {new_token}: Retrying with request.")
             data = {'grant_type': 'refresh_token', 'refresh_token': ref_token,
                     'client_id': client_id, }
             r = requests.post(urljoin(authURL, token_endpoint), data=data)
             if r.status_code == requests.codes.ok:
                 new_token = r.json()
-                print(f"Manual refresh: {new_token}")
+                log.debug(f"Manual refresh: {new_token}")
                 return new_token
             else:
-                print(f"Not OK! {r.status_code}: {r.content}")
+                log.error(f"Couldn't refresh authentication token. {r.status_code}: {r.content}")
         else:
-            print(f"Success? {new_token}")
+            log.info(f"Authentication token refreshed for {user}")
             return new_token
     except UnsupportedTokenTypeError:
         # Failed, let's do it manually.
         data = {'grant_type': 'refresh_token', 'refresh_token': ref_token,
                 'client_id': client_id}
-        r = requests.post(urljoin(authURL,token_endpoint), data=data)
+        r = requests.post(urljoin(authURL, token_endpoint), data=data)
         if r.status_code == requests.codes.ok:
             new_token = r.json()
-            print(f"Manual refresh: {new_token}")
+            log.info(f"Unsupported token type from authlib. Manual refresh: {new_token}")
             return new_token
 
 
@@ -71,17 +72,17 @@ def capi(endpoint, user):
         refresh_token = None
     else:
         refresh_token = None
-    print(f"CAPI Refresh token: {refresh_token}")
+    log.debug(f"CAPI Refresh token: {refresh_token}")
     if client.token:
-        print(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
+        log.debug(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
         if client.token.is_expired():
-            print("Expired token!")
+            log.debug(f"Expired access token for {user.cmdr_name}!")
             newtoken = update_token(client.token, ref_token=refresh_token, user=user)
             client.token = newtoken
             user.access_token = str(dict(client.token))
             user.refresh_token = client.token['refresh_token']
             user.token_expiration = client.token['expires_at']
-            print(f"Updated token: {newtoken}")
+            log.debug(f"Updated token: {newtoken}")
 
         try:
             res = client.get(urljoin(capiURL, endpoint))
@@ -89,15 +90,15 @@ def capi(endpoint, user):
             return res.content
         except requests.HTTPError as err:
             if res.status_code == 401:
-                print("Unauthorized? Try a refresh.")
+                log.warning(f"CAPI request for {user.cmdr_name} unauthorized. Attempting to refresh token.")
                 newtoken = update_token(client.token, ref_token=refresh_token, user=user)
-                print(f"Newtoken: {newtoken}")
+                log.debug(f"New token for {user.cmdr_name}: {newtoken}")
                 client.token = newtoken
                 user.access_token = str(dict(client.token))
                 user.refresh_token = client.token['refresh_token']
                 user.token_expiration = client.token['expires_at']
 
-        print(f"Failed to get CAPI resource! {err}")
+        log.error(f"Failed to get CAPI resource! {err}")
         return None
 
 
@@ -110,6 +111,7 @@ def get_carrier(user):
     try:
         return json.loads(capi('/fleetcarrier', user))
     except TypeError:
+        log.error(f"CAPI: User {user.cmdr_name} - failed to fetch /fleetcarrier endpoint.")
         return None
 
 
@@ -122,6 +124,7 @@ def get_cmdr(user):
     try:
         return json.loads(capi('/profile', user))
     except TypeError:
+        log.error(f"CAPI: User {user.cmdr_name} - failed to fetch /profile endpoint.")
         return None
 
 

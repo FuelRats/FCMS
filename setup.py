@@ -31,6 +31,7 @@ requires = [
     'authlib',
     'humanfriendly',
     'numpy',
+    'graypy',
 ]
 
 tests_require = [

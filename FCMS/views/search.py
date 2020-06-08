@@ -8,12 +8,14 @@ from sqlalchemy import text
 from ..models import user, carrier
 from ..utils import capi, sapi, util, menu
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def fill_data(candidates, source):
     items=[]
     for row in candidates:
-        print(f"Row proc: {row.callsign}")
         target = numpy.array((row.x, row.y, row.z))
         dist = numpy.linalg.norm(source - target)
         taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 1 \
@@ -77,7 +79,6 @@ def search_view(request):
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
 
     if 'dssa' in request.params:
-        print("In top DSSA search.")
         candidates = request.dbsession.query(carrier.Carrier).from_statement(
             text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                  f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -96,7 +97,6 @@ def search_view(request):
             usr = capi.get_cmdr(request.user)
             sys = usr['lastSystem']['name']
             coords = sapi.get_coords(sys)
-            print(f"Got coords {coords} for {sys}")
             x = coords['x']
             y = coords['y']
             z = coords['z']
@@ -111,7 +111,6 @@ def search_view(request):
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" order by Distance LIMIT 25"))
             items = fill_data(candidates, source)
-            print(f"Items: {items}")
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {sys}',
                     'carrier_search': True, 'sidebar': mymenu}
@@ -128,7 +127,6 @@ def search_view(request):
         if coords:
             candidates = None
             if 'DSSA' in request.params:
-                print("In DSSA system search.")
                 cand = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                          f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -138,9 +136,7 @@ def search_view(request):
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
-                print(f"Candidates: {cand}")
             else:
-                print("In main system search.")
                 cand = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                          f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -150,7 +146,6 @@ def search_view(request):
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" order by Distance LIMIT 25")).all()
-                print(f"Candidates: {cand}")
             items = fill_data(cand, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
@@ -173,10 +168,7 @@ def search_view(request):
             else:
                 return {'error': 'Player does not have a carrier.'}
         elif res.count() > 1:
-            print(f"Multiple CMDR name matches, present list. {res.count()}")
             for row in res:
-                print(f"Row: {row}")
-
                 items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
 
     res = request.dbsession.query(carrier.Carrier).\
@@ -192,6 +184,7 @@ def search_view(request):
                 print(f"Row: {row.callsign}")
         # We have a carrier name match!
     else:
-        print(f"No match")
+        log.error(f"No match for search on term {term}")
+        return {'error': f'No matches for your search term {term}'}
     return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
             'col4_header': 'Distance'}

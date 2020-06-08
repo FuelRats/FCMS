@@ -1,5 +1,8 @@
 # Sidebar menu building tools
 from ..utils import user as usr
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def populate_sidebar(request):
@@ -12,9 +15,9 @@ def populate_sidebar(request):
     sidebar = {}
     user = usr.populate_user(request)
     view = request.current_route_path()
-    print(f"Splits: {view.split('/')}")
-    print(f"Matched view: {view}")
-    print(f"User: {user}")
+    log.debug(f"Splits: {view.split('/')}")
+    log.debug(f"Matched view: {view}")
+    log.debug(f"User: {user}")
     sidebar_treeview = None
     if 'carrier' in view.split('/'):
         if len(view.split('/')) > 3:
