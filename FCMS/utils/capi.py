@@ -64,6 +64,9 @@ def capi(endpoint, user):
     """
     # Do a bloody song and dance, because can't be sure if the token passed with the user is a stored db string,
     # a dict fresh from the initial OAuth request, or an authlib token object...
+    if not user:
+        return None
+    log.debug(f"User is of type {type(user)}")
     if isinstance(user.access_token, str):
         client.token = ast.literal_eval(user.access_token)
         refresh_token = ast.literal_eval(user.access_token)['refresh_token']
