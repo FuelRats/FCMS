@@ -114,7 +114,7 @@ def get_carrier(user):
     try:
         return json.loads(capi('/fleetcarrier', user))
     except TypeError:
-        log.error(f"CAPI: User {user.cmdr_name} - failed to fetch /fleetcarrier endpoint.")
+        log.error(f"CAPI: User {user} - failed to fetch /fleetcarrier endpoint.")
         return None
 
 
@@ -127,7 +127,7 @@ def get_cmdr(user):
     try:
         return json.loads(capi('/profile', user))
     except TypeError:
-        log.error(f"CAPI: User {user.cmdr_name} - failed to fetch /profile endpoint.")
+        log.error(f"CAPI: User {user} - failed to fetch /profile endpoint.")
         return None
 
 
