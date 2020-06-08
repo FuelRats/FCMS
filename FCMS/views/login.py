@@ -4,7 +4,7 @@ from pyramid.view import view_config
 import pyramid.httpexceptions as exc
 from pyramid.security import remember, forget
 from ..models import user, carrier
-from ..utils import capi
+from ..utils import capi, sapi
 from ..utils.encryption import pwd_context
 import logging
 
@@ -94,6 +94,9 @@ def oauth_finalize(request):
                 oc.owner = user.id
             return {'project': 'Got a callback, updated existing user oauth keys.',
                     'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+        coords = sapi.get_coords(jcarrier['currentStarSystem'])
+        if not coords:
+            coords = {"x": 0, "y": 0, "z": 0}
         newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'],
                                      name=jcarrier['name']['vanityName'],
                                      currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
@@ -112,6 +115,10 @@ def oauth_finalize(request):
                                      hasBlackMarket=True if services['blackmarket'] == 'ok' else False,
                                      hasVoucherRedemption=True if services['voucherredemption'] == 'ok' else False,
                                      hasExploration=True if services['exploration'] == 'ok' else False,
+                                     cachedJson=jcarrier,
+                                     x=coords['x'],
+                                     y=coords['y'],
+                                     z=coords['z'],
                                      lastUpdated=datetime.now())
         request.dbsession.add(newcarrier)
         # TODO: Inject rest of the data too.
