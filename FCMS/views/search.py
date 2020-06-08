@@ -41,7 +41,7 @@ def fill_data(candidates, source):
                                     'title': f'Rearming {"" if row.hasRearm else "NOT"} available'},
                                    {'color': '#00A000' if row.hasExploration else '#FF0000',
                                     'svg': 'inline_svgs/exploration.jinja2',
-                                    'title': f'Interstellar Cargography {"" if row.hasExploration else "NOT"} available'},
+                                    'title': f'Interstellar Cartography {"" if row.hasExploration else "NOT"} available'},
                                    {'color': '#00A000' if row.hasVoucherRedemption else '#FF0000',
                                     'svg': 'inline_svgs/voucher_redemption.jinja2',
                                     'title': f'Interstellar Factor {"" if row.hasVoucherRedemption else "NOT"}  available'},
