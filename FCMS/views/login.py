@@ -36,7 +36,6 @@ def logout_view(request):
 
 @view_config(route_name='register', renderer='../templates/register.jinja2')
 def register_view(request):
-    print(request.params)
     if 'register' in request.params:
         if not request.params['email']:
             return {'reg_failure': True, 'message': 'No email set.'}
