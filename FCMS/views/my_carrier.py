@@ -16,10 +16,12 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='my_carrier', renderer='../templates/my_carrier.jinja2')
 def mycarrier_view(request):
+    global user
     if request.POST:
+        user = request.user
         if request.POST['myfile'].file:
             mycarrier = request.dbsession.query(carrier.Carrier).\
-                filter(carrier.Carrier.owner == request.user.id).one_or_none()
+                filter(carrier.Carrier.owner == user.id).one_or_none()
             try:
                 filename = request.storage.save(request.POST['myfile'], folder=f'carrier-{mycarrier.id}', randomize=True)
                 log.debug(f"Filename pre storage: {filename}")
@@ -33,10 +35,9 @@ def mycarrier_view(request):
                     log.info(f"Updated carrier image for {mycarrier.callsign}")
                     cex.carrier_image = filename
             except FileNotAllowed:
-                log.error(f"Attempt to upload invalid file by user {request.user.username} from {request.client_addr}")
+                log.error(f"Attempt to upload invalid file by user {user.username} from {request.client_addr}")
                 request.session.flash('Sorry, this file is not allowed.')
                 return exc.HTTPSeeOther(request.route_url('my_carrier'))
-    user = request.user
     userdata = usr.populate_user(request)
     mycarrier = None
     if user:
@@ -47,6 +48,8 @@ def mycarrier_view(request):
         else:
             mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == user.id).one_or_none()
         if not mycarrier:
+            if user.no_carrier:
+                return {'user': userdata, 'nocarrier': True}
             log.warning(f"Attempt to access nonexistant own carrier by {user.username}")
             return {'user': userdata, 'error': 'no carrier!'}
         finances = carrier_data.get_finances(request, mycarrier.id)

@@ -123,7 +123,6 @@ def get_cargo(request, cid):
                                                    'locname': cg.locName
                                                    }
         data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
-        log.debug(f"Cargo request for {cid} returning: {data}")
         return data
 
 
@@ -223,7 +222,6 @@ def populate_view(request, cid, user):
         'sidebar': mymenu,
         'events': events,
         'calendar': True,
-
     }
     return data
 

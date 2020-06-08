@@ -124,6 +124,9 @@ def oauth_finalize(request):
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.
     except:
-        return {'project': 'Failed to retrieve your carrier. Did you buy one?'}
+        user.no_carrier = True
+        return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
+                           'If you purchase one, go to your /my_carrier page and click the button there, '
+                           'and we will add it!', 'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5}}
     return {'project': 'OAuth flow completed. Carrier added.',
             'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5}}
