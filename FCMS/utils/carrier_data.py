@@ -213,7 +213,7 @@ def populate_view(request, cid, user):
         'black_market': mycarrier.hasBlackMarket or False,
         'voucher_redemption': mycarrier.hasVoucherRedemption or False,
         'maintenance': int(mycarrier.coreCost + mycarrier.servicesCost) or 0,
-        'carrier_image': extra.carrier_image if extra else "/static/img/abs-carrier-fuelrats.jpg",
+        'carrier_image': extra.carrier_image if extra else "/static/img/carrier_default.png",
         'carrier_motd': extra.carrier_motd if extra else "No MOTD set",
         'system': mycarrier.currentStarSystem,
         'arrived_at': mycarrier.lastUpdated,
