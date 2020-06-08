@@ -14,3 +14,4 @@ def includeme(config):
     config.add_route('search', '/search')
     config.add_route('uploadtest', '/uploadtest')
     config.add_route('settings', '/settings')
+    config.add_route('terms', '/terms')
