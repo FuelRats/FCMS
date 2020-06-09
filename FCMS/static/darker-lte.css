@@ -100,13 +100,14 @@ body {
 
 .login-box .card,
 .register-box .card {
-  background: transparent;
+  background: rgba(62, 62, 62, 0.1);
+  backdrop-filter: blur(2px);
+  border: 2px solid rgba(221, 221, 221, 0.2);
 }
 
 .login-box .card-body,
 .register-box .card-body {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(3px);
+  background: transparent;
 }
 
 .login-box,
