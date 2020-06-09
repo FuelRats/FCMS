@@ -104,6 +104,7 @@ def capi(endpoint, user):
             return None
     else:
         log.warning(f"No CAPI token for user {user.cmdr_name}. Bailing.")
+
         return None
 
 

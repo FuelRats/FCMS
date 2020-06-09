@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from ..models import user, carrier
 from ..utils import capi, sapi, util, menu
+from ..utils import user as myuser
 import re
 import logging
 
@@ -63,8 +64,6 @@ def fill_data(candidates, source):
 # TODO: This shit is nuts and needs to die in a fire. FIX IT!
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search_view(request):
-    if 'searchform' in request.params:
-        return { 'searchform': True }
     term = request.params['term'] if 'term' in request.params else None
     userdata = {}
     mymenu = menu.populate_sidebar(request)
@@ -76,9 +75,11 @@ def search_view(request):
     items = []
     cube = 5000
     if request.user:
-        userdata = {'cmdr_name': request.user.cmdr_name, 'cmdr_image': '/static/dist/img/avatar.png'}
+        userdata = myuser.populate_user(request)
     else:
-        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
+        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png', 'link': '/login'}
+    if 'searchform' in request.params:
+        return { 'searchform': True, 'user': userdata, 'sidebar': mymenu }
 
     if 'dssa' in request.params:
         candidates = request.dbsession.query(carrier.Carrier).from_statement(

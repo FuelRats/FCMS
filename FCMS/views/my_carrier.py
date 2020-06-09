@@ -55,8 +55,8 @@ def mycarrier_view(request):
             # if user.no_carrier:
             #    return {'user': userdata, 'nocarrier': True}
             # log.warning(f"Attempt to access nonexistant own carrier by {user.username}")
-            user.no_carrier = True
-            return {'user': userdata, 'error': 'no carrier!'}
+            request.user.no_carrier = True
+            return {'user': userdata, 'error': 'no carrier!', 'sidebar': menu.populate_sidebar(request)}
 
         finances = carrier_data.get_finances(request, mycarrier.id)
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
@@ -70,6 +70,7 @@ def mycarrier_view(request):
         data['crew'] = crew
         data['cargo'] = cargo
         data['sidebar'] = menu.populate_sidebar(request)
+
         data['funding_time'] = format_timespan(int(mycarrier.balance /
                                                    int(mycarrier.servicesCost + mycarrier.coreCost) * 604800)) \
             if mycarrier.balance > 0 else f'DEBT DECOMMISSION IN {format_timespan(int(300000000 / int(mycarrier.servicesCost + mycarrier.coreCost) * 604800))}'
