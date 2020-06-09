@@ -70,7 +70,11 @@
               <div class="card-body box-profile">
                 <div class="text-center">
                   <img class="img-responsive"
+                       {% if carrier_image %}
                        src="{{ request.storage.url(carrier_image) or "/static/img/carrier_default.png" }}"
+                       {% else %}
+                       src="/static/img/carrier_default.png"
+                       {% endif %}
                        alt="User profile picture"
                        style="object-fit: contain; height:250px; width:100%">
                 </div>

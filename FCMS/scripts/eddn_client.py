@@ -23,7 +23,7 @@ from FCMS.models import (
     get_tm_session,
 )
 
-
+from FCMS.utils.sapi import get_coords
 from FCMS.models.carrier import Carrier
 
 __relayEDDN = 'tcp://eddn.edcd.io:9500'
@@ -186,20 +186,21 @@ def main(argv=None):
                         if data['event'] in {'Docked', 'CarrierJump'} and data['StationType'] == 'FleetCarrier':
                             print(f"Raw docked/jump carrier: {data}")
                             try:
-                                oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
+                                oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName']).one_or_none()
                                 if oldcarrier:
-                                    oldcarrier.update(marketId=data['marketID'], systemName=data['StarSystem'],
-                                                      systemId64=data['SystemAddress'],
-                                                      haveShipyard=True if 'shipyard' in data['StationServices']
-                                                      else False,
-                                                      haveOutfitting=True if 'outfitting' in data['StationServices']
-                                                      else False,
-                                                      haveMarket=True if 'commodities' in data['StationServices']
-                                                      else False,
-                                                      updateTime=data['timestamp']
-                                                      )
+                                    print("Old carrier found.")
+                                    oldcarrier.currentStarSystem = data['StarSystem']
+                                    oldcarrier.hasShipyard = True if 'shipyard' in data['StationServices'] else False
+                                    oldcarrier.hasOutfitting = True if 'outfitting' in data['StationServices'] else False
+                                    oldcarrier.hasCommodities = True if 'commodities' in data['StationServices'] else False
+                                    oldcarrier.lastUpdated = data['timestamp']
+                                    oldcarrier.x = coords['x']
+                                    oldcarrier.y = coords['y']
+                                    oldcarrier.z = coords['z']
                                     ucarcount = ucarcount + 1
                                 else:
+                                    print("Doing new carrier.")
+                                    coords = get_coords(data['StarSystem'])
                                     newcarrier = Carrier(callsign=data['StationName'],
                                                          name=data['StationName'], lastUpdated=data['timestamp'],
                                                          currentStarSystem=data['StarSystem'],
@@ -209,6 +210,9 @@ def main(argv=None):
                                                          else False,
                                                          hasCommodities=True if 'commodities' in data['StationServices']
                                                          else False,
+                                                         x = coords['x'],
+                                                         y = coords['y'],
+                                                         z = coords['z'],
                                                          trackedOnly=True
                                                          )
                                     session.add(newcarrier)
