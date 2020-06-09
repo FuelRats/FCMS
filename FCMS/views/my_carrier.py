@@ -70,6 +70,7 @@ def mycarrier_view(request):
         data['crew'] = crew
         data['cargo'] = cargo
         data['sidebar'] = menu.populate_sidebar(request)
+
         data['funding_time'] = format_timespan(int(mycarrier.balance /
                                                    int(mycarrier.servicesCost + mycarrier.coreCost) * 604800)) \
             if mycarrier.balance > 0 else f'DEBT DECOMMISSION IN {format_timespan(int(300000000 / int(mycarrier.servicesCost + mycarrier.coreCost) * 604800))}'

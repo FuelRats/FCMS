@@ -16,10 +16,12 @@ def populate_user(request):
     if request.user:
         userdata = {'cmdr_name': request.user.cmdr_name,
                     'cmdr_image': '/static/dist/img/avatar.png',
+                    'link': '/my_carrier',
                     'logged_in': True}
     else:
         userdata = {'cmdr_name': "Not logged in",
                     'cmdr_image': '/static/dist/img/avatar.png',
+                    'link': '/login',
                     'logged_in': False}
     return userdata
 
