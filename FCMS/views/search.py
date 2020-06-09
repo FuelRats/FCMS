@@ -18,8 +18,11 @@ def fill_data(candidates, source):
     for row in candidates:
         target = numpy.array((row.x, row.y, row.z))
         dist = numpy.linalg.norm(source - target)
-        taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 0 \
-            else "#FFC4505F" if 50 > row.taxation > 26 else "#FF0000"
+        if row.taxation:
+            taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 0 \
+                else "#FFC4505F" if 50 > row.taxation > 26 else "#FF0000"
+        else:
+            taxcolor = "#555555"
         items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': util.from_hex(row.name),
                       'col2': row.callsign,
                       'is_DSSA': row.isDSSA,
