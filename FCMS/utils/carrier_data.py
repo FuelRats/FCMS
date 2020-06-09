@@ -288,6 +288,7 @@ def update_carrier(request, cid, user):
         mycarrier.x = coords['x']
         mycarrier.y = coords['y']
         mycarrier.z = coords['z']
+        mycarrier.trackedOnly = False
         mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id

@@ -21,7 +21,7 @@ def login_view(request):
         if res:
             if pwd_context.verify(request.params['pass'], res.password):
                 headers = remember(request, res.id)
-                return exc.HTTPFound(location=request.route_url('my_carrier'), headers=headers)
+                return exc.HTTPFound('/my_carrier', headers=headers)
             else:
                 log.warning(f"Failed login for {request.params['email']} from {request.client_addr}.")
         else:
@@ -119,6 +119,7 @@ def oauth_finalize(request):
                                      x=coords['x'],
                                      y=coords['y'],
                                      z=coords['z'],
+                                     trackedOnly=False,
                                      lastUpdated=datetime.now())
         user.no_carrier = False
         request.dbsession.add(newcarrier)

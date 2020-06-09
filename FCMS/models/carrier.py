@@ -59,6 +59,7 @@ class Carrier(Base):
     hasExploration = Column(Boolean)
     capacity = Column(Integer)
     isDSSA = Column(Boolean)
+    trackedOnly = Column(Boolean)
     lastUpdated = Column(DateTime)
     cachedJson = Column(Text)
 
