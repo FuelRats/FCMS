@@ -29,6 +29,14 @@
                         <p>My Carrier</p>
                     </a>
                   </li>
+            {% else %}
+                  <li class="nav-item">
+                    <a href="/login" class="nav-link">
+                        <i class="far fas fa-sign-in">{% include 'inline_svgs/state.jinja2' %}</i>
+                        <p>Log in</p>
+                    </a>
+                  </li>
+
             {% endif %}
         {% endif %}
         {% if sidebar %}

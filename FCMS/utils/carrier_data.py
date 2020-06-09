@@ -252,6 +252,10 @@ def update_carrier(request, cid, user):
                 log.warning(f"Not same owner! {mycarrier.owner} vs {request.user.id}.")
                 return None
         log.info(f"New carrier: {jcarrier}")
+        if mycarrier.callsign != jcarrier['callsign']:
+            log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
+                      f"stored, update has {jcarrier['callsign']}. Refresh initiated by user {request.user.username}.")
+            return None
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
         services = jcarrier['market']['services']
         mycarrier.owner = owner.id

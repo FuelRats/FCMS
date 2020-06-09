@@ -28,7 +28,7 @@ class Carrier(Base):
     __tablename__ = 'carriers'
     id = Column(Integer, primary_key=True)
     owner = Column(Integer, ForeignKey('users.id'))
-    callsign = Column(Text)
+    callsign = Column(Text, unique=True)
     name = Column(Text)
     currentStarSystem = Column(Text)
     x = Column(Float)

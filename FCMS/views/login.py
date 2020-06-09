@@ -120,6 +120,7 @@ def oauth_finalize(request):
                                      y=coords['y'],
                                      z=coords['z'],
                                      lastUpdated=datetime.now())
+        user.no_carrier = False
         request.dbsession.add(newcarrier)
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.

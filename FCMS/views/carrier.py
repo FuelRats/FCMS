@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 def carrier_subview(request):
     cid = request.dbsession.query(carrier.Carrier). \
         filter(carrier.Carrier.callsign == request.matchdict['cid']).one_or_none()
-    log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
+    # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
     owner = request.dbsession.query(user.User).filter(user.User.id == cid.owner).one_or_none()
     if not owner:
         log.debug(f"No owner for carrier {cid}. Fake it.")
@@ -44,6 +44,7 @@ def carrier_subview(request):
             'col3_header': headers['col3_header'],
             'col4_header': headers['col4_header'],
             'items': data,
+            'events': events,
             'sidebar': mymenu}
 
 

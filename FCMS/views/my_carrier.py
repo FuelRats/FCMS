@@ -42,15 +42,19 @@ def mycarrier_view(request):
     mycarrier = None
     if user:
         # Debugging backdoor to other CMDRs my_carrier view.
-        if user.userlevel > 4 and 'emulate' in request.params:
-            mycarrier = request.dbsession.query(carrier.Carrier). \
-                filter(carrier.Carrier.callsign == request.params['emulate']).one_or_none()
-        else:
-            mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == user.id).one_or_none()
+        try:
+            if user.userlevel > 4 and 'emulate' in request.params:
+                mycarrier = request.dbsession.query(carrier.Carrier). \
+                    filter(carrier.Carrier.callsign == request.params['emulate']).one_or_none()
+            else:
+                mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == user.id).one_or_none()
+        except AttributeError:
+            return exc.HTTPFound("/login")
         if not mycarrier:
             if user.no_carrier:
                 return {'user': userdata, 'nocarrier': True}
             log.warning(f"Attempt to access nonexistant own carrier by {user.username}")
+            user.no_carrier = True
             return {'user': userdata, 'error': 'no carrier!'}
         finances = carrier_data.get_finances(request, mycarrier.id)
         data = carrier_data.populate_view(request, mycarrier.id, user)
