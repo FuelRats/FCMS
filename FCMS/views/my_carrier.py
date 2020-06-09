@@ -55,7 +55,7 @@ def mycarrier_view(request):
             # if user.no_carrier:
             #    return {'user': userdata, 'nocarrier': True}
             # log.warning(f"Attempt to access nonexistant own carrier by {user.username}")
-            user.no_carrier = True
+            request.user.no_carrier = True
             return {'user': userdata, 'error': 'no carrier!'}
 
         finances = carrier_data.get_finances(request, mycarrier.id)
