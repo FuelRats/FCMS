@@ -66,15 +66,17 @@
               </li>
             {% endif %}
     {% endif %}
-{% if sidebar.sidebar_menuitems %}
-            {% for item in sidebar.sidebar_menuitems %}
-              <li class="nav-item">
-                <a href="{{ item.link }}" class="nav-link">
-                  <i class="icon shipyard">{% include item.icon %}</i>
-                  <p>{{ item.name }}</p>
-                </a>
-              </li>
-            {% endfor %}
+{% if sidebar %}
+    {% if sidebar.sidebar_menuitems %}
+                {% for item in sidebar.sidebar_menuitems %}
+                  <li class="nav-item">
+                    <a href="{{ item.link }}" class="nav-link">
+                      <i class="icon shipyard">{% include item.icon %}</i>
+                      <p>{{ item.name }}</p>
+                    </a>
+                  </li>
+                {% endfor %}
+    {% endif %}
 {% endif %}
         </ul>
 
