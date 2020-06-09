@@ -17,8 +17,8 @@ body {
   z-index: 1039;
 }
 
-.login-page .main-footer, .register-oage .main-footer {
-  position: absolute;
+.login-page .main-footer, .register-page .main-footer {
+  position: static;
 }
 
 .sidebar-open .main-sidebar {
@@ -104,10 +104,15 @@ body {
 
 .login-box, .register-box {
   background: #000b16;
+  max-width: 100%;
 }
 
 .login-page, .register-page {
   background: #000000;
+  display: grid;
+  grid-template-rows: 1fr max-content;
+  grid-template-columns: minmax(300px, 100vw);
+  place-items: center;
 }
 
 .table td {
@@ -230,5 +235,9 @@ a.text-muted:hover {
 
 .card-primary.card-outline {
   border-top-color: #ab3f3f;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: #ab3f3f;
 }
 
