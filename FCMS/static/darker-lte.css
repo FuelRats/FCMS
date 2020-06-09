@@ -13,7 +13,7 @@ body {
   bottom: 0;
   left: 0;
   position: sticky;
-  margin-left: 0;
+  margin-left: 0 !important;
   z-index: 1039;
 }
 
@@ -31,13 +31,9 @@ body {
   }
 }
 
-.login-logo{
-  color: #dddddd;
-
-}
-
+.login-logo,
 .register-logo{
-  color: #dddddd;
+  color: #ffffff;
 }
 
 .crew {
@@ -102,12 +98,24 @@ body {
   background: #1a1a1a;
 }
 
-.login-box, .register-box {
-  background: #000b16;
+.login-box .card,
+.register-box .card {
+  background: transparent;
+}
+
+.login-box .card-body,
+.register-box .card-body {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
+}
+
+.login-box,
+.register-box {
   max-width: 100%;
 }
 
-.login-page, .register-page {
+.login-page,
+.register-page {
   background: #000000;
   display: grid;
   grid-template-rows: 1fr max-content;
@@ -196,12 +204,12 @@ a.text-muted:hover {
   border-color: #ab3f3f;
 }
 
-.bt-primary:hover {
+.btn-primary:hover {
   background-color: #d65050;
   border-color: #d65050;
 }
 
-.bt-primary:hover {
+.btn-primary:focus {
   background-color: #d65050;
   border-color: #ffffff;
 }
@@ -213,7 +221,7 @@ a.text-muted:hover {
 
 .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
   background-color: #d65050;
-  border-color: #d65050;
+  border-color: #d65050 #d65050 #ffffff #d65050;
 }
 
 .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + label::before, .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + input[type="hidden"] + label::before {

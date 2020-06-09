@@ -3,7 +3,7 @@ body {
   padding: 0;
   font-family: 'Euro Caps', sans-serif;
   background-color: rgb(0, 0, 0);
-  color: rgb(216, 126, 9);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,18 +16,20 @@ body {
 }
 
 .middle-banner {
-  background-color: rgba(216, 126, 9, 0.3);
+  background-color: rgba(0, 0, 0, 0.3);
   padding: 1rem 2rem;
-  border: 2px solid rgb(216, 126, 9);
+  border: 2px solid #ab3f3f;
   text-align: center;
+  backdrop-filter: blur(3px);
 }
 
 .middle-banner .header {
-    font-size: 3rem;
+  font-size: 3rem;
+  color: rgb(216, 126, 9);
 }
 
 .middle-banner .subtitle {
-    font-size: 2rem;
+  font-size: 2rem;
 }
 
 a {
