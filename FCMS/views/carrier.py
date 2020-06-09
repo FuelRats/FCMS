@@ -11,15 +11,18 @@ log = logging.getLogger(__name__)
 def carrier_subview(request):
     cid = request.dbsession.query(carrier.Carrier). \
         filter(carrier.Carrier.callsign == request.matchdict['cid']).one_or_none()
+    data = []
+    userdata = usr.populate_user(request)
+    mymenu = menu.populate_sidebar(request)
     # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
+    if not cid:
+        log.error(f"Attempt to call subview for invalid carrier: {cid}")
+        return {'error': 'Invalid carrier.', 'sidebar': mymenu, 'user': userdata}
     owner = request.dbsession.query(user.User).filter(user.User.id == cid.owner).one_or_none()
     if not owner:
         log.debug(f"No owner for carrier {cid}. Fake it.")
         owner = user.User(cmdr_name='Unknown CMDR')
     view = request.matchdict['subview']
-    data = []
-    userdata = usr.populate_user(request)
-    mymenu = menu.populate_sidebar(request)
     if view in ['shipyard', 'itinerary', 'market', 'outfitting', 'calendar']:
         headers, data = carrier_data.populate_subview(request, cid.id, view)
     log.debug(f"Carrier subview data for {cid}: {data}")

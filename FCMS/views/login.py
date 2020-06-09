@@ -92,7 +92,7 @@ def oauth_finalize(request):
             if oc.owner != user.id:
                 log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
                 oc.owner = user.id
-            return {'project': 'Got a callback, updated existing user oauth keys.',
+            return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                     'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
         if not coords:
@@ -129,6 +129,6 @@ def oauth_finalize(request):
         user.no_carrier = True
         return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
                            'If you purchase one, go to your /my_carrier page and click the button there, '
-                           'and we will add it!', 'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5}}
+                           'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
     return {'project': 'OAuth flow completed. Carrier added.',
             'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5}}
