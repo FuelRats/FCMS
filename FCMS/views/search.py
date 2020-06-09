@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from ..models import user, carrier
 from ..utils import capi, sapi, util, menu
+from ..utils import user as myuser
 import re
 import logging
 
@@ -76,9 +77,9 @@ def search_view(request):
     items = []
     cube = 5000
     if request.user:
-        userdata = {'cmdr_name': request.user.cmdr_name, 'cmdr_image': '/static/dist/img/avatar.png'}
+        userdata = myuser.populate_user(request)
     else:
-        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
+        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png', 'link': '/login'}
 
     if 'dssa' in request.params:
         candidates = request.dbsession.query(carrier.Carrier).from_statement(
