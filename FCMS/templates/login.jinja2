@@ -5,6 +5,15 @@
     <b>{{ project }}</b>
   </div>
   <!-- /.login-logo -->
+    {% if login == 'success' %}
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Login success. You are being redirected.</p>
+    </div>
+  </div>
+    {% else %}
+
+
   <div class="card">
     <div class="card-body login-card-body">
       <p class="login-box-msg">{{ message or 'Sign in to start your session.'}}</p>
@@ -50,6 +59,7 @@
       </p>
     </div>
     <!-- /.login-card-body -->
+{% endif %}
   </div>
 </div>
 <!-- /.login-box -->

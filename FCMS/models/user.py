@@ -21,6 +21,7 @@ class User(Base):
     token_expiration = Column(Integer)
     has_validated = Column(Boolean)
     public_carrier = Column(Boolean)
+    no_carrier = Column(Boolean)
     banned = Column(Boolean)
     cachedJson = Column(Text)
     lastUpdated = Column(DateTime)

@@ -21,7 +21,11 @@ def query_sapi(endpoint, filter, query, includes):
 
 
 def get_system_by_name(system):
-    return query_sapi('systems','name:eq', system, '')
+    return query_sapi('systems', 'name:eq', system, '')
+
+
+def get_system_by_id(system):
+    return query_sapi('systems', 'id64:eq', system, '')
 
 
 def get_coords(system):
@@ -29,4 +33,4 @@ def get_coords(system):
     if sys['data']:
         return sys['data'][0]['attributes']['coords']
     else:
-        return {'x': 0, 'y': 0, 'z': 0}
+        return {'x': 0, 'y': 0, 'z': 0, 'error': 'Not found'}

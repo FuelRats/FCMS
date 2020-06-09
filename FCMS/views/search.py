@@ -7,17 +7,20 @@ from sqlalchemy import text
 
 from ..models import user, carrier
 from ..utils import capi, sapi, util, menu
+from ..utils import user as myuser
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def fill_data(candidates, source):
     items=[]
     for row in candidates:
-        print(f"Row proc: {row.callsign}")
         target = numpy.array((row.x, row.y, row.z))
         dist = numpy.linalg.norm(source - target)
-        taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 1 \
-            else "#FFC4505F" if 50 > row.taxaation > 26 else "#FF0000"
+        taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 0 \
+            else "#FFC4505F" if 50 > row.taxation > 26 else "#FF0000"
         items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': util.from_hex(row.name),
                       'col2': row.callsign,
                       'is_DSSA': row.isDSSA,
@@ -39,7 +42,7 @@ def fill_data(candidates, source):
                                     'title': f'Rearming {"" if row.hasRearm else "NOT"} available'},
                                    {'color': '#00A000' if row.hasExploration else '#FF0000',
                                     'svg': 'inline_svgs/exploration.jinja2',
-                                    'title': f'Interstellar Cargography {"" if row.hasExploration else "NOT"} available'},
+                                    'title': f'Interstellar Cartography {"" if row.hasExploration else "NOT"} available'},
                                    {'color': '#00A000' if row.hasVoucherRedemption else '#FF0000',
                                     'svg': 'inline_svgs/voucher_redemption.jinja2',
                                     'title': f'Interstellar Factor {"" if row.hasVoucherRedemption else "NOT"}  available'},
@@ -51,7 +54,7 @@ def fill_data(candidates, source):
                                     'title': f'Notorious Commanders can {"" if row.notoriousAccess else "NOT"} dock'},
                                    {'color': '#00A000' if row.dockingAccess == 'all' else '#dad55e',
                                     'svg': 'inline_svgs/docking_access.jinja2',
-                                    'title': f'Docking available for {row.dockingAccess}'},
+                                    'title': f'Docking available for {"Squadron and Friends" if row.dockingAccess == "squadronfriends" else row.dockingAccess}'},
                                    {'color': taxcolor, 'svg': 'inline_svgs/taxation.jinja2',
                                     'title': f'Taxation is {row.taxation}%'}
                                    ]})
@@ -72,12 +75,13 @@ def search_view(request):
     items = []
     cube = 5000
     if request.user:
-        userdata = {'cmdr_name': request.user.cmdr_name, 'cmdr_image': '/static/dist/img/avatar.png'}
+        userdata = myuser.populate_user(request)
     else:
-        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png'}
+        userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png', 'link': '/login'}
+    if 'searchform' in request.params:
+        return { 'searchform': True, 'user': userdata, 'sidebar': mymenu }
 
     if 'dssa' in request.params:
-        print("In top DSSA search.")
         candidates = request.dbsession.query(carrier.Carrier).from_statement(
             text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                  f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -94,9 +98,11 @@ def search_view(request):
     if 'type' in request.params:
         if request.params['type'].lower() == 'closest':
             usr = capi.get_cmdr(request.user)
-            sys = usr['lastSystem']['name']
+            if not usr:
+                sys = 'Sol'
+            else:
+                sys = usr['lastSystem']['name']
             coords = sapi.get_coords(sys)
-            print(f"Got coords {coords} for {sys}")
             x = coords['x']
             y = coords['y']
             z = coords['z']
@@ -111,7 +117,6 @@ def search_view(request):
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" order by Distance LIMIT 25"))
             items = fill_data(candidates, source)
-            print(f"Items: {items}")
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {sys}',
                     'carrier_search': True, 'sidebar': mymenu}
@@ -128,7 +133,6 @@ def search_view(request):
         if coords:
             candidates = None
             if 'DSSA' in request.params:
-                print("In DSSA system search.")
                 cand = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                          f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -138,9 +142,7 @@ def search_view(request):
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
-                print(f"Candidates: {cand}")
             else:
-                print("In main system search.")
                 cand = request.dbsession.query(carrier.Carrier).from_statement(
                     text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                          f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -150,7 +152,6 @@ def search_view(request):
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                          f" order by Distance LIMIT 25")).all()
-                print(f"Candidates: {cand}")
             items = fill_data(cand, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
@@ -173,10 +174,7 @@ def search_view(request):
             else:
                 return {'error': 'Player does not have a carrier.'}
         elif res.count() > 1:
-            print(f"Multiple CMDR name matches, present list. {res.count()}")
             for row in res:
-                print(f"Row: {row}")
-
                 items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
 
     res = request.dbsession.query(carrier.Carrier).\
@@ -192,6 +190,7 @@ def search_view(request):
                 print(f"Row: {row.callsign}")
         # We have a carrier name match!
     else:
-        print(f"No match")
+        log.error(f"No match for search on term {term}")
+        return {'error': f'No matches for your search term {term}'}
     return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
             'col4_header': 'Distance'}

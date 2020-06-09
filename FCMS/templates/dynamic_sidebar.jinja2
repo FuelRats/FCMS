@@ -13,8 +13,8 @@
         <div class="image">
           <img src="{{ user.cmdr_image }}" class="img-circle elevation-2" alt="User Image">
         </div>
-        <div class="info">
-          <a href="#" class="d-block">{{ user.cmdr_name }}</a>
+        <div class="info"><!-- Link set by dynamic sidebar. -->
+          <a href="{{ user.link }}" class="d-block">{{ user.cmdr_name }}</a>
         </div>
       </div>
 {% endif %}
@@ -29,6 +29,14 @@
                         <p>My Carrier</p>
                     </a>
                   </li>
+            {% else %}
+                  <li class="nav-item">
+                    <a href="/login" class="nav-link">
+                        <i class="far fas fa-sign-in"></i>
+                        <p>Log in</p>
+                    </a>
+                  </li>
+
             {% endif %}
         {% endif %}
         {% if sidebar %}
@@ -57,17 +65,19 @@
                 </ul>
               </li>
             {% endif %}
-        {% if sidebar.sidebar_menuitems %}
-            {% for item in sidebar.sidebar_menuitems %}
-              <li class="nav-item">
-                <a href="{{ item.link }}" class="nav-link">
-                  <i class="icon shipyard">{% include item.icon %}</i>
-                  <p>{{ item.name }}</p>
-                </a>
-              </li>
-            {% endfor %}
-        {% endif %}
     {% endif %}
+{% if sidebar %}
+    {% if sidebar.sidebar_menuitems %}
+                {% for item in sidebar.sidebar_menuitems %}
+                  <li class="nav-item">
+                    <a href="{{ item.link }}" class="nav-link">
+                      <i class="icon shipyard">{% include item.icon %}</i>
+                      <p>{{ item.name }}</p>
+                    </a>
+                  </li>
+                {% endfor %}
+    {% endif %}
+{% endif %}
         </ul>
 
       </nav>

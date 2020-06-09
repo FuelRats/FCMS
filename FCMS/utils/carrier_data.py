@@ -8,6 +8,9 @@ from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Cale
 import pyramid.httpexceptions as exc
 from ..utils import util, sapi, user as usr, menu
 from humanfriendly import format_timespan, format_number
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def populate_calendar(request, cid):
@@ -52,12 +55,17 @@ def get_finances(request, cid):
     """
     carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     if carrier:
-        cdata = json.loads(carrier.cachedJson)
+        cdata = None
+        if not carrier.cachedJson:
+            cdata = update_carrier(request, cid, request.user)
+        else:
+            cdata = json.loads(carrier.cachedJson)
         data = {}
         for key, val in cdata['finance'].items():
             data[key] = format_number(val)
         return data
     else:
+        log.error("Attempt to get finances for non-existant carrier!")
         return None
 
 
@@ -70,9 +78,14 @@ def get_crew(request, cid):
     """
     carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     if carrier:
-        cdata = json.loads(carrier.cachedJson)
+        cdata = None
+        if not carrier.cachedJson:
+            cdata = update_carrier(request, cid, request.user)
+        else:
+            cdata = json.loads(carrier.cachedJson)
         return cdata['servicesCrew']
     else:
+        log.error("Attempt to get crew for non-existant carrier!")
         return None
 
 
@@ -110,7 +123,6 @@ def get_cargo(request, cid):
                                                    'locname': cg.locName
                                                    }
         data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
-        print(data)
         return data
 
 
@@ -176,9 +188,6 @@ def populate_view(request, cid, user):
     mymenu = menu.populate_sidebar(request)
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     events = populate_calendar(request, cid)
-    print(f"\n\n\nExtra: {extra}\n\n")
-    print(
-        f"Refuel: {mycarrier.hasRearm} Rearm: {mycarrier.hasRearm} Repair: {mycarrier.hasRepair} BM: {mycarrier.hasBlackMarket} Ex: {mycarrier.hasExploration}")
     data = {
         'user': userdata,
         'owner': owner.cmdr_name,
@@ -203,7 +212,7 @@ def populate_view(request, cid, user):
         'black_market': mycarrier.hasBlackMarket or False,
         'voucher_redemption': mycarrier.hasVoucherRedemption or False,
         'maintenance': int(mycarrier.coreCost + mycarrier.servicesCost) or 0,
-        'carrier_image': extra.carrier_image if extra else "/static/img/abs-carrier-fuelrats.jpg",
+        'carrier_image': extra.carrier_image if extra else "/static/img/carrier_default.png",
         'carrier_motd': extra.carrier_motd if extra else "No MOTD set",
         'system': mycarrier.currentStarSystem,
         'arrived_at': mycarrier.lastUpdated,
@@ -213,9 +222,7 @@ def populate_view(request, cid, user):
         'sidebar': mymenu,
         'events': events,
         'calendar': True,
-
     }
-    print(data)
     return data
 
 
@@ -233,18 +240,26 @@ def update_carrier(request, cid, user):
     if owner:
         jcarrier = capi.get_carrier(owner)
         if not jcarrier:
-            print("CAPI update call failed, retry OAuth if owner.")
+            log.warning("CAPI update call failed, retry OAuth if owner.")
             if not request.user:
-                print("Not logged in, can't refresh.")
+                log.warning("Not logged in, can't refresh OAuth token.")
                 return None
             if mycarrier.owner == request.user.id:
-                print("Same user, ask for OAuth refresh.")
+                log.warning("Carrier being viewed by owner, ask for OAuth refresh.")
                 url, state = capi.get_auth_url()
                 raise exc.HTTPFound(location=url)
             else:
-                print(f"Not same user! {mycarrier.owner} vs {request.user.id}.")
+                log.warning(f"Not same owner! {mycarrier.owner} vs {request.user.id}.")
                 return None
-        print(f"New carrier: {jcarrier}")
+        try:
+            if mycarrier.callsign != jcarrier['name']['callsign']:
+                log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
+                          f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username}.")
+                return None
+        except KeyError:
+            log.error(f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
+            return None
+        log.info(f"New carrier: {jcarrier}")
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
         services = jcarrier['market']['services']
         mycarrier.owner = owner.id
@@ -277,12 +292,12 @@ def update_carrier(request, cid, user):
         mycarrier.x = coords['x']
         mycarrier.y = coords['y']
         mycarrier.z = coords['z']
+        mycarrier.trackedOnly = False
         mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
         for item in jcarrier['itinerary']['completed']:
-            print(f"Adding {item['starsystem']}")
             itm = Itinerary(carrier_id=mycarrier.id, starsystem=item['starsystem'],
                             departureTime=item['departureTime'], arrivalTime=item['arrivalTime'],
                             visitDurationSeconds=item['visitDurationSeconds'])

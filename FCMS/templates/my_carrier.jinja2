@@ -24,7 +24,42 @@
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content-header -->
-{% if error  %}
+{% if no_carrier %}
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">No carrier registered!</h5>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <p class="text-center">
+                        You don't have a carrier registered to your account. If you have aquired one recently,
+                        click <a href="/oauth">here to retrieve it.</a>
+                    </p>
+
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+          <!-- Temp close -->
+      </div>
+    </section>
+  </div>
+    </div>
+    </body>
+{% elif error %}
     <section class="content">
       <div class="container-fluid">
         <div class="row">
@@ -103,7 +138,7 @@
               <div class="card-body box-profile">
                 <div class="text-center">
                   <img class="img-responsive"
-                       src="{{ request.storage.url(carrier_image) }}"
+                       src="{{ request.storage.url(carrier_image) or "/static/img/carrier_default.png" }}"
                        alt="User profile picture"
                        style="object-fit: contain; height:250px; width:100%">
                 </div>
@@ -191,8 +226,8 @@
             </div></div>
 
 
-          <div class="col-md-9">
-            <div class="card">
+          <div class="col-md-7">
+            <div class="card ">
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
                   <li class="nav-item"><a class="nav-link active" href="#schedule" data-toggle="tab">Schedule</a></li>
@@ -208,7 +243,37 @@
 
                 <div class="active tab-pane" id="schedule">
                     <!-- THE CALENDAR -->
-                    <div id="calendar"></div>
+                    <div id="calendar"></div><p></p>
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Schedule an event</h3>
+                        </div>
+                <div class="card-body">
+                  <div class="btn-group" style="width: 100%; margin-bottom: 10px;">
+                    <!--<button type="button" id="color-chooser-btn" class="btn btn-info btn-block dropdown-toggle" data-toggle="dropdown">Color <span class="caret"></span></button>-->
+                    <ul class="fc-color-picker" id="color-chooser">
+                      <li><a class="text-primary" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-warning" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-success" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-danger" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-muted" href="#"><i class="fas fa-square"></i></a></li>
+                    </ul>
+                  </div>
+                  <!-- /btn-group -->
+                  <div class="input-group">
+                    <input id="new-event" type="text" class="form-control" placeholder="Event Title">
+
+                    <div class="input-group-append">
+                      <button id="add-new-event" type="button" class="btn btn-primary">Add</button>
+                    </div>
+                    <!-- /btn-group -->
+                  </div>
+                  <!-- /input-group -->
+                </div>
+
+
+
+                    </div>
                 </div>
                     <div class="tab-pane" id="finances">
                                         <table class="table table-striped table-valign-middle">

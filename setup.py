@@ -31,6 +31,10 @@ requires = [
     'authlib',
     'humanfriendly',
     'numpy',
+    'graypy',
+    'zmq',
+    'simplejson',
+    'semver',
 ]
 
 tests_require = [
@@ -41,7 +45,7 @@ tests_require = [
 
 setup(
     name='FCMS',
-    version='0.5',
+    version='1.0a',
     description='FCMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
@@ -50,9 +54,9 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
-    author='',
-    author_email='',
-    url='',
+    author='Kenneth Aalberg',
+    author_email='absolver@fuelrats.com',
+    url='https://github.com/FuelRats',
     keywords='web pyramid pylons',
     packages=find_packages(),
     include_package_data=True,
@@ -67,6 +71,7 @@ setup(
         ],
         'console_scripts': [
             'initialize_FCMS_db=FCMS.scripts.initialize_db:main',
+            'eddn_client=FCMS.scripts.eddn_client:main',
         ],
     },
 )
