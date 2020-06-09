@@ -371,7 +371,7 @@
                       </p>
 -->
 
-
+                {% if crew %}
                     {% for item, val in crew.items() %}
                     <div class="post">
                       <div class="user-block">
@@ -400,6 +400,9 @@
                     <!-- /.post -->
                     </div>
                     {% endfor %}
+                {% else %}
+                    <p>Error: Crew data not yet updated, please wait up to 15 minutes.</p>
+                {% endif %}
                     </div>
                     <div class="tab-pane table-responsive p-0" id="cargo">
                 <table class="table table-striped table-valign-middle">
@@ -411,6 +414,7 @@
                   </tr>
                   </thead>
                   <tbody>
+                {% if cargo %}
                   {% for it, val in cargo.clean_cargo.items() %}
                   <tr>
                     <td>
@@ -443,7 +447,9 @@
 
                   </tr>
                   {% endfor %}
-
+            {% else %}
+                  <p>No cargo data yet available, please wait up to 15 minutes.</p>
+            {% endif %}
                   </tbody>
                 </table>
                     </div>
