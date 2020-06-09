@@ -100,8 +100,10 @@ def capi(endpoint, user):
                 user.access_token = str(dict(client.token))
                 user.refresh_token = client.token['refresh_token']
                 user.token_expiration = client.token['expires_at']
-
-        log.error(f"Failed to get CAPI resource! {err}")
+            log.error(f"Failed to get CAPI resource! {err}")
+            return None
+    else:
+        log.error(f"No CAPI token for user {user.cmdr_name}. Bailing.")
         return None
 
 
