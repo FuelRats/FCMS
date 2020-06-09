@@ -56,7 +56,7 @@ def mycarrier_view(request):
             #    return {'user': userdata, 'nocarrier': True}
             # log.warning(f"Attempt to access nonexistant own carrier by {user.username}")
             request.user.no_carrier = True
-            return {'user': userdata, 'error': 'no carrier!'}
+            return {'user': userdata, 'error': 'no carrier!', 'sidebar': menu.populate_sidebar(request)}
 
         finances = carrier_data.get_finances(request, mycarrier.id)
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
