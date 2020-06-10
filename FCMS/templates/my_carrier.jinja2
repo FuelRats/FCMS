@@ -249,8 +249,11 @@
                             <h3 class="card-title">Schedule an event</h3>
                         </div>
                 <div class="card-body">
+                <form action="/my_carrier" method="post" enctype="multipart/form-data" id="eventform">
+
                   <div class="btn-group" style="width: 100%; margin-bottom: 10px;">
                     <!--<button type="button" id="color-chooser-btn" class="btn btn-info btn-block dropdown-toggle" data-toggle="dropdown">Color <span class="caret"></span></button>-->
+                      Pick an event color:
                     <ul class="fc-color-picker" id="color-chooser">
                       <li><a class="text-primary" href="#"><i class="fas fa-square"></i></a></li>
                       <li><a class="text-warning" href="#"><i class="fas fa-square"></i></a></li>
@@ -260,14 +263,53 @@
                     </ul>
                   </div>
                   <!-- /btn-group -->
+                      <div class="form-group">
+                        <label>Event type</label>
+                        <select class="form-control" id="eventtype" name="eventtype">
+                          <option value="scheduled_jump">Scheduled Jump</option>
+                          <option value="refueling">Refueling Operation</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+
+                   <div class="form-group">
+                      <label>Start time:</label>
+                    <div class="input-group date" id="starttime" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#starttime" name="starttime"/>
+                        <div class="input-group-append" data-target="#starttime" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                   </div>
+                   <div class="form-group">
+                      <label>End time:</label>
+                    <div class="input-group date" id="endtime" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#endtime" name="endtime"/>
+                        <div class="input-group-append" data-target="#endtime" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                   </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="allday">
+                          <label class="form-check-label">All day</label>
+                        </div>
+                    </div>
+
                   <div class="input-group">
-                    <input id="new-event" type="text" class="form-control" placeholder="Event Title">
+                    <input id="new-event" name="title" type="text" class="form-control" placeholder="Event Title">
 
                     <div class="input-group-append">
-                      <button id="add-new-event" type="button" class="btn btn-primary">Add</button>
+                      <button id="add-new-event" name="submit" value="Submit" class="btn btn-primary">Event Color</button>
                     </div>
+                      <div class="input-group">
+                          <input type="hidden" name="cid" value="{{ cid }}">
+                          <input type="hidden" name="owner_id" value="{{ owner_id }}">
+                          <input type="submit" value="Create Event" class="btn btn-primary">
+                      </div>
                     <!-- /btn-group -->
-                  </div>
+                  </div></form>
                   <!-- /input-group -->
                 </div>
 
