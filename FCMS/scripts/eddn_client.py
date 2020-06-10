@@ -23,8 +23,9 @@ from FCMS.models import (
     get_tm_session,
 )
 
-
 from FCMS.models.carrier import Carrier
+from FCMS.utils.sapi import get_coords
+
 
 __relayEDDN = 'tcp://eddn.edcd.io:9500'
 __timeoutEDDN = 600000
@@ -187,21 +188,25 @@ def main(argv=None):
                             print(f"Raw docked/jump carrier: {data}")
                             try:
                                 oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
+                                coords = get_coords(data['StarSystem'])
                                 if oldcarrier:
-                                    oldcarrier.update(marketId=data['marketID'], systemName=data['StarSystem'],
-                                                      systemId64=data['SystemAddress'],
-                                                      haveShipyard=True if 'shipyard' in data['StationServices']
-                                                      else False,
-                                                      haveOutfitting=True if 'outfitting' in data['StationServices']
-                                                      else False,
-                                                      haveMarket=True if 'commodities' in data['StationServices']
-                                                      else False,
-                                                      updateTime=data['timestamp']
-                                                      )
+                                    oldcarrier.currentStarSystem = data['StarSystem']
+                                    oldcarrier.hasShipyard = True if 'shipyard' in data['StationServices'] else False
+                                    oldcarrier.hasOutfitting = True if 'outfitting' in data[
+                                        'StationServices'] else False
+                                    oldcarrier.hasCommodities = True if 'commodities' in data[
+                                        'StationServices'] else False
+                                    oldcarrier.hasRefuel = True if 'refuel' in data['StationServices'] else False
+                                    oldcarrier.hasRepair = True if 'repair' in data['StationServices'] else False
+                                    oldcarrier.hasRearm = True if 'rearm' in data['StationServices'] else False
+                                    oldcarrier.lastUpdated = data['timestamp']
+                                    oldcarrier.x = coords['x']
+                                    oldcarrier.y = coords['y']
+                                    oldcarrier.z = coords['z']
                                     ucarcount = ucarcount + 1
                                 else:
                                     newcarrier = Carrier(callsign=data['StationName'],
-                                                         name=data['StationName'], lastUpdated=data['timestamp'],
+                                                         name="Unknown Name", lastUpdated=data['timestamp'],
                                                          currentStarSystem=data['StarSystem'],
                                                          hasShipyard=True if 'shipyard' in data['StationServices']
                                                          else False,
@@ -209,7 +214,13 @@ def main(argv=None):
                                                          else False,
                                                          hasCommodities=True if 'commodities' in data['StationServices']
                                                          else False,
-                                                         trackedOnly=True
+                                                         hasRefuel=True if 'refuel' in data['StationServices'] else False,
+                                                         hasRepair=True if 'repair' in data['StationServices'] else False,
+                                                         hasRearm=True if 'rearm' in data['StationServices'] else False,
+                                                         trackedOnly=True,
+                                                         x=coords['x'],
+                                                         y=coords['y'],
+                                                         z=coords['z']
                                                          )
                                     session.add(newcarrier)
                                     ncarcount = ncarcount + 1
