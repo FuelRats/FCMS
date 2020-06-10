@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from pyramid.view import view_config
 from pyramid.response import Response
 import pyramid.httpexceptions as exc
@@ -57,7 +59,15 @@ def mycarrier_view(request):
             # log.warning(f"Attempt to access nonexistant own carrier by {user.username}")
             request.user.no_carrier = True
             return {'user': userdata, 'error': 'no carrier!', 'sidebar': menu.populate_sidebar(request)}
-
+        last = mycarrier.lastUpdated
+        #log.debug(f"Last update for carrier {cid}: {last}")
+        if not last:
+            last = datetime.now() - timedelta(minutes=20)  # Cheap hack to sort out missing lastUpdated.
+        if last < datetime.now() - timedelta(minutes=15):
+            log.debug(f"Refreshing data for {mycarrier.callsign}")
+            jcarrier = carrier_data.update_carrier(request, mycarrier.id, request.user)
+            if not jcarrier:
+                log.warning(f"Carrier update failed for CID {mycarrier.callsign}. Presenting old data.")
         finances = carrier_data.get_finances(request, mycarrier.id)
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
         events = carrier_data.populate_calendar(request, mycarrier.id)
@@ -70,9 +80,8 @@ def mycarrier_view(request):
         data['crew'] = crew
         data['cargo'] = cargo
         data['sidebar'] = menu.populate_sidebar(request)
-
-        data['funding_time'] = format_timespan(int(mycarrier.balance /
-                                                   int(mycarrier.servicesCost + mycarrier.coreCost) * 604800)) \
-            if int(mycarrier.balance) > 0 else f'DEBT DECOMMISSION IN {format_timespan(int(300000000) / (int(mycarrier.servicesCost) + int(mycarrier.coreCost)) * 604800)}'
+        data['funding_time'] = format_timespan(int(int(mycarrier.balance) /
+                                                   int(int(mycarrier.servicesCost) + int(mycarrier.coreCost)) * 604800)) \
+            if int(mycarrier.balance) > 0 else f'DEBT DECOMMISSION IN {format_timespan(int(300000000 / int(mycarrier.servicesCost + mycarrier.coreCost) * 604800))}'
         return data
     raise exc.HTTPFound(request.route_url('login'))

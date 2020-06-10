@@ -6,9 +6,9 @@ def from_hex(mystr):
     try:
         return bytes.fromhex(mystr).decode('utf-8')
     except TypeError:
-        return "Invalid data"
+        return "Unregistered Carrier"
     except ValueError:
-        return "Invalid data"
+        return "Unregistered Carrier"
 
 
 def to_hex(mystr):
