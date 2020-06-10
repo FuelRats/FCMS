@@ -23,7 +23,6 @@ from FCMS.models import (
     get_tm_session,
 )
 
-from FCMS.utils.sapi import get_coords
 from FCMS.models.carrier import Carrier
 
 __relayEDDN = 'tcp://eddn.edcd.io:9500'
