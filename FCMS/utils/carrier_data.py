@@ -206,8 +206,47 @@ def populate_view(request, cid, user):
     """
     userdata = usr.populate_user(request)
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
-    owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     mymenu = menu.populate_sidebar(request)
+
+    if mycarrier.trackedOnly:
+        # We only have limited data, return a subset.
+        data = {
+            'user': userdata,
+            'cid': mycarrier.id,
+            'owner': 'Unknown CMDR',
+            'view': f'Carrier {mycarrier.callsign}',
+            'callsign': mycarrier.callsign or "XXX-XXX",
+            'name': util.from_hex(mycarrier.name) or "Unknown",
+            'fuel': mycarrier.fuel or 0,
+            'current_system': mycarrier.currentStarSystem,
+            'last_updated': mycarrier.lastUpdated or datetime.now(),
+            'balance': mycarrier.balance or 0,
+            'taxation': mycarrier.taxation or 0,
+            'distance_jumped': mycarrier.totalDistanceJumped or 0,
+            'capacity': mycarrier.capacity or 0,
+            'docking_access': mycarrier.dockingAccess,
+            'notorious_access': mycarrier.notoriousAccess,
+            'shipyard': mycarrier.hasShipyard or False,
+            'outfitting': mycarrier.hasOutfitting or False,
+            'refuel': mycarrier.hasRefuel or False,
+            'rearm': mycarrier.hasRearm or False,
+            'repair': mycarrier.hasRepair or False,
+            'exploration': mycarrier.hasExploration or False,
+            'commodities': mycarrier.hasCommodities or False,
+            'black_market': mycarrier.hasBlackMarket or False,
+            'voucher_redemption': mycarrier.hasVoucherRedemption or False,
+            'maintenance': 0,
+            'carrier_image': "/static/img/carrier_default.png",
+            'carrier_motd': "No MOTD set",
+            'system': mycarrier.currentStarSystem,
+            'arrived_at': mycarrier.lastUpdated,
+            'x': mycarrier.x,
+            'y': mycarrier.y,
+            'z': mycarrier.z,
+            'sidebar': mymenu,
+        }
+        return data
+    owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     events = populate_calendar(request, cid)
     data = {
