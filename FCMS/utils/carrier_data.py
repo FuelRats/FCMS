@@ -23,9 +23,10 @@ def populate_calendar(request, cid):
     carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     if carrier:
         data = []
-        calendar = request.dbsession.query(Calendar).filter(Calendar.carrier_id == cid
-                                                            or Calendar.is_global).all()
+        print(f"CID is {cid}")
+        calendar = request.dbsession.query(Calendar).filter(Calendar.carrier_id == cid).filter(Calendar.is_global).all()
         for event in calendar:
+            print(f"Process Calendar ID {event.id}")
             if event.url:
                 data.append({'title': event.title,
                              'start': event.start,
@@ -190,6 +191,8 @@ def populate_view(request, cid, user):
     events = populate_calendar(request, cid)
     data = {
         'user': userdata,
+        'cid': mycarrier.id,
+        'owner_id': owner.id,
         'owner': owner.cmdr_name,
         'callsign': mycarrier.callsign or "XXX-XXX",
         'name': util.from_hex(mycarrier.name) or "Unknown",

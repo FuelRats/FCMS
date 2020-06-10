@@ -31,17 +31,36 @@
     $('[data-mask]').inputmask()
 
     //Date range picker
-    $('#reservationdate').datetimepicker({
-        format: 'L'
+    $('#starttime').datetimepicker({
+        //format: 'L'
+        format: 'YYYY-MM-DDTHH:mm:ssZ',
+        icons: {
+                    time: "fa fa-clock",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down"
+                }
     });
+    $('#endtime').datetimepicker({
+        //format: 'L'
+        format: 'YYYY-MM-DDTHH:mm:ssZ',
+        icons: {
+                    time: "fa fa-clock",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down"
+                }
+    });
+
+
     //Date range picker
     $('#reservation').daterangepicker()
     //Date range picker with time picker
-    $('#reservationtime').daterangepicker({
+    $('#eventtimerange').daterangepicker({
       timePicker: true,
       timePickerIncrement: 30,
       locale: {
-        format: 'MM/DD/YYYY hh:mm A'
+        format: 'YYYY-MM-DDTHH:mm:ssZ'
       }
     })
     //Date range as a button
