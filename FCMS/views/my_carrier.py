@@ -84,6 +84,7 @@ def mycarrier_view(request):
         events = carrier_data.populate_calendar(request, mycarrier.id)
         crew = carrier_data.get_crew(request, mycarrier.id)
         cargo = carrier_data.get_cargo(request, mycarrier.id)
+        data['view'] = 'My Carrier'
         data['finance'] = finances
         data['calendar'] = True
         data['formadvanced'] = True

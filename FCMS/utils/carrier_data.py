@@ -213,6 +213,7 @@ def populate_view(request, cid, user):
     data = {
         'user': userdata,
         'cid': mycarrier.id,
+        'view': f'Carrier {mycarrier.callsign}',
         'owner_id': owner.id,
         'owner': owner.cmdr_name,
         'callsign': mycarrier.callsign or "XXX-XXX",
