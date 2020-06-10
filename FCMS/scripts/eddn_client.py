@@ -23,7 +23,6 @@ from FCMS.models import (
     get_tm_session,
 )
 
-from FCMS.utils.sapi import get_coords
 from FCMS.models.carrier import Carrier
 
 __relayEDDN = 'tcp://eddn.edcd.io:9500'
@@ -186,23 +185,25 @@ def main(argv=None):
                         if data['event'] in {'Docked', 'CarrierJump'} and data['StationType'] == 'FleetCarrier':
                             print(f"Raw docked/jump carrier: {data}")
                             try:
-                                oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName']).one_or_none()
+                                oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
                                 if oldcarrier:
-                                    print("Old carrier found.")
                                     oldcarrier.currentStarSystem = data['StarSystem']
                                     oldcarrier.hasShipyard = True if 'shipyard' in data['StationServices'] else False
-                                    oldcarrier.hasOutfitting = True if 'outfitting' in data['StationServices'] else False
-                                    oldcarrier.hasCommodities = True if 'commodities' in data['StationServices'] else False
+                                    oldcarrier.hasOutfitting = True if 'outfitting' in data[
+                                        'StationServices'] else False
+                                    oldcarrier.hasCommodities = True if 'commodities' in data[
+                                        'StationServices'] else False
+                                    oldcarrier.hasRefuel = True if 'refuel' in data['StationServices'] else False
+                                    oldcarrier.hasRepair = True if 'repair' in data['StationServices'] else False
+                                    oldcarrier.hasRearm = True if 'rearm' in data['StationServices'] else False
                                     oldcarrier.lastUpdated = data['timestamp']
-                                    oldcarrier.x = coords['x']
-                                    oldcarrier.y = coords['y']
-                                    oldcarrier.z = coords['z']
+                                    oldcarrier.x = data['StarPos'][0]
+                                    oldcarrier.y = data['StarPos'][1]
+                                    oldcarrier.z = data['StarPos'][2]
                                     ucarcount = ucarcount + 1
                                 else:
-                                    print("Doing new carrier.")
-                                    coords = get_coords(data['StarSystem'])
                                     newcarrier = Carrier(callsign=data['StationName'],
-                                                         name=data['StationName'], lastUpdated=data['timestamp'],
+                                                         name="Unknown Name", lastUpdated=data['timestamp'],
                                                          currentStarSystem=data['StarSystem'],
                                                          hasShipyard=True if 'shipyard' in data['StationServices']
                                                          else False,
@@ -210,10 +211,13 @@ def main(argv=None):
                                                          else False,
                                                          hasCommodities=True if 'commodities' in data['StationServices']
                                                          else False,
-                                                         x = coords['x'],
-                                                         y = coords['y'],
-                                                         z = coords['z'],
-                                                         trackedOnly=True
+                                                         hasRefuel=True if 'refuel' in data['StationServices'] else False,
+                                                         hasRepair=True if 'repair' in data['StationServices'] else False,
+                                                         hasRearm=True if 'rearm' in data['StationServices'] else False,
+                                                         trackedOnly=True,
+                                                         x=data['StarPos'][0],
+                                                         y=data['StarPos'][1],
+                                                         z=data['StarPos'][2]
                                                          )
                                     session.add(newcarrier)
                                     ncarcount = ncarcount + 1
