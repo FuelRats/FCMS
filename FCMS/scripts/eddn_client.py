@@ -188,7 +188,6 @@ def main(argv=None):
                             print(f"Raw docked/jump carrier: {data}")
                             try:
                                 oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
-                                coords = get_coords(data['StarSystem'])
                                 if oldcarrier:
                                     oldcarrier.currentStarSystem = data['StarSystem']
                                     oldcarrier.hasShipyard = True if 'shipyard' in data['StationServices'] else False
@@ -200,9 +199,9 @@ def main(argv=None):
                                     oldcarrier.hasRepair = True if 'repair' in data['StationServices'] else False
                                     oldcarrier.hasRearm = True if 'rearm' in data['StationServices'] else False
                                     oldcarrier.lastUpdated = data['timestamp']
-                                    oldcarrier.x = coords['x']
-                                    oldcarrier.y = coords['y']
-                                    oldcarrier.z = coords['z']
+                                    oldcarrier.x = data['StarPos'][0]
+                                    oldcarrier.y = data['StarPos'][1]
+                                    oldcarrier.z = data['StarPos'][2]
                                     ucarcount = ucarcount + 1
                                 else:
                                     newcarrier = Carrier(callsign=data['StationName'],
@@ -218,9 +217,9 @@ def main(argv=None):
                                                          hasRepair=True if 'repair' in data['StationServices'] else False,
                                                          hasRearm=True if 'rearm' in data['StationServices'] else False,
                                                          trackedOnly=True,
-                                                         x=coords['x'],
-                                                         y=coords['y'],
-                                                         z=coords['z']
+                                                         x=data['StarPos'][0],
+                                                         y=data['StarPos'][1],
+                                                         z=data['StarPos'][2]
                                                          )
                                     session.add(newcarrier)
                                     ncarcount = ncarcount + 1
