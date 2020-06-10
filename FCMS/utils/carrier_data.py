@@ -289,7 +289,7 @@ def update_carrier(request, cid, user):
         mycarrier.hasExploration = True if services['exploration'] == 'ok' else False
         mycarrier.hasRepair = True if services['repair'] == 'ok' else False
         mycarrier.hasRefuel = True if services['refuel'] == 'ok' else False
-        if not coords['error']:
+        if 'error' in coords:
             mycarrier.x = coords['x']
             mycarrier.y = coords['y']
             mycarrier.z = coords['z']
