@@ -143,9 +143,10 @@
                        style="object-fit: contain; height:250px; width:100%">
                 </div>
 
-                <h3 class="profile-username text-center">{{ name }}</h3>
+                  <h3 class="profile-username text-center"><a href="/carrier/{{ callsign }}">{{ name }}</a></h3>
 
-                <p class="text-muted text-center">{{ callsign }}</p>
+                <p class="text-muted text-center">{{ callsign }}
+                    <input type="hidden" id="LinkTarget" value="/carrier/{{ callsign }}"><a class="nav-link" id="Copy" href="#"><i id="Copy" class="fas fa-link"></i></a></p>
                                   <ul class="list-group list-group-unbordered mb-3">
                   <li class="list-group-item">
                     <b>Balance</b> <a class="float-right">{{ balance or "Unknown" }}</a>
