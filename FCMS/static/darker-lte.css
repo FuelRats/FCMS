@@ -17,22 +17,23 @@ body {
   z-index: 1039;
 }
 
-.login-page .main-footer {
-  position: absolute;
+.login-page .main-footer, .register-page .main-footer {
+  position: static;
 }
 
 .sidebar-open .main-sidebar {
   z-index: 1040;
 }
 
-.login-logo{
-  color: #dddddd;
-  background: #000000;
-
+@media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .main-footer {
+    margin-left: 0 !important;
+  }
 }
+
+.login-logo,
 .register-logo{
-  color: #dddddd;
-  background: #000000;
+  color: #ffffff;
 }
 
 .crew {
@@ -63,13 +64,14 @@ body {
 
 .list-group {
   color: #dddddd;
-  background: #000000;
+  background: transparent;
 }
 
 .list-group-item {
   color: #dddddd;
-  background: #000000;
+  background: transparent;
 }
+
 .navbar {
   color: #dddddd;
   background: #000000;
@@ -96,17 +98,30 @@ body {
   background: #1a1a1a;
 }
 
-.login-box, .register-box {
-  color: #1aa67d;
-  background: #000b16;
+.login-box .card,
+.register-box .card {
+  background: rgba(62, 62, 62, 0.1);
+  backdrop-filter: blur(2px);
+  border: 2px solid rgba(221, 221, 221, 0.2);
 }
 
-.login-page, .register-page {
+.login-box .card-body,
+.register-box .card-body {
+  background: transparent;
+}
+
+.login-box,
+.register-box {
+  max-width: 100%;
+}
+
+.login-page,
+.register-page {
   background: #000000;
-}
-
-.register-logo {
-  color: #876500;
+  display: grid;
+  grid-template-rows: 1fr max-content;
+  grid-template-columns: minmax(300px, 100vw);
+  place-items: center;
 }
 
 .table td {
@@ -184,3 +199,54 @@ a.text-muted:hover {
 .btn-group.show .btn-tool, .btn-tool:hover {
   color: #d65050;
 }
+
+.btn-primary {
+  background-color: #ab3f3f;
+  border-color: #ab3f3f;
+}
+
+.btn-primary:hover {
+  background-color: #d65050;
+  border-color: #d65050;
+}
+
+.btn-primary:focus {
+  background-color: #d65050;
+  border-color: #ffffff;
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+  background-color: #ab3f3f;
+  border-color: #ab3f3f;
+}
+
+.btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
+  background-color: #d65050;
+  border-color: #d65050 #d65050 #ffffff #d65050;
+}
+
+.icheck-primary > input:first-child:not(:checked):not(:disabled):hover + label::before, .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + input[type="hidden"] + label::before {
+  border-color: #ab3f3f;
+}
+
+.icheck-primary > input:first-child:checked + label::before, .icheck-primary > input:first-child:checked + input[type="hidden"] + label::before {
+  background-color: #ab3f3f;
+  border-color: #ab3f3f;
+}
+
+.form-control:focus, .login-card-body .input-group .form-control:focus ~ .input-group-append .input-group-text, .register-card-body .input-group .form-control:focus ~ .input-group-append .input-group-text {
+  border-color: #ab3f3f;
+}
+
+.card-primary:not(.card-outline) > .card-header {
+  background-color: #ab3f3f;
+}
+
+.card-primary.card-outline {
+  border-top-color: #ab3f3f;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: #ab3f3f;
+}
+
