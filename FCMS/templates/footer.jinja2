@@ -21,8 +21,24 @@
 {% endif %}
 {% if jsgrid %}
 <script src="../../plugins/jsgrid/jsgrid.min.js"></script>
-
 {% endif %}
+<script>
+function makeCarrierLink() {
+  /* Get the text field */
+    var copyText = "https://fleetcarrier.space/carrier/{{ callsign }}"
+    var tempInput = document.createElement("input");
+    tempInput.value = copyText;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+}
+
+document.querySelector('#Copy').onclick = function(){
+    makeCarrierLink();
+}
+</script>
+
   </body>
 </html>
 
