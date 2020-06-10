@@ -13,16 +13,22 @@ body {
   bottom: 0;
   left: 0;
   position: sticky;
-  margin-left: 0 !important;
+  margin-left: 0;
   z-index: 1039;
 }
 
-.login-page .main-footer {
+.login-page .main-footer, .register-oage .main-footer {
   position: absolute;
 }
 
 .sidebar-open .main-sidebar {
   z-index: 1040;
+}
+
+@media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .main-footer {
+    margin-left: 0 !important;
+  }
 }
 
 .login-logo{
