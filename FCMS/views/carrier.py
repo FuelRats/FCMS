@@ -31,6 +31,7 @@ def carrier_subview(request):
             'owner': owner.cmdr_name or "Unknown",
             'callsign': cid.callsign,
             'name': util.from_hex(cid.name),
+            'view': f'Carrier {cid.callsign}',
             'current_view': view,
             'cmdr_image': '/static/dist/img/avatar.png',
             'shipyard': cid.hasShipyard,

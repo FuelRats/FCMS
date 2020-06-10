@@ -27,4 +27,4 @@ def terms_view(request):
     deletion of said data, by sending an email to gdpr@fuelrats.com.</p>   
     """
 
-    return {'title': 'Fleetcarrier.space Terms of Service', 'message': terms}
+    return {'title': 'Fleetcarrier.space Terms of Service', 'message': terms, 'view': 'Terms and Conditions'}
