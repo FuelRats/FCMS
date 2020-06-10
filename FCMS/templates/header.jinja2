@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head>
+<head  prefix="og: http://ogp.me/ns#">
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{{ view }} | Fleetcarrier.space </title>
@@ -12,6 +12,9 @@
         <!-- Refresh -->
         <meta http-equiv="refresh" content="{{ meta.delay }};url={{ meta.target }}" />
     {% endif %}
+{% endif %}
+{% if og_meta %}
+    {% include "elements/og_meta.jinja2" %}
 {% endif %}
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{{request.static_url('FCMS:static/plugins/fontawesome-free/css/all.min.css')}}">
