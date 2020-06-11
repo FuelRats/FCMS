@@ -9,6 +9,10 @@ body {
   background: #000000;
 }
 
+.atlwdg-trigger{
+  z-index: 1050;
+}
+
 .main-footer{
   bottom: 0;
   left: 0;
