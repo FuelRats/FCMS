@@ -53,7 +53,7 @@ def api_view(request):
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if hook['webhook_type'] == 'discord':
-                        res = webhooks.cancel_jump(request, mycarrier.id, hook['webhook_url'], True)
+                        res = webhooks.cancel_jump(request, mycarrier.id, hook['webhook_url'])
                         log.debug(f"Hook result: {res}")
 
     return {'Status': 'Maybe OK?'}
