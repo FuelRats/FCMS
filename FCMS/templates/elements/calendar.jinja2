@@ -34,7 +34,7 @@
       events    : [
           {% for event in events %}
               {
-                  title             : '{{ event.title }}',
+                  title             : '{{ event.title|e }}',
                   start             : '{{ event.start }}',
                   end               : '{{ event.end }}',
                   allDay            : {{ 'false' if not event.allday else 'true' }},

@@ -14,6 +14,7 @@ from .module import Module
 from .ship import Ship
 from .market import Market
 from .calendar import Calendar
+from .webhooks import Webhook
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

@@ -35,6 +35,7 @@ requires = [
     'zmq',
     'simplejson',
     'semver',
+    'discord-webhook'
 ]
 
 tests_require = [

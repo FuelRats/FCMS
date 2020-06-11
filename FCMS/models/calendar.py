@@ -22,6 +22,8 @@ class Calendar(Base):
     url = Column(Text)
     allday = Column(Boolean)
     is_global = Column(Boolean)
+    departureSystem = Column(Text)
+    arrivalSystem = Column(Text)
 
 
 Index('calendar_index', Calendar.id, unique=True)
