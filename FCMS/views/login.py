@@ -96,7 +96,7 @@ def oauth_finalize(request):
                 log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
                 oc.owner = user.id
             return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
-                    'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+                    'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
         if not coords:
             coords = {"x": 0, "y": 0, "z": 0}
