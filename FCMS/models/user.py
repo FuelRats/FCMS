@@ -24,6 +24,7 @@ class User(Base):
     no_carrier = Column(Boolean)
     banned = Column(Boolean)
     cachedJson = Column(Text)
+    apiKey = Column(Text)
     lastUpdated = Column(DateTime)
 
 

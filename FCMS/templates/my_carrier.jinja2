@@ -510,6 +510,13 @@
 
                   <div class="tab-pane" id="settings">
                     <form action="/my_carrier" method="post" enctype="multipart/form-data">
+
+                        <div class="card-body">
+                            <label for="APIKey">API Key</label>
+                            <div class="input-group">
+                                <input type="text" disabled="disabled" value="{{ apiKey }}">
+                            </div>
+                        </div>
                         <div class="card-body">
                           <div class="form-group">
                             <label for="exampleInputFile">Carrier image</label>

@@ -1,3 +1,5 @@
+import os
+from binascii import hexlify
 from datetime import datetime, timedelta
 
 from pyramid.view import view_config
@@ -113,6 +115,8 @@ def mycarrier_view(request):
             jcarrier = carrier_data.update_carrier(request, mycarrier.id, request.user)
             if not jcarrier:
                 log.warning(f"Carrier update failed for CID {mycarrier.callsign}. Presenting old data.")
+        if not request.user.apiKey:
+            request.user.apiKey = hexlify(os.urandom(64)).decode()
         finances = carrier_data.get_finances(request, mycarrier.id)
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
         events = carrier_data.populate_calendar(request, mycarrier.id)
@@ -125,6 +129,7 @@ def mycarrier_view(request):
         data['events'] = events
         data['crew'] = crew
         data['cargo'] = cargo
+        data['apiKey'] = request.user.apiKey
         data['sidebar'] = menu.populate_sidebar(request)
         data['funding_time'] = format_timespan(int(int(mycarrier.balance) /
                                                    int(int(mycarrier.servicesCost) + int(mycarrier.coreCost)) * 604800)) \
