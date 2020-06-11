@@ -23,6 +23,32 @@
 {% if jsgrid %}
 <script src="../../plugins/jsgrid/jsgrid.min.js"></script>
 {% endif %}
+{% if modal %}
+<!-- SweetAlert2 -->
+    <script src="/static/plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Toastr -->
+    <script src="/static/plugins/toastr/toastr.min.js"></script>
+
+        {% if modal.load_fire %}
+            <script>
+                    const Toast = Swal.mixin({
+                      toast: true,
+                      position: 'top-end',
+                      showConfirmButton: false,
+                      timer: 3000
+                    });
+
+                (function() {
+                    Toast.fire({
+                        icon: '{{ modal.load_fire.icon }}',
+                        title: '{{ modal.load_fire.message }}'
+                    })
+                })();
+            </script>
+        {% endif %}
+
+{% endif %}
+
 <script>
 function makeCarrierLink() {
   /* Get the text field */
@@ -39,7 +65,6 @@ document.querySelector('#Copy').onclick = function(){
     makeCarrierLink();
 }
 </script>
-
   </body>
 </html>
 

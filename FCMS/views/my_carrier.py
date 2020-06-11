@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='my_carrier', renderer='../templates/my_carrier.jinja2')
 def mycarrier_view(request):
+    modal_data = None
     if request.POST:
         if 'discord_webhook' in request.POST:
             # Got a new Discord webhook
@@ -27,6 +28,7 @@ def mycarrier_view(request):
             newhook = Webhook(owner_id=request.user.id, carrier_id=mycarrier.id,
                               hook_url=request.POST['discord_webhook'],
                               hook_type='discord', enabled=True)
+            modal_data = {'load_fire': {'icon': 'success', 'message': 'Discord webhook added!'}}
             request.dbsession.add(newhook)
         if 'eventtype' in request.POST:
             # Got a calendar event.
@@ -58,6 +60,7 @@ def mycarrier_view(request):
             hooks = webhooks.get_webhooks(request, mycarrier.id)
             request.dbsession.flush()
             request.dbsession.refresh(newevent)
+            modal_data = {'load_fire': {'icon': 'success', 'message': 'Calendar event added!'}}
             if hooks:
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
@@ -80,14 +83,16 @@ def mycarrier_view(request):
                     log.info(f"Adding new carrier image for {mycarrier.callsign}.")
                     nc = CarrierExtra(cid=mycarrier.id, carrier_image=filename)
                     request.dbsession.add(nc)
+                    modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image uploaded!'}}
                 else:
                     request.storage.delete(cex.carrier_image)
                     log.info(f"Updated carrier image for {mycarrier.callsign}")
                     cex.carrier_image = filename
+                    modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image updated!'}}
             except FileNotAllowed:
                 log.error(f"Attempt to upload invalid file by user {request.user.username} from {request.client_addr}")
                 request.session.flash('Sorry, this file is not allowed.')
-                return exc.HTTPSeeOther(request.route_url('my_carrier'))
+                modal_data = {'load_fire': {'icon': 'error', 'message': 'Sorry, that file type is not allowed.'}}
     userdata = usr.populate_user(request)
     if request.user:
         # Debugging backdoor to other CMDRs my_carrier view.
@@ -122,6 +127,9 @@ def mycarrier_view(request):
         events = carrier_data.populate_calendar(request, mycarrier.id)
         crew = carrier_data.get_crew(request, mycarrier.id)
         cargo = carrier_data.get_cargo(request, mycarrier.id)
+        if modal_data:
+            data['modal'] = modal_data
+
         data['view'] = 'My Carrier'
         data['finance'] = finances
         data['calendar'] = True
