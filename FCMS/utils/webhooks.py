@@ -65,6 +65,45 @@ def schedule_jump(request, calendar_id, webhook_url):
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
+def announce_jump(request, cid, target, webhook_url, body=None):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    embed = DiscordEmbed(title='Frame Shift Drive Charging',
+                         description=f'{util.from_hex(mycarrier.name)} is jumping.', color=242424,
+                         url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    if extra:
+        embed.set_image(url=request.storage.url(extra.carrier_image))
+    else:
+        embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
+    embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
+    embed.add_embed_field(name='Departing from', value=mycarrier.currentStarSystem)
+    embed.add_embed_field(name='Headed to', value=target)
+    if body:
+        embed.add_embed_field(name='Orbiting ', value=body)
+    embed.set_timestamp()
+    return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
+
+
+def cancel_jump(request, cid, webhook_url, override):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    embed = DiscordEmbed(title='Jump Cancelled',
+                         description=f'{util.from_hex(mycarrier.name)} has cancelled jump.', color=242424,
+                         url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    if extra:
+        embed.set_image(url=request.storage.url(extra.carrier_image))
+    else:
+        embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
+    if override:
+        embed.set_image(url='https://media.giphy.com/media/B9NG8QJWN6pnG/giphy.gif')
+    embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
+    embed.add_embed_field(name='Staying right here in ', value=mycarrier.currentStarSystem)
+    embed.set_timestamp()
+    return send_webhook(webhook_url, 'Carrier Jump cancelled', hooktype='discord', myembed=embed)
+
+
 def calendar_event(request, calendar_id, webhook_url):
     """
 
