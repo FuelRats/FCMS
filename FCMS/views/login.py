@@ -53,7 +53,7 @@ def register_view(request):
         apikey = hexlify(os.urandom(64))
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1,
                             cmdr_name=request.params['cmdr_name'], has_validated=False, public_carrier=True,
-                            banned=False, apikey=apikey)
+                            banned=False, apiKey=apikey)
         request.dbsession.add(newuser)
         log.info(f"Registered new user {request.params['email']} from {request.client_addr}.")
         return exc.HTTPFound(location=request.route_url('login'))
