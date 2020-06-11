@@ -85,7 +85,7 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
-def cancel_jump(request, cid, webhook_url, override):
+def cancel_jump(request, cid, webhook_url, override=False):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     embed = DiscordEmbed(title='Jump Cancelled',
