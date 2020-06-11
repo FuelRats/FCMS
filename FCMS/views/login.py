@@ -50,7 +50,7 @@ def register_view(request):
         if res:
             return {'reg_failure': True, 'message': 'User exists!'}
         cryptpass = pwd_context.hash(request.params['pass'])
-        apikey = hexlify(os.urandom(64))
+        apikey = hexlify(os.urandom(64)).decode()
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1,
                             cmdr_name=request.params['cmdr_name'], has_validated=False, public_carrier=True,
                             banned=False, apiKey=apikey)
