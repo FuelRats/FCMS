@@ -126,6 +126,9 @@ def oauth_finalize(request):
                                      lastUpdated=datetime.now())
         user.no_carrier = False
         request.dbsession.add(newcarrier)
+        request.dbsession.flush()
+        request.dbsession.refresh(newcarrier)
+        user.carrierid=newcarrier.id
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.
     except:

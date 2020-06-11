@@ -41,8 +41,12 @@ def api_view(request):
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if hook['webhook_type'] == 'discord':
-                        res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
-                                                     hook['webhook_url'], body=data['Body'])
+                        if 'Body' in data:
+                            res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
+                                                         hook['webhook_url'], body=data['Body'])
+                        else:
+                            res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
+                                                         hook['webhook_url'])
                         log.debug(f"Hook result: {res}")
 
         elif data['event'] == 'CarrierJumpCancelled':
