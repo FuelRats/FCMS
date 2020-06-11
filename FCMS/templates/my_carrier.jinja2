@@ -272,6 +272,14 @@
                           <option value="other">Other</option>
                         </select>
                       </div>
+                     <div class="form-group">
+                        <label>Departure System</label>
+                         <input id="departureSystem" name="departureSystem" type="text" class="form-control" placeholder="Departure System">
+                      </div>
+                     <div class="form-group">
+                        <label>Arrival System</label>
+                         <input id="arrivalSystem" name="arrivalSystem" type="text" class="form-control" placeholder="Arrival System">
+                      </div>
 
                    <div class="form-group">
                       <label>Start time:</label>
@@ -517,7 +525,22 @@
                           <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                       </form>
-
+                      <hr>
+                    <form action="/my_carrier" method="post" enctype="multipart/form-data">
+                        <div class="card-body">
+                          <div class="form-group">
+                            <label for="Webhook">Add Discord Webhook</label>
+                            <div class="input-group">
+                              <div class="input-group-text">
+                                <input type="text" class="form-control" name="discord_webhook" id="discord_webhook">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <div class="card-footer">
+                          <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                      </form>
                     </div>
                   <!-- /.tab-pane -->
 

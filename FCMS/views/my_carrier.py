@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 
 from pyramid.view import view_config
@@ -6,10 +5,10 @@ from pyramid.view import view_config
 import pyramid.httpexceptions as exc
 from pyramid_storage.exceptions import FileNotAllowed
 
-from ..models import carrier, CarrierExtra, Calendar
+from ..models import carrier, CarrierExtra, Calendar, Webhook
 
 from ..utils import carrier_data
-from ..utils import menu, user as usr
+from ..utils import menu, user as usr, webhooks
 from humanfriendly import format_timespan
 import logging
 
@@ -19,19 +18,54 @@ log = logging.getLogger(__name__)
 @view_config(route_name='my_carrier', renderer='../templates/my_carrier.jinja2')
 def mycarrier_view(request):
     if request.POST:
+        if 'discord_webhook' in request.POST:
+            # Got a new Discord webhook
+            mycarrier = request.dbsession.query(carrier.Carrier).filter(
+                carrier.Carrier.owner == request.user.id).one_or_none()
+            newhook = Webhook(owner_id=request.user.id, carrier_id=mycarrier.id,
+                              hook_url=request.POST['discord_webhook'],
+                              hook_type='discord', enabled=True)
+            request.dbsession.add(newhook)
         if 'eventtype' in request.POST:
             # Got a calendar event.
             starttime = datetime.fromisoformat(request.POST['starttime'])
-            endtime = datetime.fromisoformat(request.POST['endtime'])
-
+            if 'endtime' in request.POST and request.POST['endtime'] != '':
+                endtime = datetime.fromisoformat(request.POST['endtime'])
+            else:
+                endtime = starttime
+            print(request.POST)
             if 'allday' in request.POST:
                 allday = True if 'allday' == 'on' else False
             else:
                 allday = False
-            newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
-                                title=request.POST['title'], start=starttime, end=endtime,
-                                allday=allday, fgcolor="#00AA00", bgcolor="#00FF00")
+            if request.POST['eventtype'] == 'scheduled_jump':
+                print("In scheduled jump newevent.")
+                newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
+                                    title=request.POST['title'], start=starttime, end=endtime,
+                                    allday=allday, fgcolor="#00AA00", bgcolor="#00FF00",
+                                    departureSystem=request.POST['departureSystem'],
+                                    arrivalSystem=request.POST['arrivalSystem'])
+            else:
+                print("In calendar newevent.")
+                newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
+                                    title=request.POST['title'], start=starttime, end=endtime,
+                                    allday=allday, fgcolor="#00AA00", bgcolor="#00FF00")
             request.dbsession.add(newevent)
+            mycarrier = request.dbsession.query(carrier.Carrier).filter(
+                carrier.Carrier.owner == request.user.id).one_or_none()
+            hooks = webhooks.get_webhooks(request, mycarrier.id)
+            request.dbsession.flush()
+            request.dbsession.refresh(newevent)
+            if hooks:
+                for hook in hooks:
+                    log.debug(f"Process hook {hook['webhook_url']}")
+                    if hook['webhook_type'] == 'discord':
+                        if request.POST['eventtype'] == 'scheduled_jump':
+                            res = webhooks.schedule_jump(request, newevent.id, hook['webhook_url'])
+                            log.debug(f"Hook result: {res}")
+                        else:
+                            webhooks.calendar_event(request, newevent.id, hook['webhook_url'])
+
         if 'myfile' in request.POST:
             mycarrier = request.dbsession.query(carrier.Carrier). \
                 filter(carrier.Carrier.owner == request.user.id).one_or_none()

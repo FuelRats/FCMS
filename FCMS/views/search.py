@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 
 def fill_data(candidates, source):
-    items=[]
+    items = []
     for row in candidates:
         target = numpy.array((row.x, row.y, row.z))
         dist = numpy.linalg.norm(source - target)
@@ -82,7 +82,7 @@ def search_view(request):
     else:
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png', 'link': '/login'}
     if 'searchform' in request.params:
-        return { 'searchform': True, 'user': userdata, 'sidebar': mymenu }
+        return {'searchform': True, 'user': userdata, 'sidebar': mymenu}
 
     if 'dssa' in request.params:
         candidates = request.dbsession.query(carrier.Carrier).from_statement(
@@ -95,9 +95,9 @@ def search_view(request):
                  f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
                  f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
         items = fill_data(candidates, source)
-        return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
-                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
-                    'carrier_search': True, 'sidebar': mymenu}
+        return {'view': 'DSSA Carriers', 'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
+                'col4_header': 'Distance', 'items': items, 'result_header': f'DSSA Carriers',
+                'carrier_search': True, 'sidebar': mymenu}
     if 'type' in request.params:
         if request.params['type'].lower() == 'closest':
             usr = capi.get_cmdr(request.user)
@@ -111,18 +111,18 @@ def search_view(request):
             z = coords['z']
             source = numpy.array((x, y, z))
             candidates = request.dbsession.query(carrier.Carrier).from_statement(
-                    text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
-                         f")^2 + (cast(carriers.y AS FLOAT) - {y}"
-                         f")^2 + (cast(carriers.z AS FLOAT) - {z}"
-                         f")^2)) as Distance from carriers where cast(carriers.x AS FLOAT) BETWEEN "
-                         f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
-                         f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
-                         f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
-                         f" order by Distance LIMIT 25"))
+                text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
+                     f")^2 + (cast(carriers.y AS FLOAT) - {y}"
+                     f")^2 + (cast(carriers.z AS FLOAT) - {z}"
+                     f")^2)) as Distance from carriers where cast(carriers.x AS FLOAT) BETWEEN "
+                     f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
+                     f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
+                     f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
+                     f" order by Distance LIMIT 25"))
             items = fill_data(candidates, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {sys}',
-                    'carrier_search': True, 'sidebar': mymenu}
+                    'carrier_search': True, 'sidebar': mymenu, 'view': 'Closest Carriers'}
 
     if 'system' in request.params:
         # We're asking for a system name, so do a distance search.
@@ -158,7 +158,7 @@ def search_view(request):
             items = fill_data(cand, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                     'col4_header': 'Distance', 'items': items, 'result_header': f'carriers near {term}',
-                    'carrier_search': True, 'sidebar': mymenu}
+                    'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
     rs = '^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$'
     r = re.compile(rs)
     if r.search(term):
@@ -180,7 +180,7 @@ def search_view(request):
             for row in res:
                 items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
 
-    res = request.dbsession.query(carrier.Carrier).\
+    res = request.dbsession.query(carrier.Carrier). \
         filter(carrier.Carrier.name.like(f'%{util.to_hex(term.upper()).decode("utf8")}%'))
     print(f"Callsign: {term.upper()} Enc: {util.to_hex(term.upper()).decode('utf8')}")
     if res:
@@ -196,4 +196,4 @@ def search_view(request):
         log.error(f"No match for search on term {term}")
         return {'error': f'No matches for your search term {term}'}
     return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
-            'col4_header': 'Distance'}
+            'col4_header': 'Distance', 'view': 'Carrier search'}
