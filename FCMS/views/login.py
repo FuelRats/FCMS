@@ -50,7 +50,7 @@ def register_view(request):
         if res:
             return {'reg_failure': True, 'message': 'User exists!'}
         cryptpass = pwd_context.hash(request.params['pass'])
-        apikey = hexlify(os.urandom(64))
+        apikey = hexlify(os.urandom(64)).decode()
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1,
                             cmdr_name=request.params['cmdr_name'], has_validated=False, public_carrier=True,
                             banned=False, apiKey=apikey)
@@ -96,7 +96,7 @@ def oauth_finalize(request):
                 log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
                 oc.owner = user.id
             return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
-                    'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+                    'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
         if not coords:
             coords = {"x": 0, "y": 0, "z": 0}
