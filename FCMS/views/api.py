@@ -28,6 +28,9 @@ def api_view(request):
         print("No user")
         raise exc.HTTPBadRequest(detail='Invalid API request.')
     user = request.dbsession.query(User).filter(User.username == pvars['user']).one_or_none()
+    if not user:
+        print("Bad user.")
+        raise exc.HTTPBadRequest(detail='Invalid API key.')
     if pvars['key'] != user.apiKey:
         print("Bad key.")
         raise exc.HTTPBadRequest(detail='Invalid API key.')
