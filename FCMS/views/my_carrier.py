@@ -21,15 +21,6 @@ log = logging.getLogger(__name__)
 def mycarrier_view(request):
     modal_data = None
     if request.POST:
-        if 'discord_webhook' in request.POST:
-            # Got a new Discord webhook
-            mycarrier = request.dbsession.query(carrier.Carrier).filter(
-                carrier.Carrier.owner == request.user.id).one_or_none()
-            newhook = Webhook(owner_id=request.user.id, carrier_id=mycarrier.id,
-                              hook_url=request.POST['discord_webhook'],
-                              hook_type='discord', enabled=True)
-            modal_data = {'load_fire': {'icon': 'success', 'message': 'Discord webhook added!'}}
-            request.dbsession.add(newhook)
         if 'eventtype' in request.POST:
             # Got a calendar event.
             starttime = datetime.fromisoformat(request.POST['starttime'])
@@ -71,28 +62,6 @@ def mycarrier_view(request):
                         else:
                             webhooks.calendar_event(request, newevent.id, hook['webhook_url'])
 
-        if 'myfile' in request.POST:
-            mycarrier = request.dbsession.query(carrier.Carrier). \
-                filter(carrier.Carrier.owner == request.user.id).one_or_none()
-            try:
-                filename = request.storage.save(request.POST['myfile'], folder=f'carrier-{mycarrier.id}',
-                                                randomize=True)
-                log.debug(f"Filename pre storage: {filename}")
-                cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
-                if not cex:
-                    log.info(f"Adding new carrier image for {mycarrier.callsign}.")
-                    nc = CarrierExtra(cid=mycarrier.id, carrier_image=filename)
-                    request.dbsession.add(nc)
-                    modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image uploaded!'}}
-                else:
-                    request.storage.delete(cex.carrier_image)
-                    log.info(f"Updated carrier image for {mycarrier.callsign}")
-                    cex.carrier_image = filename
-                    modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image updated!'}}
-            except FileNotAllowed:
-                log.error(f"Attempt to upload invalid file by user {request.user.username} from {request.client_addr}")
-                request.session.flash('Sorry, this file is not allowed.')
-                modal_data = {'load_fire': {'icon': 'error', 'message': 'Sorry, that file type is not allowed.'}}
     userdata = usr.populate_user(request)
     if request.user:
         # Debugging backdoor to other CMDRs my_carrier view.
