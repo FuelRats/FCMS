@@ -89,11 +89,8 @@ def search_view(request):
             text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                  f")^2 + (cast(carriers.y AS FLOAT) - {y}"
                  f")^2 + (cast(carriers.z AS FLOAT) - {z}"
-                 f")^2)) as Distance from carriers where cast(carriers.x AS FLOAT) BETWEEN "
-                 f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
-                 f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
-                 f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
-                 f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
+                 f")^2)) as Distance from carriers where"
+                 f" carriers.\"isDSSA\" is TRUE order by Distance"))
         items = fill_data(candidates, source)
         return {'view': 'DSSA Carriers', 'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                 'col4_header': 'Distance', 'items': items, 'result_header': f'DSSA Carriers',

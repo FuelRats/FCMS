@@ -4,18 +4,37 @@ from sqlalchemy import (
     Integer,
     Text, Boolean, DateTime, ForeignKey,
 )
-
+import colander
 from .meta import Base
 
 
 class Webhook(Base):
     __tablename__ = 'webhooks'
-    id = Column(Integer, primary_key=True)
-    owner_id = Column(Integer, ForeignKey('users.id'))
-    carrier_id = Column(Integer, ForeignKey('carriers.id'))
-    hook_url = Column(Text)
-    hook_type = Column(Text)
-    enabled = Column(Boolean)
+    id = Column(Integer, primary_key=True,
+                info={'colanderalchemy': {
+                    'typ': colander.Integer(),
+                }})
+    owner_id = Column(Integer, ForeignKey('users.id'),
+                      info={'colanderalchemy': {
+                          'typ': colander.Integer(),
+                      }})
+    carrier_id = Column(Integer, ForeignKey('carriers.id'),
+                        info={'colanderalchemy': {
+                            'typ': colander.Integer(),
+
+                        }})
+    hook_url = Column(Text, info={'colanderalchemy': {
+        'typ': colander.String(),
+        'title': 'Webhook URL'
+    }})
+    hook_type = Column(Text, info={'colanderalchemy': {
+        'typ': colander.String(),
+        'title': 'Webhook type'
+    }})
+    enabled = Column(Boolean, info={'colanderalchemy':{
+        'typ': colander.Boolean(),
+        'title': 'Boolean'
+    }})
 
 
 Index('webhooks_index', Webhook.id, unique=True)
