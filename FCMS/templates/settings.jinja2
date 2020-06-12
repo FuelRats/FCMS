@@ -37,22 +37,9 @@
                       <div class="card-body">
                           {{ carrier_settings|safe }}
                           <hr>
-                          <form action="/settings" method="post" enctype="multipart/form-data">
-                              <div class="form-group">
-                                  <label for="CarrierImageFile"><h3 class="card-title">Carrier image</h3></label>
-                                  <i><img class="responsive img-bordered-sm img-thumbnail" src="{{ request.storage.url(carrier_image) }}" alt="Carrier image"></i>
-                                    <div class="input-group">
-                                      <div class="custom-file">
-                                        <input type="file" class="custom-file-input" name="myfile" id="exampleInputFile">
-                                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                                      </div>
-                                    </div>
-                                  </div>
-                              <div class="card-footer">
-                                  <button type="submit" class="btn btn-primary">Submit</button>
-                              </div>
-                          </form>
-
+                            <i><img class="responsive img-bordered-sm img-thumbnail"
+                                    src="{{ request.storage.url(carrier_image) }}" alt="Carrier image"></i>
+                          {{ extra_settings|safe }}
                       </div>
 {% else %}
                       <div class="card-body">
