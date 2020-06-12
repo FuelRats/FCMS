@@ -250,7 +250,6 @@ def populate_view(request, cid, user):
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
-    row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
     events = populate_calendar(request, cid)
     data = {
         'user': userdata,
@@ -282,7 +281,6 @@ def populate_view(request, cid, user):
         'carrier_image': extra.carrier_image if extra else "/static/img/carrier_default.png",
         'carrier_motd': extra.carrier_motd if extra else "No MOTD set",
         'system': mycarrier.currentStarSystem,
-        'arrival': row.arrivalTime,
         'og_meta': True,
         'x': mycarrier.x,
         'y': mycarrier.y,
@@ -291,6 +289,9 @@ def populate_view(request, cid, user):
         'events': events,
         'calendar': True,
     }
+    row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
+    if row:
+        data['arrival'] = row.arrivalTime
     return data
 
 
