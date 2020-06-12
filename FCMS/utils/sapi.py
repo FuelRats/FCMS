@@ -29,8 +29,10 @@ def get_system_by_id(system):
 
 
 def get_coords(system):
-    sys = get_system_by_name(system)
-    if sys['data']:
-        return sys['data'][0]['attributes']['coords']
-    else:
-        return {'x': 0, 'y': 0, 'z': 0, 'error': 'Not found'}
+    if system:
+        sys = get_system_by_name(system)
+        if sys['data']:
+            return sys['data'][0]['attributes']['coords']
+        else:
+            return {'x': 0, 'y': 0, 'z': 0, 'error': 'Not found'}
+    return {'x': 0, 'y': 0, 'z': 0, 'error': 'Not found'}

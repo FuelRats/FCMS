@@ -1,4 +1,5 @@
 import codecs
+from sqlalchemy import inspect
 
 
 def from_hex(mystr):
@@ -16,3 +17,14 @@ def to_hex(mystr):
         return codecs.encode(mystr.encode(), 'hex')
     except:
         return None
+
+
+def object_as_dict(obj):
+    """
+    Converts a SQLAlchemy object (a single row) to a dict.
+    https://stackoverflow.com/a/37350445/2214933
+
+    :param obj:
+    :return:
+    """
+    return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
