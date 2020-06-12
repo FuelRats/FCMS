@@ -1,12 +1,14 @@
 # Carrier settings form target
 # Also, images!
 import colander
+import deform
 from deform import widget, Form, ValidationFailure
 from deform.interfaces import FileUploadTempStore
 from pyramid.view import view_config
 from pyramid_storage.exceptions import FileNotAllowed
 
 from ..utils.util import object_as_dict
+from ..utils import user as usr, menu, carrier_data
 from ..models import Carrier, CarrierExtra, Calendar, Webhook
 import logging
 
@@ -29,18 +31,21 @@ class CarrierSettings(colander.MappingSchema):
 
 
 hooktypes = (('discord', 'discord'), ('generic', 'generic'))
-imgtemp = FileUploadTempStore()
+tmpstore = FileUploadTempStore()
 
 
 class CarrierExtraSettings(colander.MappingSchema):
-    carrierImage = colander.SchemaNode(colander.String(),
-                                       widget=widget.FileUploadWidget(tmpstore=imgtemp),
-                                       title='Carrier Image',
-                                       description="Choose file to upload")
-    carrierMOTD = colander.SchemaNode(colander.String(),
-                                      widget=widget.TextInputWidget(),
-                                      description="Set your carrier's Motto / MOTD.",
-                                      missing=colander.drop)
+    carrier_image = colander.SchemaNode(deform.FileData(),
+                                        widget=widget.FileUploadWidget(tmpstore=tmpstore),
+                                        title='Carrier Image',
+                                        description="Choose file to upload",
+                                        missing=colander.null)
+    carrier_motd = colander.SchemaNode(colander.String(),
+                                       widget=widget.TextInputWidget(),
+                                       description="Set your carrier's Motto / MOTD.",
+                                       title="Carrier Motto",
+                                       validator=colander.Length(max=150),
+                                       missing=colander.null)
 
 
 class WebhookSchema(colander.Schema):
@@ -79,13 +84,16 @@ def settings_view(request):
 
     carrierform = Form(carrierschema, buttons=('submit',), use_ajax=True, formid='carrierform')
     webhookform = Form(hooksschema, buttons=('submit',), use_ajax=True, formid='webhookform')
-    webhookform.widget.css_class = "col-md"
     extraform = Form(extraschema, buttons=('submit',), use_ajax=True, formid='extraform')
 
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.owner == request.user.id).one_or_none()
     myextra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
     myhooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == mycarrier.id).all()
 
+    # Sidebar and menus.
+    userdata = usr.populate_user(request)
+    sidebar = menu.populate_sidebar(request)
+    cdata = carrier_data.populate_view(request, mycarrier.id, request.user)
     tmphooks = []
     for hook in myhooks:
         tmphooks.append({'hook_url': hook.hook_url,
@@ -97,7 +105,7 @@ def settings_view(request):
 
     webhook_settings = webhookform.render({'hooks': tmphooks})
     carrier_settings = carrierform.render(object_as_dict(mycarrier))
-    extra_settings = extraform.render(object_as_dict(myextra))
+    extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd})
 
     if 'myfile' in request.POST:
         try:
@@ -122,13 +130,13 @@ def settings_view(request):
             modal_data = {'load_fire': {'icon': 'error', 'message': 'Sorry, that file type is not allowed.'}}
         carrier_form = carrierform.render(object_as_dict(mycarrier))
         webhook_form = webhookform.render()
-        return {'modal': modal_data, 'formadvanced': True, 'carrier_settings': carrier_form,
-                'webhooks_settings': webhook_form, 'carrier_image': myextra.carrier_image,
-                'extra_settings': extra_settings}
+        return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
+                            'carrier_settings': carrier_form,
+                            'webhooks_settings': webhook_form, 'carrier_image': myextra.carrier_image,
+                            'extra_settings': extra_settings}}
     if 'submit' in request.POST:
         if request.POST['__formid__'] == 'carrierform':
             try:
-                print("Got a carrier form!")
                 controls = request.POST.items()
                 appstruct = carrierform.validate(controls)
                 mycarrier.fromdict(appstruct)
@@ -136,33 +144,76 @@ def settings_view(request):
                 request.dbsession.refresh(mycarrier)
                 carrier_settings = carrierform.render(object_as_dict(mycarrier))
                 modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier settings updated!'}}
-                return {'modal': modal_data, 'formadvanced': True, 'carrier_settings': carrier_settings,
-                        'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
-                        'webhooks_settings': webhook_settings}
+                return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
+                                    'carrier_settings': carrier_settings,
+                                    'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                    'webhooks_settings': webhook_settings}}
             except ValidationFailure as e:
                 carrier_settings = e.render()
-                logging.error(f"Validation failed!")
-                modal_data = {'load_fire', {'icon': 'error', 'message': 'Carrier settings invalid!'}}
-                return {'modal': modal_data, 'formadvanced': True, 'carrier_settings': carrier_settings,
+                logging.error(f"Carrier Validation failed! {e.error}")
+                # modal_data = {'load_fire', {'icon': 'error', 'message': 'Carrier settings invalid!'}}
+                return {{**cdata, 'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True,
+                         'carrier_settings': carrier_settings,
+                         'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                         'webhooks_settings': webhook_settings}}
+        elif request.POST['__formid__'] == 'extraform':
+            cnt = request.POST.items()
+            modal_data = {}
+            try:
+                lappstruct = extraform.validate(cnt)
+                try:
+                    cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
+                    log.debug(f"Load: {lappstruct}")
+                    # Hurr?
+                    if request.POST['upload'] != b'':
+                        filename = request.storage.save(request.POST['upload'], folder=f'carrier-{mycarrier.id}',
+                                                        randomize=True)
+                        log.debug(f"Filename pre storage: {filename}")
+
+                        if not cex:
+                            log.info(f"Adding new carrier image for {mycarrier.callsign}.")
+                            nc = CarrierExtra(cid=mycarrier.id, carrier_image=filename)
+                            request.dbsession.add(nc)
+                            modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image uploaded!'}}
+                        else:
+                            request.storage.delete(cex.carrier_image)
+                            log.info(f"Updated carrier image for {mycarrier.callsign}")
+                            cex.carrier_image = filename
+                            modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image updated!'}}
+                    if request.POST['carrier_motd'] !='':
+                        cex.carrier_motd = request.POST['carrier_motd']
+                        modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier Motto updated!'}}
+                        request.dbsession.flush()
+                        request.dbsession.refresh(cex)
+                except FileNotAllowed:
+                    log.error(
+                        f"Attempt to upload invalid file by user {request.user.username} from {request.client_addr}")
+                    request.session.flash('Sorry, this file is not allowed.')
+                    modal_data = {'load_fire': {'icon': 'error', 'message': 'Sorry, that file type is not allowed.'}}
+            except ValidationFailure as e:
+                log.debug(f"Failed to validate carrier extra! {e.error}")
+                extra_settings = e.render()
+                # modal_data = {'load_fire', {'icon': 'error', 'message': 'Something went wrong with that file upload.'}}
+                return {'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True,
+                        'carrier_settings': carrier_settings,
                         'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
                         'webhooks_settings': webhook_settings}
+            request.dbsession.flush()
+            request.dbsession.refresh(cex)
+            return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
+                                'carrier_settings': carrier_settings,
+                                'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                'webhooks_settings': webhook_settings}}
 
         elif request.POST['__formid__'] == 'webhookform':
-            print("Got a webhooks form!")
             controls = request.POST.items()
             try:
                 appstruct = webhookform.validate(controls)
-                print(f"appstruct: {appstruct}")
-                hookids=[]
-                newids=[]
+                hookids = []
+                newids = []
                 for hook in appstruct['hooks']:
-                    print(f"Hook: {hook['hook_url']}")
                     if 'id' in hook:
-                        print("Hook has ID.")
-                        print(hook)
                         hookids.append(hook['id'])
-                    else:
-                        print("No hook id?")
                     if 'id' in hook:
                         oldhook = request.dbsession.query(Webhook).filter(Webhook.id == hook['id'])
                         oldhook.enabled = hook['enabled']
@@ -175,21 +226,20 @@ def settings_view(request):
                         request.dbsession.flush()
                         request.dbsession.refresh(newhook)
                         newids.append(newhook.id)
-                #Check whether any hooks were deleted.
+                # Check whether any hooks were deleted.
                 exthooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == mycarrier.id).all()
                 for ext in exthooks:
                     # OH MY FUCKING GOD, CHECK THAT THE ROW YOU JUST ADDED ISN'T DELETED IMMEDIATELY AFTER ADDING!!!!!!
                     if ext.id not in hookids:
                         # Hook removed, delete!
                         if ext.id not in newids:
-                            request.dbsession.query(Webhook).filter(Webhook.id==ext.id).delete()
+                            request.dbsession.query(Webhook).filter(Webhook.id == ext.id).delete()
                 modal_data = {'load_fire': {'icon': 'success', 'message': 'Webhooks updated!'}}
                 request.dbsession.flush()
                 myhooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == mycarrier.id)
                 tmphooks = []
                 for hook in myhooks:
                     request.dbsession.refresh(hook)
-                    print(f"Proc hook: {hook}")
                     tmphooks.append({'hook_url': hook.hook_url,
                                      'hook_type': hook.hook_type,
                                      'enabled': True,
@@ -198,17 +248,19 @@ def settings_view(request):
                                      'carrier_id': hook.carrier_id})
 
                 webhook_settings = webhookform.render({'hooks': tmphooks})
-                return {'modal': modal_data, 'formadvanced': True, 'carrier_settings': carrier_settings,
-                            'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
-                            'webhooks_settings': webhook_settings}
+                return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
+                                    'carrier_settings': carrier_settings,
+                                    'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                    'webhooks_settings': webhook_settings}}
             except ValidationFailure as e:
                 webhook_settings = e.render()
-                logging.error(f"Webhooks validation failed!")
-                print(e.error)
+                logging.error(f"Webhooks validation failed! {e.error}")
                 # modal_data = {'load_fire', {'icon': 'error', 'message': 'Webhook settings invalid!'}}
-                return {'formadvanced': True, 'carrier_settings': carrier_settings,
-                        'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
-                        'webhooks_settings': webhook_settings}
+                return {**cdata, **{'formadvanced': True, 'carrier_settings': carrier_settings,
+                                    'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                    'webhooks_settings': webhook_settings}}
 
-    return {'formadvanced': True, 'carrier_settings': carrier_settings, 'webhooks_settings': webhook_settings,
-            'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image}
+    return {**cdata,
+            **{'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True, 'carrier_settings': carrier_settings,
+               'webhooks_settings': webhook_settings, 'extra_settings': extra_settings,
+               'carrier_image': myextra.carrier_image}}
