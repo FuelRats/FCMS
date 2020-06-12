@@ -12,6 +12,8 @@ from ..utils import menu, user as usr, webhooks
 from humanfriendly import format_timespan
 import logging
 
+from ..utils.carrier_data import update_carrier
+
 log = logging.getLogger(__name__)
 
 
@@ -40,6 +42,12 @@ def api_view(request):
                 print("Have hook, will fire.")
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
+                    if mycarrier.lastUpdated:
+                        if mycarrier.lastUpdated < datetime.now() - timedelta(minutes=15):
+                            log.debug("Refreshing carrier data before sending webhook.")
+                            update_carrier(request, mycarrier.id, request.user)
+                            request.dbsession.flush()
+                            request.dbsession.refresh(mycarrier)
                     if hook['webhook_type'] == 'discord':
                         if 'Body' in data:
                             res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],

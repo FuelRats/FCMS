@@ -28,7 +28,7 @@ def login_view(request):
                 log.warning(f"Failed login for {request.params['email']} from {request.client_addr}.")
         else:
             log.warning(f"Attempt to log in to non-existing user {request.params['email']} from {request.client_addr}")
-    return {'project': 'Fleet Carrier Management System'}
+    return {'project': 'Fleet Carrier Management System', 'view': 'Login'}
 
 
 @view_config(route_name='logout', renderer='../templates/login.jinja2')
