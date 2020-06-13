@@ -29,7 +29,6 @@ class CarrierSettings(colander.MappingSchema):
                                      title="Show on search pages",
                                      description="Show my carrier on Search and Closest pages")
 
-
 hooktypes = (('discord', 'discord'), ('generic', 'generic'))
 tmpstore = FileUploadTempStore()
 
@@ -105,7 +104,8 @@ def settings_view(request):
 
     webhook_settings = webhookform.render({'hooks': tmphooks})
     carrier_settings = carrierform.render(object_as_dict(mycarrier))
-    extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd})
+    if myextra:
+        extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd or ""})
 
     if 'myfile' in request.POST:
         try:
@@ -160,10 +160,10 @@ def settings_view(request):
             cnt = request.POST.items()
             modal_data = {}
             try:
-                lappstruct = extraform.validate(cnt)
+                #lappstruct = extraform.validate(cnt)
                 try:
                     cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
-                    log.debug(f"Load: {lappstruct}")
+                    #log.debug(f"Load: {lappstruct}")
                     # Hurr?
                     if request.POST['upload'] != b'':
                         filename = request.storage.save(request.POST['upload'], folder=f'carrier-{mycarrier.id}',
