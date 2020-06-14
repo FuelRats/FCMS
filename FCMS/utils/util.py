@@ -28,3 +28,24 @@ def object_as_dict(obj):
     :return:
     """
     return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
+
+
+def clean_market_data(obj):
+    """
+    Removes those naughty drones from a market data list
+    :param obj: List or dict containing market data
+    :return: A copy of the clean list or dict
+    """
+    if 'commodities' in obj:
+        r = []
+        for commodity in obj['commodities']:
+            if commodity['categoryname'] != 'NonMarketable':
+                r.append(commodity)
+        return {'commodities': r}
+
+    if type(obj) is list:
+        r = []
+        for commodity in obj:
+            if commodity['categoryname'] != 'NonMarketable':
+                r.append(commodity)
+        return r

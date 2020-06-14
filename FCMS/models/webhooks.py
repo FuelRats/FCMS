@@ -31,10 +31,13 @@ class Webhook(Base):
         'typ': colander.String(),
         'title': 'Webhook type'
     }})
-    enabled = Column(Boolean, info={'colanderalchemy':{
+    enabled = Column(Boolean, default=True, info={'colanderalchemy': {
         'typ': colander.Boolean(),
         'title': 'Boolean'
     }})
+    jumpEvents = Column(Boolean, default=True)
+    marketEvents = Column(Boolean, default=True)
+    calendarEvents = Column(Boolean, default=True)
 
 
 Index('webhooks_index', Webhook.id, unique=True)
