@@ -255,7 +255,14 @@
 
                 <div class="active tab-pane" id="schedule">
                     <!-- THE CALENDAR -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Scheduled events <i class="text-muted">(All times in UTC)</i>
+                        </div>
+                    </div>
+                    <div class="card-body">
                     <div id="calendar"></div><p></p>
+                    </div>
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title">Schedule an event</h3>
@@ -300,6 +307,8 @@
                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                         </div>
                     </div>
+                       <p>
+                            <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
                    </div>
                    <div class="form-group">
                       <label>End time:</label>
@@ -309,6 +318,8 @@
                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                         </div>
                     </div>
+                       <p>
+                            <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
                    </div>
                     <div class="form-group">
                         <div class="form-check">

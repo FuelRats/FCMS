@@ -115,6 +115,7 @@ def search_view(request):
                      f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
                      f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                      f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
+                     f" AND carriers.\"showSearch\" IS TRUE"
                      f" order by Distance LIMIT 25"))
             items = fill_data(candidates, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
@@ -151,6 +152,7 @@ def search_view(request):
                          f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
+                         f" AND carriers.\"showSearch\" IS TRUE"
                          f" order by Distance LIMIT 25")).all()
             items = fill_data(cand, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',

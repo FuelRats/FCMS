@@ -22,7 +22,7 @@ configure_mappers()
 
 
 def get_engine(settings, prefix='sqlalchemy.'):
-    return engine_from_config(settings, prefix)
+    return engine_from_config(settings, prefix, connect_args={"options": "-c timezone=utc"})
 
 
 def get_session_factory(engine):
