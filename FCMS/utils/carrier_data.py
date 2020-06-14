@@ -176,7 +176,6 @@ def populate_subview(request, cid, subview):
         else:
             itinerary = []
         for it in itinerary:
-            if it.categoryname != 'NonMarketable':
                 res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
                             'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
                             'col4': it.departureTime})
@@ -192,8 +191,9 @@ def populate_subview(request, cid, subview):
         else:
             market = []
         for mk in market:
-            res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                        'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
+            if mk.categoryname != 'NonMarketable':
+                res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
+                            'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
