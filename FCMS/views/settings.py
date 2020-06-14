@@ -106,7 +106,8 @@ def settings_view(request):
     carrier_settings = carrierform.render(object_as_dict(mycarrier))
     if myextra:
         extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd or ""})
-
+    else:
+        extra_settings = extraform.render()
     if 'myfile' in request.POST:
         try:
             filename = request.storage.save(request.POST['myfile'], folder=f'carrier-{mycarrier.id}',
