@@ -29,6 +29,7 @@ class CarrierSettings(colander.MappingSchema):
                                      title="Show on search pages",
                                      description="Show my carrier on Search and Closest pages")
 
+
 hooktypes = (('discord', 'discord'), ('generic', 'generic'))
 tmpstore = FileUploadTempStore()
 
@@ -133,7 +134,8 @@ def settings_view(request):
         webhook_form = webhookform.render()
         return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
                             'carrier_settings': carrier_form,
-                            'webhooks_settings': webhook_form, 'carrier_image': myextra.carrier_image,
+                            'webhooks_settings': webhook_form,
+                            'carrier_image': myextra.carrier_image if myextra else None,
                             'extra_settings': extra_settings}}
     if 'submit' in request.POST:
         if request.POST['__formid__'] == 'carrierform':
@@ -147,7 +149,8 @@ def settings_view(request):
                 modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier settings updated!'}}
                 return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
                                     'carrier_settings': carrier_settings,
-                                    'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                    'extra_settings': extra_settings,
+                                    'carrier_image': myextra.carrier_image if myextra else None,
                                     'webhooks_settings': webhook_settings}}
             except ValidationFailure as e:
                 carrier_settings = e.render()
@@ -161,10 +164,10 @@ def settings_view(request):
             cnt = request.POST.items()
             modal_data = {}
             try:
-                #lappstruct = extraform.validate(cnt)
+                # lappstruct = extraform.validate(cnt)
                 try:
                     cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
-                    #log.debug(f"Load: {lappstruct}")
+                    # log.debug(f"Load: {lappstruct}")
                     # Hurr?
                     if request.POST['upload'] != b'':
                         filename = request.storage.save(request.POST['upload'], folder=f'carrier-{mycarrier.id}',
@@ -176,15 +179,32 @@ def settings_view(request):
                             nc = CarrierExtra(cid=mycarrier.id, carrier_image=filename)
                             request.dbsession.add(nc)
                             modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image uploaded!'}}
+                            cex = nc
                         else:
-                            request.storage.delete(cex.carrier_image)
-                            log.info(f"Updated carrier image for {mycarrier.callsign}")
+                            try:
+                                request.storage.delete(cex.carrier_image)
+                                log.info(f"Updated carrier image for {mycarrier.callsign}")
+                            except:
+                                log.error(f"Failed to delete old image for {mycarrier.callsign}!")
                             cex.carrier_image = filename
                             modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image updated!'}}
-                    if request.POST['carrier_motd'] !='':
-                        cex.carrier_motd = request.POST['carrier_motd']
-                        modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier Motto updated!'}}
-                        request.dbsession.flush()
+                    if 'carrier_motd' in request.POST and request.POST['carrier_motd'] != '':
+                        if not cex:
+                            log.info(f"Adding new carrier MOTD.")
+                            nc = CarrierExtra(cid=mycarrier.id, carrier_motd=request.POST['carrier_motd'])
+                            request.dbsession.add(nc)
+                            modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier motto set!'}}
+                            cex = nc
+                        else:
+                            log.info(f"Updated carrier motto for {mycarrier.callsign}")
+                            cex.carrier_motd = request.POST['carrier_motd']
+                            modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier motto updated!'}}
+                    request.dbsession.flush()
+                    if not myextra:
+                        myextra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
+                        extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd or ""})
+                    if cex:
+                        print(f"CEX is {cex}")
                         request.dbsession.refresh(cex)
                 except FileNotAllowed:
                     log.error(
@@ -200,10 +220,12 @@ def settings_view(request):
                         'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
                         'webhooks_settings': webhook_settings}
             request.dbsession.flush()
-            request.dbsession.refresh(cex)
+            if cex:
+                request.dbsession.refresh(cex)
             return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
                                 'carrier_settings': carrier_settings,
-                                'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                'extra_settings': extra_settings,
+                                'carrier_image': myextra.carrier_image if myextra else None,
                                 'webhooks_settings': webhook_settings}}
 
         elif request.POST['__formid__'] == 'webhookform':
@@ -251,17 +273,19 @@ def settings_view(request):
                 webhook_settings = webhookform.render({'hooks': tmphooks})
                 return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
                                     'carrier_settings': carrier_settings,
-                                    'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                    'extra_settings': extra_settings,
+                                    'carrier_image': myextra.carrier_image if myextra else None,
                                     'webhooks_settings': webhook_settings}}
             except ValidationFailure as e:
                 webhook_settings = e.render()
                 logging.error(f"Webhooks validation failed! {e.error}")
                 # modal_data = {'load_fire', {'icon': 'error', 'message': 'Webhook settings invalid!'}}
                 return {**cdata, **{'formadvanced': True, 'carrier_settings': carrier_settings,
-                                    'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
+                                    'extra_settings': extra_settings,
+                                    'carrier_image': myextra.carrier_image if myextra else None,
                                     'webhooks_settings': webhook_settings}}
 
     return {**cdata,
             **{'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True, 'carrier_settings': carrier_settings,
                'webhooks_settings': webhook_settings, 'extra_settings': extra_settings,
-               'carrier_image': myextra.carrier_image}}
+               'carrier_image': myextra.carrier_image if myextra else None}}
