@@ -54,7 +54,7 @@ def api_view(request):
                             update_carrier(request, mycarrier.id, request.user)
                             request.dbsession.flush()
                             request.dbsession.refresh(mycarrier)
-                    if hook['webhook_type'] == 'discord':
+                    if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
                         if 'Body' in data:
                             res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
                                                          hook['webhook_url'], body=data['Body'])
@@ -70,7 +70,7 @@ def api_view(request):
                 print("Have hook, will fire.")
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
-                    if hook['webhook_type'] == 'discord':
+                    if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
                         res = webhooks.cancel_jump(request, mycarrier.id, hook['webhook_url'], False)
                         log.debug(f"Hook result: {res}")
         elif data['event'] == 'MarketUpdate':
@@ -79,7 +79,7 @@ def api_view(request):
                 print("Have hook, will fire.")
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
-                    if hook['webhook_type'] == 'discord':
+                    if hook['webhook_type'] == 'discord' and hook['marketEvents']:
                         res = webhooks.market_update(request, mycarrier.id, None, hook['webhook_url'])
                         log.debug(f"Hook result: {res}")
 

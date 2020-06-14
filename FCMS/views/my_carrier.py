@@ -54,13 +54,15 @@ def mycarrier_view(request):
             modal_data = {'load_fire': {'icon': 'success', 'message': 'Calendar event added!'}}
             if hooks:
                 for hook in hooks:
-                    log.debug(f"Process hook {hook['webhook_url']}")
+                    log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
                     if hook['webhook_type'] == 'discord':
-                        if request.POST['eventtype'] == 'scheduled_jump':
+                        print(f"Discord hook, and calendarEvents {hook['calendarEvents']}")
+                        if request.POST['eventtype'] == 'scheduled_jump' and hook['calendarEvents']:
                             res = webhooks.schedule_jump(request, newevent.id, hook['webhook_url'])
                             log.debug(f"Hook result: {res}")
                         else:
-                            webhooks.calendar_event(request, newevent.id, hook['webhook_url'])
+                            if hook['calendarEvents']:
+                                webhooks.calendar_event(request, newevent.id, hook['webhook_url'])
 
     userdata = usr.populate_user(request)
     if request.user:

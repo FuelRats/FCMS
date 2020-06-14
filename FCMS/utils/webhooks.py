@@ -2,7 +2,7 @@
 
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
-from ..models import Carrier, Calendar, CarrierExtra, Webhook
+from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market
 from ..utils import util
 
 
@@ -63,6 +63,37 @@ def schedule_jump(request, calendar_id, webhook_url):
     embed.add_embed_field(name='Departure time', value=str(cdata.start))
     embed.set_timestamp()
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
+
+
+def market_update(request, cid, items, webhook_url):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    embed = DiscordEmbed(title='Priority Market Update',
+                         description=f'{util.from_hex(mycarrier.name)} has new items on buy order.', color=242424,
+                         url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    if extra:
+        embed.set_image(url=request.storage.url(extra.carrier_image))
+    else:
+        embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
+    embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
+
+    market = request.dbsession.query(Market).filter(Market.carrier_id == cid).all()
+    for item in market:
+        if item.categoryname == 'NonMarketable':
+            continue
+        if item.stock > 0:
+            embed.add_embed_field(name='Selling', value=item.name)
+            embed.add_embed_field(name='For', value=item.buyPrice)
+            embed.add_embed_field(name='Quantity', value=item.stock)
+        if item.demand > 0:
+            embed.add_embed_field(name='Buying', value=item.name)
+            embed.add_embed_field(name='For', value=item.sellPrice)
+            embed.add_embed_field(name='Quantity', value=item.stock)
+    embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
+    embed.add_embed_field(name='Docking Access', value='Squadron and Friends' if mycarrier.dockingAccess=='squadronfriends' else mycarrier.dockingAccess.title())
+    embed.set_timestamp()
+    return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
 
 
 def announce_jump(request, cid, target, webhook_url, body=None):
@@ -144,7 +175,9 @@ def get_webhooks(request, cid):
     if hooks:
         data = []
         for row in hooks:
-            data.append({'webhook_url': row.hook_url, 'webhook_type': row.hook_type})
+            print(f"Getting webhook, row events {row.calendarEvents}")
+            data.append({'webhook_url': row.hook_url, 'webhook_type': row.hook_type, 'calendarEvents': row.calendarEvents,
+                         'jumpEvents': row.jumpEvents, 'marketEvents': row.marketEvents})
         return data
     else:
         return False

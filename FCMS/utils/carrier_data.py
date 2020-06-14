@@ -172,14 +172,14 @@ def populate_subview(request, cid, subview):
             if mycarrier.showItinerary or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
                 itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
         elif mycarrier.showItinerary:
-            itinerary = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+            itinerary = request.dbsession.query(Itinerary).filter(Market.carrier_id == cid)
         else:
             itinerary = []
-
         for it in itinerary:
-            res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
-                        'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
-                        'col4': it.departureTime})
+            if it.categoryname != 'NonMarketable':
+                res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
+                            'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
+                            'col4': it.departureTime})
         headers = {'col1_header': 'Star system', 'col2_header': 'Arrival time', 'col3_header': 'Visit duration',
                    'col4_header': 'Departure time'}
     if subview == 'market':

@@ -56,6 +56,12 @@ class WebhookSchema(colander.Schema):
                                     validator=colander.OneOf(('discord', 'generic')))
     enabled = colander.SchemaNode(colander.Boolean(),
                                   widget=widget.CheckboxWidget(template="bootstrap"), required=False)
+    jumpEvents = colander.SchemaNode(colander.Boolean(),
+                                     widget=widget.CheckboxWidget(template="bootstrap"), required=False)
+    marketEvents = colander.SchemaNode(colander.Boolean(),
+                                       widget=widget.CheckboxWidget(template="bootstrap"), required=False)
+    calendarEvents = colander.SchemaNode(colander.Boolean(),
+                                         widget=widget.CheckboxWidget(template="bootstrap"), required=False)
     id = colander.SchemaNode(colander.Integer(),
                              widget=widget.HiddenWidget(),
                              required=False, default=None, missing=colander.drop)
@@ -96,9 +102,13 @@ def settings_view(request):
     cdata = carrier_data.populate_view(request, mycarrier.id, request.user)
     tmphooks = []
     for hook in myhooks:
+        print(f"Loading calendarevents as {hook.calendarEvents}")
         tmphooks.append({'hook_url': hook.hook_url,
                          'hook_type': hook.hook_type,
                          'enabled': True,
+                         'jumpEvents': hook.jumpEvents,
+                         'marketEvents': hook.marketEvents,
+                         'calendarEvents': hook.calendarEvents,
                          'id': hook.id,
                          'owner_id': hook.owner_id,
                          'carrier_id': hook.carrier_id})
@@ -109,34 +119,7 @@ def settings_view(request):
         extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd or ""})
     else:
         extra_settings = extraform.render()
-    if 'myfile' in request.POST:
-        try:
-            filename = request.storage.save(request.POST['myfile'], folder=f'carrier-{mycarrier.id}',
-                                            randomize=True)
-            log.debug(f"Filename pre storage: {filename}")
-            cex = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
-            if not cex:
-                log.info(f"Adding new carrier image for {mycarrier.callsign}.")
-                nc = CarrierExtra(cid=mycarrier.id, carrier_image=filename)
-                request.dbsession.add(nc)
-                modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image uploaded!'}}
-            else:
-                request.storage.delete(cex.carrier_image)
-                log.info(f"Updated carrier image for {mycarrier.callsign}")
-                cex.carrier_image = filename
-                modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier image updated!'}}
 
-        except FileNotAllowed:
-            log.error(f"Attempt to upload invalid file by user {request.user.username} from {request.client_addr}")
-            request.session.flash('Sorry, this file is not allowed.')
-            modal_data = {'load_fire': {'icon': 'error', 'message': 'Sorry, that file type is not allowed.'}}
-        carrier_form = carrierform.render(object_as_dict(mycarrier))
-        webhook_form = webhookform.render()
-        return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
-                            'carrier_settings': carrier_form,
-                            'webhooks_settings': webhook_form,
-                            'carrier_image': myextra.carrier_image if myextra else None,
-                            'extra_settings': extra_settings}}
     if 'submit' in request.POST:
         if request.POST['__formid__'] == 'carrierform':
             try:
@@ -201,7 +184,8 @@ def settings_view(request):
                             modal_data = {'load_fire': {'icon': 'success', 'message': 'Carrier motto updated!'}}
                     request.dbsession.flush()
                     if not myextra:
-                        myextra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
+                        myextra = request.dbsession.query(CarrierExtra).filter(
+                            CarrierExtra.cid == mycarrier.id).one_or_none()
                         extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd or ""})
                     if cex:
                         print(f"CEX is {cex}")
@@ -234,17 +218,28 @@ def settings_view(request):
                 appstruct = webhookform.validate(controls)
                 hookids = []
                 newids = []
+                print(f"Load appstruct {appstruct}")
                 for hook in appstruct['hooks']:
                     if 'id' in hook:
                         hookids.append(hook['id'])
                     if 'id' in hook:
-                        oldhook = request.dbsession.query(Webhook).filter(Webhook.id == hook['id'])
+                        print(f"Update old hook with {hook['calendarEvents']}")
+                        oldhook = request.dbsession.query(Webhook).filter(Webhook.id == hook['id']).one_or_none()
                         oldhook.enabled = hook['enabled']
                         oldhook.hook_url = hook['hook_url']
                         oldhook.hook_type = hook['hook_type']
+                        oldhook.jumpEvents = hook['jumpEvents']
+                        oldhook.marketEvents = hook['marketEvents']
+                        oldhook.calendarEvents = hook['calendarEvents']
+                        print("Flush hook")
+                        request.dbsession.flush()
+                        request.dbsession.refresh(oldhook)
                     else:
+                        print(f"Make new hook with {hook['calendarEvents']}")
                         newhook = Webhook(owner_id=request.user.id, carrier_id=mycarrier.id, hook_url=hook['hook_url'],
-                                          hook_type=hook['hook_type'], enabled=hook['enabled'])
+                                          hook_type=hook['hook_type'], enabled=hook['enabled'],
+                                          calendarEvents=hook['calendarEvents'], jumpEvents=hook['jumpEvents'],
+                                          marketEvents=hook['marketEvents'])
                         request.dbsession.add(newhook)
                         request.dbsession.flush()
                         request.dbsession.refresh(newhook)
@@ -262,10 +257,14 @@ def settings_view(request):
                 myhooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == mycarrier.id)
                 tmphooks = []
                 for hook in myhooks:
+                    print(f"Refresh form with {hook.calendarEvents}")
                     request.dbsession.refresh(hook)
                     tmphooks.append({'hook_url': hook.hook_url,
                                      'hook_type': hook.hook_type,
                                      'enabled': True,
+                                     'jumpEvents': hook.jumpEvents,
+                                     'marketEvents': hook.marketEvents,
+                                     'calendarEvents': hook.calendarEvents,
                                      'id': hook.id,
                                      'owner_id': hook.owner_id,
                                      'carrier_id': hook.carrier_id})
