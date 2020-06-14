@@ -172,7 +172,7 @@ def populate_subview(request, cid, subview):
             if mycarrier.showItinerary or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
                 itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
         elif mycarrier.showItinerary:
-            itinerary = request.dbsession.query(Itinerary).filter(Market.carrier_id == cid)
+            itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
         else:
             itinerary = []
         for it in itinerary:
@@ -309,6 +309,21 @@ def populate_view(request, cid, user):
     if row:
         data['arrival'] = row.arrivalTime
     return data
+
+
+def deferred_update_carrier(request, cid, user):
+    """
+    Runs a deferred carrier data update. This is allowed to slog on for far longer than the eager update,
+    and runs as a callback to the finished render of the page. The user has to manually update.
+    :param request: The request object
+    :param cid: carrier ID
+    :param user: User object
+    :return: Nothing, data update is done directly on DB.
+    """
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
+    if owner:
+        jcarrier = capi.get_carrier_deferred(owner)
 
 
 def update_carrier(request, cid, user):
