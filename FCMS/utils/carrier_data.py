@@ -139,11 +139,11 @@ def get_cargo(request, cid):
                     clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
                 else:
                     clean_cargo[cg.commodity] = {'commodity': cg.commodity,
-                                                   'quantity': cg.quantity,
-                                                   'value': cg.value,
-                                                   'stolen': cg.stolen,
-                                                   'locname': cg.locName
-                                                   }
+                                                 'quantity': cg.quantity,
+                                                 'value': cg.value,
+                                                 'stolen': cg.stolen,
+                                                 'locname': cg.locName
+                                                 }
         data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
         return data
 
@@ -167,17 +167,22 @@ def populate_subview(request, cid, subview):
                    'col4_header': 'Coriolis'}
     if subview == 'itinerary':
         itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
-        for it in itinerary:
-            res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
-                        'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
-                        'col4': it.departureTime})
+        mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+        print(f"Owner: {mycarrier.owner} User: {request.user.id}")
+        if mycarrier.showItinerary or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+            for it in itinerary:
+                res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
+                            'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
+                            'col4': it.departureTime})
         headers = {'col1_header': 'Star system', 'col2_header': 'Arrival time', 'col3_header': 'Visit duration',
                    'col4_header': 'Departure time'}
     if subview == 'market':
-        market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
-        for mk in market:
-            res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                        'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
+        mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+        if mycarrier.showMarket or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+            market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+            for mk in market:
+                res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
+                            'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
@@ -326,7 +331,8 @@ def update_carrier(request, cid, user):
                           f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username}.")
                 return None
         except KeyError:
-            log.error(f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
+            log.error(
+                f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
             return None
         log.info(f"New carrier: {jcarrier}")
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
