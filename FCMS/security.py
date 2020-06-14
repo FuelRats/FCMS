@@ -24,8 +24,8 @@ def includeme(config):
     settings = config.get_settings()
     authn_policy = MyAuthPolicy(
         settings['auth_secret'],
-        hashalg='sha512', timeout=1200,
-        max_age=31557600, reissue_time=120
+        hashalg='sha512',
+        max_age=31557600, reissue_time=360
     )
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(ACLAuthorizationPolicy())
