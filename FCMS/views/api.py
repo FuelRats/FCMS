@@ -34,6 +34,9 @@ def api_view(request):
     if pvars['key'] != user.apiKey:
         print("Bad key.")
         raise exc.HTTPBadRequest(detail='Invalid API key.')
+    if pvars['cmdr'] != user.cmdr_name:
+        print("CMDR name mismatch")
+        raise exc.HTTPBadRequest(detail='Data not for correct CMDR.')
     else:
         data = pvars['data']
         print(f"Got valid data post: {data}")
@@ -69,6 +72,15 @@ def api_view(request):
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if hook['webhook_type'] == 'discord':
                         res = webhooks.cancel_jump(request, mycarrier.id, hook['webhook_url'], False)
+                        log.debug(f"Hook result: {res}")
+        elif data['event'] == 'MarketUpdate':
+            hooks = webhooks.get_webhooks(request, mycarrier.id)
+            if hooks:
+                print("Have hook, will fire.")
+                for hook in hooks:
+                    log.debug(f"Process hook {hook['webhook_url']}")
+                    if hook['webhook_type'] == 'discord':
+                        res = webhooks.market_update(request, mycarrier.id, None, hook['webhook_url'])
                         log.debug(f"Hook result: {res}")
 
     return {'Status': 'Maybe OK?'}
