@@ -168,21 +168,32 @@ def populate_subview(request, cid, subview):
     if subview == 'itinerary':
         itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
         mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
-        print(f"Owner: {mycarrier.owner} User: {request.user.id}")
-        if mycarrier.showItinerary or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
-            for it in itinerary:
-                res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
-                            'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
-                            'col4': it.departureTime})
+        if request.user:
+            if mycarrier.showItinerary or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+                itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
+        elif mycarrier.showItinerary:
+            itinerary = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+        else:
+            itinerary = []
+
+        for it in itinerary:
+            res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
+                        'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
+                        'col4': it.departureTime})
         headers = {'col1_header': 'Star system', 'col2_header': 'Arrival time', 'col3_header': 'Visit duration',
                    'col4_header': 'Departure time'}
     if subview == 'market':
         mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
-        if mycarrier.showMarket or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+        if request.user:
+            if mycarrier.showMarket or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+                market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+        elif mycarrier.showMarket:
             market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
-            for mk in market:
-                res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                            'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
+        else:
+            market = []
+        for mk in market:
+            res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
+                        'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
