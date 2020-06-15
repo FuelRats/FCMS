@@ -126,7 +126,8 @@ def search_view(request):
         # We're asking for a system name, so do a distance search.
         coords = sapi.get_coords(term)
         if 'error' in coords:
-            return {'error': 'Source system is not in system database.'}
+            return {'error': 'Source system is not in system database.', 'sidebar': mymenu, 'view': 'Carrier Search',
+                    'user': userdata}
         x = coords['x']
         y = coords['y']
         z = coords['z']
@@ -180,6 +181,9 @@ def search_view(request):
         elif res.count() > 1:
             for row in res:
                 items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
+            return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
+                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers owned by {term}',
+                    'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
 
     res = request.dbsession.query(carrier.Carrier). \
         filter(carrier.Carrier.name.like(f'%{util.to_hex(term.upper()).decode("utf8")}%'))
@@ -192,7 +196,12 @@ def search_view(request):
         elif res.count() > 1:
             for row in res:
                 print(f"Row: {row.callsign}")
+                items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
         # We have a carrier name match!
+            return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
+                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers matching {term}',
+                    'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
+
     else:
         log.error(f"No match for search on term {term}")
         return {'error': f'No matches for your search term {term}'}
