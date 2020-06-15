@@ -139,11 +139,11 @@ def get_cargo(request, cid):
                     clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
                 else:
                     clean_cargo[cg.commodity] = {'commodity': cg.commodity,
-                                                   'quantity': cg.quantity,
-                                                   'value': cg.value,
-                                                   'stolen': cg.stolen,
-                                                   'locname': cg.locName
-                                                   }
+                                                 'quantity': cg.quantity,
+                                                 'value': cg.value,
+                                                 'stolen': cg.stolen,
+                                                 'locname': cg.locName
+                                                 }
         data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
         return data
 
@@ -167,17 +167,33 @@ def populate_subview(request, cid, subview):
                    'col4_header': 'Coriolis'}
     if subview == 'itinerary':
         itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
+        mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+        if request.user:
+            if mycarrier.showItinerary or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+                itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
+        elif mycarrier.showItinerary:
+            itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
+        else:
+            itinerary = []
         for it in itinerary:
-            res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
-                        'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
-                        'col4': it.departureTime})
+                res.append({'col1_svg': 'inline_svgs/completed_jumps.jinja2', 'col1': it.starsystem,
+                            'col2': it.arrivalTime, 'col3': format_timespan(it.visitDurationSeconds),
+                            'col4': it.departureTime})
         headers = {'col1_header': 'Star system', 'col2_header': 'Arrival time', 'col3_header': 'Visit duration',
                    'col4_header': 'Departure time'}
     if subview == 'market':
-        market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+        mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+        if request.user:
+            if mycarrier.showMarket or mycarrier.owner == request.user.id or request.user.userlevel >= 4:
+                market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+        elif mycarrier.showMarket:
+            market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+        else:
+            market = []
         for mk in market:
-            res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                        'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
+            if mk.categoryname != 'NonMarketable':
+                res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
+                            'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
@@ -249,6 +265,7 @@ def populate_view(request, cid, user):
         return data
     owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    itinerary = request.dbsession.query(Itinerary).filter(Itinerary.carrier_id == cid)
     events = populate_calendar(request, cid)
     data = {
         'user': userdata,
@@ -280,7 +297,6 @@ def populate_view(request, cid, user):
         'carrier_image': extra.carrier_image if extra else "/static/img/carrier_default.png",
         'carrier_motd': extra.carrier_motd if extra else "No MOTD set",
         'system': mycarrier.currentStarSystem,
-        'arrived_at': mycarrier.lastUpdated,
         'og_meta': True,
         'x': mycarrier.x,
         'y': mycarrier.y,
@@ -289,7 +305,25 @@ def populate_view(request, cid, user):
         'events': events,
         'calendar': True,
     }
+    row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
+    if row:
+        data['arrival'] = row.arrivalTime
     return data
+
+
+def deferred_update_carrier(request, cid, user):
+    """
+    Runs a deferred carrier data update. This is allowed to slog on for far longer than the eager update,
+    and runs as a callback to the finished render of the page. The user has to manually update.
+    :param request: The request object
+    :param cid: carrier ID
+    :param user: User object
+    :return: Nothing, data update is done directly on DB.
+    """
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    owner = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
+    if owner:
+        jcarrier = capi.get_carrier_deferred(owner)
 
 
 def update_carrier(request, cid, user):
@@ -323,7 +357,8 @@ def update_carrier(request, cid, user):
                           f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username}.")
                 return None
         except KeyError:
-            log.error(f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
+            log.error(
+                f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
             return None
         log.info(f"New carrier: {jcarrier}")
         coords = sapi.get_coords(jcarrier['currentStarSystem'])

@@ -9,6 +9,18 @@ body {
   background: #000000;
 }
 
+.atlwdg-trigger{
+  z-index: 1050;
+}
+
+.deform-seq-add{
+  color: #0e84b5;
+}
+
+.deform-seq-add:visited {
+  color: #00bfff;
+}
+
 .main-footer{
   bottom: 0;
   left: 0;

@@ -4,6 +4,7 @@
     </div>
     <strong>Copyright &copy; 2020 <a href="https://github.com/FuelRats">The Fuel Rats Mischief</a>.</strong> All rights
     reserved. | <a href="https://github.com/FuelRats/FCMS">Github</a> | <a href="https://fuelrats.com/">Fuel Rats</a>
+    | <a href="https://www.patreon.com/fcms">Patreon</a>
     | I like jumping around on the screen a lot. I'll be fixed soon, don't report me as a bug.
   </footer>
 
@@ -22,6 +23,32 @@
 {% if jsgrid %}
 <script src="../../plugins/jsgrid/jsgrid.min.js"></script>
 {% endif %}
+{% if modal %}
+<!-- SweetAlert2 -->
+    <script src="/static/plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Toastr -->
+    <script src="/static/plugins/toastr/toastr.min.js"></script>
+
+        {% if modal.load_fire %}
+            <script>
+                    const Toast = Swal.mixin({
+                      toast: true,
+                      position: 'top-end',
+                      showConfirmButton: false,
+                      timer: 3000
+                    });
+
+                (function() {
+                    Toast.fire({
+                        icon: '{{ modal.load_fire.icon }}',
+                        title: '{{ modal.load_fire.message }}'
+                    })
+                })();
+            </script>
+        {% endif %}
+
+{% endif %}
+
 <script>
 function makeCarrierLink() {
   /* Get the text field */
@@ -38,7 +65,7 @@ document.querySelector('#Copy').onclick = function(){
     makeCarrierLink();
 }
 </script>
-
+<script type="text/javascript" src="https://jira.fuelrats.com/s/d41d8cd98f00b204e9800998ecf8427e-CDN/f689ip/804002/6150ae68746ae40172da9594bd8ff2bb/2.2.4.7/_/download/batch/com.atlassian.plugins.jquery:jquery/com.atlassian.plugins.jquery:jquery.js?collectorId=d7fb8795"></script><script type="text/javascript" src="https://jira.fuelrats.com/s/3ec581e51898860e1adb2d5c6851a9a5-T/f689ip/804002/6150ae68746ae40172da9594bd8ff2bb/3.1.0/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-UK&collectorId=d7fb8795"></script>
   </body>
 </html>
 

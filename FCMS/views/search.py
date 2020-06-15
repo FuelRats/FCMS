@@ -89,11 +89,8 @@ def search_view(request):
             text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
                  f")^2 + (cast(carriers.y AS FLOAT) - {y}"
                  f")^2 + (cast(carriers.z AS FLOAT) - {z}"
-                 f")^2)) as Distance from carriers where cast(carriers.x AS FLOAT) BETWEEN "
-                 f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
-                 f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
-                 f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
-                 f" AND carriers.\"isDSSA\" is TRUE order by Distance"))
+                 f")^2)) as Distance from carriers where"
+                 f" carriers.\"isDSSA\" is TRUE order by Distance"))
         items = fill_data(candidates, source)
         return {'view': 'DSSA Carriers', 'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
                 'col4_header': 'Distance', 'items': items, 'result_header': f'DSSA Carriers',
@@ -118,6 +115,7 @@ def search_view(request):
                      f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
                      f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                      f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
+                     f" AND carriers.\"showSearch\" IS TRUE"
                      f" order by Distance LIMIT 25"))
             items = fill_data(candidates, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
@@ -127,6 +125,9 @@ def search_view(request):
     if 'system' in request.params:
         # We're asking for a system name, so do a distance search.
         coords = sapi.get_coords(term)
+        if 'error' in coords:
+            return {'error': 'Source system is not in system database.', 'sidebar': mymenu, 'view': 'Carrier Search',
+                    'user': userdata}
         x = coords['x']
         y = coords['y']
         z = coords['z']
@@ -154,6 +155,7 @@ def search_view(request):
                          f"{str(float(x) - cube)} AND {str(float(x) + cube)}"
                          f" AND cast(carriers.y AS FLOAT) BETWEEN {str(float(y) - cube)} AND {str(float(y) + cube)}"
                          f" AND cast(carriers.z as FLOAT) BETWEEN {str(float(z) - cube)} AND {str(float(z) + cube)}"
+                         f" AND carriers.\"showSearch\" IS TRUE"
                          f" order by Distance LIMIT 25")).all()
             items = fill_data(cand, source)
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
@@ -178,7 +180,12 @@ def search_view(request):
                 return {'error': 'Player does not have a carrier.'}
         elif res.count() > 1:
             for row in res:
-                items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
+                cx = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == row.id).one_or_none()
+                if cx:
+                    items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': row.cmdr_name, 'col2': cx.callsign, 'col3': util.from_hex(cx.name), 'col4': cx.currentStarSystem})
+            return {'user': userdata, 'col1_header': 'CMDR', 'col2_header': 'Callsign', 'col3_header': 'Carrier name',
+                    'col4_header': 'Current System', 'items': items, 'result_header': f'carrier owners matching {term}',
+                    'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
 
     res = request.dbsession.query(carrier.Carrier). \
         filter(carrier.Carrier.name.like(f'%{util.to_hex(term.upper()).decode("utf8")}%'))
@@ -191,7 +198,12 @@ def search_view(request):
         elif res.count() > 1:
             for row in res:
                 print(f"Row: {row.callsign}")
+                items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': util.from_hex(row.name), 'col2': row.callsign, 'col3': row.currentStarSystem, 'col4': None})
         # We have a carrier name match!
+            return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
+                    'col4_header': '', 'items': items, 'result_header': f'carriers matching "{term}"',
+                    'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
+
     else:
         log.error(f"No match for search on term {term}")
         return {'error': f'No matches for your search term {term}'}

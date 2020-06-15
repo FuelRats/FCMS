@@ -38,8 +38,13 @@
                 <div class="row">
                   <div class="col-md-8">
                     <p class="text-center">
+                        {% if request.user %}
                         You don't have a carrier registered to your account. If you have aquired one recently,
                         click <a href="/oauth">here to retrieve it.</a>
+                        {% else %}
+                            You need to log in to this site before adding your carrier. Click <a href="/register">here</a>
+                            to register, or <a href="/login">here to log in if you've already registered.</a>
+                        {% endif %}
                     </p>
 
                   </div>
@@ -73,8 +78,13 @@
                 <div class="row">
                   <div class="col-md-8">
                     <p class="text-center">
+                        {% if request.user %}
                         You don't have a carrier registered. Click <a href="{{ request.route_url('oauth') }}">
                         here </a>to Oauth with FDev and attempt to retrieve it.
+                        {% else %}
+                            You need to log in to this site before adding your carrier. Click <a href="/register">here</a>
+                            to register, or <a href="/login">here to log in if you've already registered.</a>
+                        {% endif %}
                     </p>
 
                   </div>
@@ -147,6 +157,7 @@
 
                 <p class="text-muted text-center">{{ callsign }}
                     <input type="hidden" id="LinkTarget" value="/carrier/{{ callsign }}"><a class="nav-link" id="Copy" href="#"><i id="Copy" class="fas fa-link"></i></a></p>
+                  <p class="text-muted text-center">{{ carrier_motd }}</p>
                                   <ul class="list-group list-group-unbordered mb-3">
                   <li class="list-group-item">
                     <b>Balance</b> <a class="float-right">{{ balance or "Unknown" }}</a>
@@ -244,7 +255,14 @@
 
                 <div class="active tab-pane" id="schedule">
                     <!-- THE CALENDAR -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Scheduled events <i class="text-muted">(All times in UTC)</i>
+                        </div>
+                    </div>
+                    <div class="card-body">
                     <div id="calendar"></div><p></p>
+                    </div>
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title">Schedule an event</h3>
@@ -289,6 +307,8 @@
                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                         </div>
                     </div>
+                       <p>
+                            <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
                    </div>
                    <div class="form-group">
                       <label>End time:</label>
@@ -298,6 +318,8 @@
                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                         </div>
                     </div>
+                       <p>
+                            <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
                    </div>
                     <div class="form-group">
                         <div class="form-check">
@@ -509,39 +531,17 @@
 
 
                   <div class="tab-pane" id="settings">
-                    <form action="/my_carrier" method="post" enctype="multipart/form-data">
+
                         <div class="card-body">
-                          <div class="form-group">
-                            <label for="exampleInputFile">Carrier image</label>
+                            <label for="APIKey">API Key</label>
                             <div class="input-group">
-                              <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="myfile" id="exampleInputFile">
-                                <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                              </div>
+                                <input type="text" disabled="disabled" value="{{ apiKey }}">
                             </div>
-                          </div>
                         </div>
-                      <div class="card-footer">
-                          <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                      </form>
-                      <hr>
-                    <form action="/my_carrier" method="post" enctype="multipart/form-data">
                         <div class="card-body">
-                          <div class="form-group">
-                            <label for="Webhook">Add Discord Webhook</label>
-                            <div class="input-group">
-                              <div class="input-group-text">
-                                <input type="text" class="form-control" name="discord_webhook" id="discord_webhook">
-                              </div>
-                            </div>
-                          </div>
+                            This stuff isn't here anymore. Instead, <a href="/settings"> go to this handy page.</a>
                         </div>
-                      <div class="card-footer">
-                          <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                      </form>
-                    </div>
+                  </div>
                   <!-- /.tab-pane -->
 
                   <div class="tab-pane" id="profile">

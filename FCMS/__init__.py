@@ -1,5 +1,6 @@
 from pyramid.config import Configurator
 from pyramid.session import SignedCookieSessionFactory
+from deform.renderer import configure_zpt_renderer
 
 
 def main(global_config, **settings):
@@ -16,4 +17,5 @@ def main(global_config, **settings):
         config.add_static_view('storage', 'storage')
         config.set_session_factory(my_session_factory)
         config.scan()
+        configure_zpt_renderer(['FCMS:/templates/deform'])
     return config.make_wsgi_app()

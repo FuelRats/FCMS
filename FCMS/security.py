@@ -11,6 +11,7 @@ class MyAuthPolicy(AuthTktAuthenticationPolicy):
             return user.id
         return None
 
+
 def get_user(request):
     user_id = request.unauthenticated_userid
     if user_id is not None:
@@ -23,7 +24,7 @@ def includeme(config):
     settings = config.get_settings()
     authn_policy = MyAuthPolicy(
         settings['auth_secret'],
-        hashalg='sha512',
+        hashalg='sha512', reissue_time=360
     )
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(ACLAuthorizationPolicy())
