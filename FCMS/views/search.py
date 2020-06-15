@@ -125,6 +125,8 @@ def search_view(request):
     if 'system' in request.params:
         # We're asking for a system name, so do a distance search.
         coords = sapi.get_coords(term)
+        if 'error' in coords:
+            return {'error': 'Source system is not in system database.'}
         x = coords['x']
         y = coords['y']
         z = coords['z']
