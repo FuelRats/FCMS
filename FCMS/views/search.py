@@ -180,9 +180,11 @@ def search_view(request):
                 return {'error': 'Player does not have a carrier.'}
         elif res.count() > 1:
             for row in res:
-                items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
-            return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
-                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers owned by {term}',
+                cx = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == row.id).one_or_none()
+                if cx:
+                    items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': row.cmdr_name, 'col2': cx.callsign, 'col3': util.from_hex(cx.name), 'col4': cx.currentStarSystem})
+            return {'user': userdata, 'col1_header': 'CMDR', 'col2_header': 'Callsign', 'col3_header': 'Carrier name',
+                    'col4_header': 'Current System', 'items': items, 'result_header': f'carrier owners matching {term}',
                     'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
 
     res = request.dbsession.query(carrier.Carrier). \
@@ -196,10 +198,10 @@ def search_view(request):
         elif res.count() > 1:
             for row in res:
                 print(f"Row: {row.callsign}")
-                items.append({'col1': row.cmdr_name, 'col2': row.callsign, 'col3': row.system, 'col4': None})
+                items.append({'col1_svg': 'inline_svgs/state.jinja2', 'col1': util.from_hex(row.name), 'col2': row.callsign, 'col3': row.currentStarSystem, 'col4': None})
         # We have a carrier name match!
             return {'user': userdata, 'col1_header': 'Carrier', 'col2_header': 'Callsign', 'col3_header': 'System',
-                    'col4_header': 'Distance', 'items': items, 'result_header': f'carriers matching {term}',
+                    'col4_header': '', 'items': items, 'result_header': f'carriers matching "{term}"',
                     'carrier_search': True, 'sidebar': mymenu, 'view': 'Carrier Search'}
 
     else:
