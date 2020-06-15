@@ -1,17 +1,76 @@
 import json
 import os
+import smtplib
+import urllib
 from binascii import hexlify
-from datetime import datetime
+from datetime import datetime, timedelta, tzinfo
+from urllib.parse import urljoin
 
 from pyramid.view import view_config
 import pyramid.httpexceptions as exc
 from pyramid.security import remember, forget
-from ..models import user, carrier
-from ..utils import capi, sapi
+from ..models import user, carrier, ResetToken
+from ..utils import capi, sapi, util
 from ..utils.encryption import pwd_context
 import logging
 
 log = logging.getLogger(__name__)
+
+
+@view_config(route_name='forgot-password', renderer='../templates/forgot_password.jinja2')
+def resetpass_view(request):
+    if request.POST:
+        print(f"Got a post: {request.POST}")
+    if 'token' in request.POST:
+        print("Token in param.")
+        if request.params['password'] != request.params['password_verify']:
+            log.warning(f"Password reset attempt - passwords do not match.")
+            return {'error': 'Passwords do not match!'}
+        log.warning(f"Reset password attempt by {request.client_addr} for token {request.POST['token']}")
+        resettoken = request.dbsession.query(ResetToken).filter(ResetToken.token == request.POST['token']).one_or_none()
+        if resettoken:
+            if resettoken.token == request.POST['token']:
+                log.debug(f"Valid token supplied.")
+                if resettoken.expires_at < datetime.utcnow():
+                    log.error(f"Reset token expired, not valid. {resettoken.expires_at}")
+                else:
+                    myuser = request.dbsession.query(user.User).filter(user.User.id == resettoken.user_id).one_or_none()
+                    if myuser:
+                        log.warning(f"Successful reset by {request.client_addr}")
+                        cryptpass = pwd_context.hash(request.POST['password'])
+                        myuser.password = cryptpass
+                        request.dbsession.query(ResetToken).filter(ResetToken.user_id == myuser.id).delete()
+                        request.dbsession.flush()
+                        request.dbsession.refresh(myuser)
+                        return {'reset_success': 'Password updated!'}
+                    else:
+                        log.critical(f"User does not exist for valid reset token?!! This should not happen.")
+        else:
+            log.error(f"Invalid token supplied by {request.client_addr}")
+            return {'error': 'Invalid password reset token.'}
+    elif 'request_token' in request.POST:
+        print("Got request_token")
+        if 'email' not in request.POST or request.POST['email'] == '':
+            return {'error': 'No email supplied'}
+        myuser = request.dbsession.query(user.User).filter(user.User.username == request.POST['email']).one_or_none()
+        if myuser:
+            # Send email.
+            print("Got a valid email to send.")
+            request.dbsession.query(ResetToken).filter(ResetToken.user_id == myuser.id).delete()
+            token = hexlify(os.urandom(64)).decode()
+            tc = ResetToken(user_id=myuser.id, token=token, expires_at=datetime.now() + timedelta(hours=1),
+                            generated_by=request.client_addr)
+            request.dbsession.add(tc)
+            request.dbsession.flush()
+            request.dbsession.refresh(tc)
+            url = urljoin(request.route_url('forgot-password'), f'?token={tc.token}')
+            util.send_email(myuser.username, 'Password reset for Fleetcarrier.space',
+                            f'Greetings CMDR!\n\nSomeone (hopefully you!) has requested a password reset for your '
+                            f'account. You can reset your password by clicking the link below.\n\n{url}')
+        else:
+            print("Invalid email, but ignore.")
+        return {'view': 'reset-password', 'email_sent': True}
+    return {'project': 'Fleet Carrier Management System'}
 
 
 @view_config(route_name='login', renderer='../templates/login.jinja2')
@@ -22,7 +81,10 @@ def login_view(request):
         res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()
         if res:
             if pwd_context.verify(request.params['pass'], res.password):
-                headers = remember(request, res.id)
+                if request.params['remember']:
+                    headers = remember(request, res.id, max_age=2629800)
+                else:
+                    headers = remember(request, res.id, max_age=3600)
                 return exc.HTTPFound('/my_carrier', headers=headers)
             else:
                 log.warning(f"Failed login for {request.params['email']} from {request.client_addr}.")
@@ -131,7 +193,7 @@ def oauth_finalize(request):
         request.dbsession.add(newcarrier)
         request.dbsession.flush()
         request.dbsession.refresh(newcarrier)
-        user.carrierid=newcarrier.id
+        user.carrierid = newcarrier.id
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.
     except:
