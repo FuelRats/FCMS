@@ -120,11 +120,11 @@ def market_update(request, cid, items, webhook_url):
             continue
         if item.stock > 0:
             embed.add_embed_field(name='Selling', value=item.name)
-            embed.add_embed_field(name='For', value=item.sellPrice)
+            embed.add_embed_field(name='For', value=item.buyPrice)
             embed.add_embed_field(name='Quantity', value=item.stock)
         if item.demand > 0:
             embed.add_embed_field(name='Buying', value=item.name)
-            embed.add_embed_field(name='For', value=item.buyPrice)
+            embed.add_embed_field(name='For', value=item.sellPrice)
             embed.add_embed_field(name='Quantity', value=item.demand)
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Docking Access',
