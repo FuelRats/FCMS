@@ -6,7 +6,7 @@ from datetime import datetime
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar, CarrierExtra
 import pyramid.httpexceptions as exc
-from ..utils import util, sapi, user as usr, menu
+from ..utils import util, sapi, user as usr, menu, translation
 from humanfriendly import format_timespan, format_number
 import logging
 
@@ -128,9 +128,9 @@ def get_cargo(request, cid):
                 if cg.commodity in stolen_cargo.keys():
                     stolen_cargo[cg.commodity]['quantity'] = stolen_cargo[cg.commodity]['quantity'] + cg.quantity
                 else:
-                    stolen_cargo[cg.commodity] = {'commodity': cg.commodity,
+                    stolen_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
                                                   'quantity': cg.quantity,
-                                                  'value': cg.value,
+                                                  'value': format_number(cg.value),
                                                   'stolen': cg.stolen,
                                                   'locname': cg.locName
                                                   }
@@ -138,9 +138,9 @@ def get_cargo(request, cid):
                 if cg.commodity in clean_cargo.keys():
                     clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
                 else:
-                    clean_cargo[cg.commodity] = {'commodity': cg.commodity,
+                    clean_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
                                                  'quantity': cg.quantity,
-                                                 'value': cg.value,
+                                                 'value': format_number(cg.value),
                                                  'stolen': cg.stolen,
                                                  'locname': cg.locName
                                                  }
@@ -192,15 +192,17 @@ def populate_subview(request, cid, subview):
             market = []
         for mk in market:
             if mk.categoryname != 'NonMarketable':
-                res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                            'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
+                res.append({'col1_svg': 'inline_svgs/commodities.jinja2',
+                            'col1': (format_number(mk.demand) if mk.demand else format_number(mk.stock)),
+                            'col2': translation.localize_commodity(mk.name), 'col3': format_number(mk.buyPrice),
+                            'col4': format_number(mk.sellPrice)})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
         module = request.dbsession.query(Module).filter(Module.carrier_id == cid)
         for md in module:
-            res.append({'col1_svg': 'inline_svgs/outfitting.jinja2', 'col1': md.stock, 'col2': md.category,
-                        'col3': md.name, 'col4': md.cost})
+            res.append({'col1_svg': 'inline_svgs/outfitting.jinja2', 'col1': format_number(md.stock), 'col2': md.category,
+                        'col3': translation.localize_outfitting(md.name), 'col4': format_number(md.cost)})
         headers = {'col1_header': 'Stock', 'col2_header': 'Category', 'col3_header': 'Name',
                    'col4_header': 'Cost'}
     if subview == 'calendar':
