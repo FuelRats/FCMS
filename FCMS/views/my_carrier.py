@@ -19,6 +19,8 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='my_carrier_subview', renderer='../templates/my_carrier_subview.jinja2')
 def carrier_subview(request):
+    if not request.user:
+        return exc.HTTPFound(request.route_url('login'))
     modal_data = None
     userdata = usr.populate_user(request)
     mymenu = menu.populate_sidebar(request)

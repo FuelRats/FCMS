@@ -382,7 +382,11 @@ def update_carrier(request, cid, user):
             if mycarrier.callsign != jcarrier['name']['callsign']:
                 log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
                           f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username}.")
-                return None
+                # Doublecheck that the owner is equal to the carrier.
+                if request.user.id == mycarrier.owner:
+                    log.warning("Proceeding with update to carrier ID.")
+                else:
+                    return None
         except KeyError:
             log.error(
                 f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
@@ -424,7 +428,7 @@ def update_carrier(request, cid, user):
         mycarrier.trackedOnly = False
         mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
-        request.dbsession.autoflush=False
+        request.dbsession.autoflush = False
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
         for item in jcarrier['itinerary']['completed']:
