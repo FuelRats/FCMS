@@ -438,7 +438,7 @@ def update_carrier(request, cid, user):
         for item in jcarrier['cargo']:
             cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
                        quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
-
+            request.dbsession.add(cg)
         request.dbsession.flush()
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
@@ -466,11 +466,14 @@ def update_carrier(request, cid, user):
                                                == mycarrier.id).delete()
         print(jcarrier['modules'])
         if 'modules' in jcarrier:
-            for it in jcarrier['modules']:
-                md = Module(carrier_id=mycarrier.id, category=it['category'],
-                            name=it['name'], cost=it['cost'], stock=it['stock'],
-                            module_id=it['id'])
-                request.dbsession.add(md)
+            try:
+                for item, it in jcarrier['modules'].items():
+                    md = Module(carrier_id=mycarrier.id, category=it['category'],
+                                name=it['name'], cost=it['cost'], stock=it['stock'],
+                                module_id=it['id'])
+                    request.dbsession.add(md)
+            except:
+                log.debug("Failed to get modules from jcarrier?!")
         request.dbsession.flush()
         request.dbsession.autoflush = True
         return jcarrier or None
