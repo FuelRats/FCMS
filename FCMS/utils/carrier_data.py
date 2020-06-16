@@ -424,7 +424,7 @@ def update_carrier(request, cid, user):
         mycarrier.trackedOnly = False
         mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
-
+        request.dbsession.autoflush=False
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
         for item in jcarrier['itinerary']['completed']:
@@ -438,8 +438,8 @@ def update_carrier(request, cid, user):
         for item in jcarrier['cargo']:
             cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
                        quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
-            request.dbsession.add(cg)
 
+        request.dbsession.flush()
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
         for item in jcarrier['market']['commodities']:
@@ -471,5 +471,7 @@ def update_carrier(request, cid, user):
                             name=it['name'], cost=it['cost'], stock=it['stock'],
                             module_id=it['id'])
                 request.dbsession.add(md)
+        request.dbsession.flush()
+        request.dbsession.autoflush = True
         return jcarrier or None
     return None
