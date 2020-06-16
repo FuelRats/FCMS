@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='my_carrier_subview', renderer='../templates/my_carrier_subview.jinja2')
 def carrier_subview(request):
+    modal_data = None
     userdata = usr.populate_user(request)
     mymenu = menu.populate_sidebar(request)
     mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
