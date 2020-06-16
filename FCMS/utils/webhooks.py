@@ -2,6 +2,8 @@
 
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
+from humanfriendly import format_number
+
 from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User
 from ..utils import util
 import json
@@ -120,12 +122,12 @@ def market_update(request, cid, items, webhook_url):
             continue
         if item.stock > 0:
             embed.add_embed_field(name='Selling', value=item.name)
-            embed.add_embed_field(name='For', value=item.buyPrice)
-            embed.add_embed_field(name='Quantity', value=item.stock)
+            embed.add_embed_field(name='For', value=format_number(item.buyPrice))
+            embed.add_embed_field(name='Quantity', value=format_number(item.stock))
         if item.demand > 0:
             embed.add_embed_field(name='Buying', value=item.name)
-            embed.add_embed_field(name='For', value=item.sellPrice)
-            embed.add_embed_field(name='Quantity', value=item.demand)
+            embed.add_embed_field(name='For', value=format_number(item.sellPrice))
+            embed.add_embed_field(name='Quantity', value=format_number(item.demand))
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Docking Access',
                           value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())

@@ -25,6 +25,8 @@ def carrier_subview(request):
     userdata = usr.populate_user(request)
     mymenu = menu.populate_sidebar(request)
     mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
+    if not mycarrier:
+        return exc.HTTPFound(request.route_url('/my_carrier'))
     if 'delete-event' in request.POST:
         event = request.dbsession.query(Calendar).filter(Calendar.id == request.POST['delete-event']).one_or_none()
         if event:
