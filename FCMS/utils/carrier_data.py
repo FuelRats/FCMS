@@ -401,6 +401,7 @@ def update_carrier(request, cid, user):
         mycarrier.lastUpdated = datetime.now()
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
+        request.dbsession.flush()
         for item in jcarrier['itinerary']['completed']:
             itm = Itinerary(carrier_id=mycarrier.id, starsystem=item['starsystem'],
                             departureTime=item['departureTime'], arrivalTime=item['arrivalTime'],
@@ -408,12 +409,14 @@ def update_carrier(request, cid, user):
             request.dbsession.add(itm)
         request.dbsession.query(Cargo).filter(Cargo.carrier_id
                                               == mycarrier.id).delete()
+        request.dbsession.flush()
         for item in jcarrier['cargo']:
             cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
                        quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
             request.dbsession.add(cg)
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
+        request.dbsession.flush()
         for item in jcarrier['market']['commodities']:
             mk = Market(carrier_id=mycarrier.id, commodity_id=item['id'],
                         categoryname=item['categoryname'], name=item['name'],
@@ -423,6 +426,7 @@ def update_carrier(request, cid, user):
             request.dbsession.add(mk)
         request.dbsession.query(Ship).filter(Ship.carrier_id
                                              == mycarrier.id).delete()
+        request.dbsession.flush()
         if 'ships' in jcarrier:
             if jcarrier['ships']['shipyard_list']:
                 for item, it in jcarrier['ships']['shipyard_list'].items():
@@ -432,14 +436,15 @@ def update_carrier(request, cid, user):
                               ship_id=it['id'], basevalue=it['basevalue'],
                               stock=it['stock'])
                     request.dbsession.add(sp)
-                request.dbsession.query(Module).filter(Module.carrier_id
-                                                       == mycarrier.id).delete()
-            print(jcarrier['modules'])
-        if jcarrier['modules']:
+        request.dbsession.query(Module).filter(Module.carrier_id
+                                               == mycarrier.id).delete()
+        print(jcarrier['modules'])
+        if 'modules' in jcarrier:
             for item, it in jcarrier['modules'].items():
                 md = Module(carrier_id=mycarrier.id, category=it['category'],
                             name=it['name'], cost=it['cost'], stock=it['stock'],
                             module_id=it['id'])
                 request.dbsession.add(md)
+        request.dbsession.flush()
         return jcarrier or None
     return None
