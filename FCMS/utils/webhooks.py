@@ -2,8 +2,12 @@
 
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
-from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market
+from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User
 from ..utils import util
+import json
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def send_webhook(hookurl, message=None, hooktype='generic', myembed=None):
@@ -18,7 +22,6 @@ def send_webhook(hookurl, message=None, hooktype='generic', myembed=None):
     if hooktype == 'discord':
         webhook = DiscordWebhook(url=hookurl)
         if myembed:
-
             webhook.add_embed(myembed)
             return webhook.execute()
         return webhook.execute()
@@ -27,19 +30,49 @@ def send_webhook(hookurl, message=None, hooktype='generic', myembed=None):
         return r
 
 
-def discord_embed(request, cid, event):
+def populate_webhook(request, user):
     """
-    Makes a discord embed of a message.
+    Populates user and carrier datafields for a webhook request
     :param request: The request object
-    :param cid: Carrier ID
-    :param event: The event dict (EventType, StartTime, EndTime, Description)
-    :return: A Discord embed object
+    :param user: The user being serialized for the request.
+    :return: A dict of data
     """
+    user = request.dbsession.query(User).filter(User.id == 1).one_or_none()
+    carrier = request.dbsession.query(Carrier).filter(Carrier.owner == 1).one_or_none()
+    if user:
+        return dict({'cmdr_name': user.cmdr_name, 'carrier_callsign': carrier.callsign, 'carrier_vanity_name':
+            carrier.name, 'docking_access': carrier.dockingAccess, 'current_starsystem': carrier.currentStarSystem,
+                     'notorious_access': carrier.notoriousAccess, 'taxation': carrier.taxation,
+                     'has_refuel': carrier.hasRefuel, 'has_repair': carrier.hasRepair, 'has_rearm': carrier.hasRearm})
+
+
+def calendar_generic(request, calendar_id, webhook_url):
+    """
+    Executes a generic calendar webhook
+    :param request: The request object
+    :param calendar_id: Calendar ID of event to send
+    :param webhook_url: The webhook URL
+    :return: Request status object
+    """
+
+    calendar = request.dbsession.query(Calendar).filter(Calendar.id == calendar_id).one_or_none()
+    if calendar:
+        generic = populate_webhook(request, Calendar.owner_id)
+        data = {'calendar_title': calendar.title, 'calendar_start': str(calendar.start), 'calendar_end': str(calendar.end),
+                'calendar_url': calendar.url, 'calendar_allday': calendar.allday,
+                'calendar_departureSystem': calendar.departureSystem,
+                'calendar_arrivalSystem': calendar.arrivalSystem}
+        indata = {**generic, **data}
+        myjson = json.dumps(indata)
+        log.debug(str(indata))
+        # send_webhook(webhook_url, myjson, hooktype='generic')
+    return myjson
 
 
 def schedule_jump(request, calendar_id, webhook_url):
     """
     Fires a webhook for a jump calendar event.
+    :param webhook_url: The webhook URL
     :param request: The request object
     :param calendar_id: Calendar ID for event
     :return: Result of webhook firing
@@ -80,7 +113,10 @@ def market_update(request, cid, items, webhook_url):
 
     market = request.dbsession.query(Market).filter(Market.carrier_id == cid).all()
     for item in market:
+
         if item.categoryname == 'NonMarketable':
+            continue
+        if items and str(item.id) not in items:
             continue
         if item.stock > 0:
             embed.add_embed_field(name='Selling', value=item.name)
@@ -91,7 +127,8 @@ def market_update(request, cid, items, webhook_url):
             embed.add_embed_field(name='For', value=item.sellPrice)
             embed.add_embed_field(name='Quantity', value=item.stock)
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
-    embed.add_embed_field(name='Docking Access', value='Squadron and Friends' if mycarrier.dockingAccess=='squadronfriends' else mycarrier.dockingAccess.title())
+    embed.add_embed_field(name='Docking Access',
+                          value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())
     embed.set_timestamp()
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
 
@@ -176,9 +213,9 @@ def get_webhooks(request, cid):
         data = []
         for row in hooks:
             print(f"Getting webhook, row events {row.calendarEvents}")
-            data.append({'webhook_url': row.hook_url, 'webhook_type': row.hook_type, 'calendarEvents': row.calendarEvents,
-                         'jumpEvents': row.jumpEvents, 'marketEvents': row.marketEvents})
+            data.append(
+                {'webhook_url': row.hook_url, 'webhook_type': row.hook_type, 'calendarEvents': row.calendarEvents,
+                 'jumpEvents': row.jumpEvents, 'marketEvents': row.marketEvents})
         return data
     else:
         return False
-

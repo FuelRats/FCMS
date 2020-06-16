@@ -34,7 +34,8 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
-                             'url': event.url
+                             'url': event.url,
+                             'id': event.id,
                              })
             else:
                 data.append({'title': event.title,
@@ -43,6 +44,7 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
+                             'id': event.id,
                              })
         calendar = request.dbsession.query(Calendar).filter(Calendar.is_global).all()
         for event in calendar:
@@ -54,7 +56,8 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
-                             'url': event.url
+                             'url': event.url,
+                             'id': event.id,
                              })
             else:
                 data.append({'title': event.title,
@@ -63,6 +66,7 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
+                             'id': event.id,
                              })
 
         return data
@@ -146,6 +150,27 @@ def get_cargo(request, cid):
                                                  }
         data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
         return data
+
+
+def get_market(request, cid):
+    """
+    Populates the market list for a carrier
+    :param request: The request object
+    :param cid: Carrier ID to populate
+    :return: A dict of market data
+    """
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+    res = []
+    for mk in market:
+        if mk.categoryname != 'NonMarketable':
+            res.append({'amount': (format_number(mk.demand) if mk.demand else format_number(mk.stock)),
+                        'loc_commodity': translation.localize_commodity(mk.name),
+                        'commodity': mk.name,
+                        'buy_price': format_number(mk.buyPrice),
+                        'sell_price': format_number(mk.sellPrice),
+                        'id': mk.id})
+    return res
 
 
 def populate_subview(request, cid, subview):
