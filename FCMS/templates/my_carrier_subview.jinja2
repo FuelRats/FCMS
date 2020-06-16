@@ -373,7 +373,7 @@
             <div class="card-header">
                 Market status
             </div>
-            <div class="card-body">
+            <div class="card-body">            <form action="/my_carrier/market" method="POST">
             <table class="table table-borderless">
                     <thead>
                         <tr>
@@ -405,14 +405,14 @@
 
                           {% endfor %}
                             <tr>
-                                <td>            <form action="/my_carrier/market" method="POST">
+                                <td>
                                     <input type="hidden" name="market-update" value="market-update">
-                                    <button type="submit" class="btn btn-tool" value="Send market update">Send market update</button>
-                                                        </form>
+                                    <button type="submit" class="btn btn-block bg-gradient-primary" value="Send market update">Send market update</button>
+
                                 </td>
                             </tr>
             </table>
-
+                                                        </form>
 
             </div>
         </div>

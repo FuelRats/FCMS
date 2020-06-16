@@ -113,7 +113,10 @@ def market_update(request, cid, items, webhook_url):
 
     market = request.dbsession.query(Market).filter(Market.carrier_id == cid).all()
     for item in market:
+
         if item.categoryname == 'NonMarketable':
+            continue
+        if items and str(item.id) not in items:
             continue
         if item.stock > 0:
             embed.add_embed_field(name='Selling', value=item.name)

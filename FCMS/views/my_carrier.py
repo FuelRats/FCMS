@@ -28,21 +28,27 @@ def carrier_subview(request):
             if event.owner_id == request.user.id:
                 request.dbsession.query(Calendar).filter(Calendar.id == request.POST['delete-event']).delete()
                 request.dbsession.flush()
+                modal_data = {'load_fire': {'icon': 'success', 'message': 'Calendar event deleted!'}}
     elif 'market-update' in request.POST:
-        print("Got a market update post.")
+        items = []
+        for control in request.POST:
+            if control.startswith('highlight'):
+                items.append(control.split('-')[1])
         hooks = webhooks.get_webhooks(request, mycarrier.id)
         if hooks:
             for hook in hooks:
                 log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
                 if hook['webhook_type'] == 'discord':
                     if hook['marketEvents']:
-                        print("Triggered update.")
-                        webhooks.market_update(request, mycarrier.id, None, webhook_url=hook['webhook_url'])
-
+                        webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'])
+                        modal_data = {'load_fire': {'icon': 'success', 'message': 'Market update sent!'}}
     # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
     view = request.matchdict['subview']
     if view == 'messages':
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+
         data['formadvanced'] = True
         data['apiKey'] = request.user.apiKey
         data['sidebar'] = menu.populate_sidebar(request)
@@ -51,6 +57,9 @@ def carrier_subview(request):
         return data
     if view == 'calendar':
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+
         data['calendar'] = carrier_data.populate_calendar(request,mycarrier.id)
         data['formadvanced'] = True
         data['apiKey'] = request.user.apiKey
@@ -60,6 +69,9 @@ def carrier_subview(request):
         return data
     if view == 'market':
         data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+
         data['market'] = carrier_data.get_market(request, mycarrier.id)
         data['formadvanced'] = True
         data['apiKey'] = request.user.apiKey
@@ -86,14 +98,12 @@ def mycarrier_view(request):
             else:
                 allday = False
             if request.POST['eventtype'] == 'scheduled_jump':
-                print("In scheduled jump newevent.")
                 newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
                                     title=request.POST['title'], start=starttime, end=endtime,
                                     allday=allday, fgcolor="#00AA00", bgcolor="#00FF00",
                                     departureSystem=request.POST['departureSystem'],
                                     arrivalSystem=request.POST['arrivalSystem'])
             else:
-                print("In calendar newevent.")
                 newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
                                     title=request.POST['title'], start=starttime, end=endtime,
                                     allday=allday, fgcolor="#00AA00", bgcolor="#00FF00")
