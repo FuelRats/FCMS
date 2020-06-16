@@ -134,7 +134,7 @@ def settings_view(request):
                                     'carrier_settings': carrier_settings,
                                     'extra_settings': extra_settings,
                                     'carrier_image': myextra.carrier_image if myextra else None,
-                                    'webhooks_settings': webhook_settings}}
+                                    'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
             except ValidationFailure as e:
                 carrier_settings = e.render()
                 logging.error(f"Carrier Validation failed! {e.error}")
@@ -142,7 +142,7 @@ def settings_view(request):
                 return {{**cdata, 'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True,
                          'carrier_settings': carrier_settings,
                          'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
-                         'webhooks_settings': webhook_settings}}
+                         'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
         elif request.POST['__formid__'] == 'extraform':
             cnt = request.POST.items()
             modal_data = {}
@@ -202,7 +202,7 @@ def settings_view(request):
                 return {'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True,
                         'carrier_settings': carrier_settings,
                         'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
-                        'webhooks_settings': webhook_settings}
+                        'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}
             request.dbsession.flush()
             if cex:
                 request.dbsession.refresh(cex)
@@ -210,7 +210,7 @@ def settings_view(request):
                                 'carrier_settings': carrier_settings,
                                 'extra_settings': extra_settings,
                                 'carrier_image': myextra.carrier_image if myextra else None,
-                                'webhooks_settings': webhook_settings}}
+                                'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
 
         elif request.POST['__formid__'] == 'webhookform':
             controls = request.POST.items()
@@ -274,7 +274,7 @@ def settings_view(request):
                                     'carrier_settings': carrier_settings,
                                     'extra_settings': extra_settings,
                                     'carrier_image': myextra.carrier_image if myextra else None,
-                                    'webhooks_settings': webhook_settings}}
+                                    'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
             except ValidationFailure as e:
                 webhook_settings = e.render()
                 logging.error(f"Webhooks validation failed! {e.error}")
@@ -282,9 +282,9 @@ def settings_view(request):
                 return {**cdata, **{'formadvanced': True, 'carrier_settings': carrier_settings,
                                     'extra_settings': extra_settings,
                                     'carrier_image': myextra.carrier_image if myextra else None,
-                                    'webhooks_settings': webhook_settings}}
+                                    'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
 
     return {**cdata,
             **{'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True, 'carrier_settings': carrier_settings,
                'webhooks_settings': webhook_settings, 'extra_settings': extra_settings,
-               'carrier_image': myextra.carrier_image if myextra else None}}
+               'carrier_image': myextra.carrier_image if myextra else None, 'subview': 'settings', 'view': 'settings'}}

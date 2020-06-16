@@ -1,0 +1,902 @@
+{% include "header.jinja2" %}
+{% if not upload_complete %}
+{% include "dynamic_sidebar.jinja2" %}
+{% endif %}
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+{% include "navbar.jinja2" %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">My Carrier</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item">My Carrier</li>
+                <li class="breadcrumb-item active">Messages</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+{% if no_carrier %}
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">No carrier registered!</h5>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <p class="text-center">
+                        {% if request.user %}
+                        You don't have a carrier registered to your account. If you have aquired one recently,
+                        click <a href="/oauth">here to retrieve it.</a>
+                        {% else %}
+                            You need to log in to this site before adding your carrier. Click <a href="/register">here</a>
+                            to register, or <a href="/login">here to log in if you've already registered.</a>
+                        {% endif %}
+                    </p>
+
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+          <!-- Temp close -->
+      </div>
+    </section>
+  </div>
+    </div>
+    </body>
+{% elif error %}
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">No carrier registered!</h5>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <p class="text-center">
+                        {% if request.user %}
+                        You don't have a carrier registered. Click <a href="{{ request.route_url('oauth') }}">
+                        here </a>to Oauth with FDev and attempt to retrieve it.
+                        {% else %}
+                            You need to log in to this site before adding your carrier. Click <a href="/register">here</a>
+                            to register, or <a href="/login">here to log in if you've already registered.</a>
+                        {% endif %}
+                    </p>
+
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+          <!-- Temp close -->
+      </div>
+    </section>
+  </div>
+    </div>
+    </body>
+{% else %}
+
+{% if subview == 'messages' %}
+ <body>
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row-cols-2">
+            <div class="card-header">
+                <div class="card-title">
+                    Messages</div>
+            </div>
+              <div class="card-body">
+                <!-- Conversations are loaded here -->
+                <div class="direct-chat-messages">
+                  <!-- Message. Default to the left -->
+                  <div class="direct-chat-msg">
+                    <div class="direct-chat-infos clearfix">
+                      <span class="direct-chat-name float-left">CMDR RatMama</span>
+                      <span class="direct-chat-timestamp float-right">16 Jun 1:02 pm</span>
+                    </div>
+                    <!-- /.direct-chat-infos -->
+                    <img class="direct-chat-img" src="/static/img/crew_white.png" alt="Message User Image">
+                    <!-- /.direct-chat-img -->
+                    <div class="direct-chat-text">
+                      Hey, this is a really nice carrier!
+                    </div>
+                    <!-- /.direct-chat-text -->
+                  </div>
+                  <!-- /.direct-chat-msg -->
+
+                  <!-- Message to the right -->
+                  <div class="direct-chat-msg right">
+                    <div class="direct-chat-infos clearfix">
+                      <span class="direct-chat-name float-right">CMDR Absolver</span>
+                      <span class="direct-chat-timestamp float-left">16 Jun 1:05 pm</span>
+                    </div>
+                    <!-- /.direct-chat-infos -->
+                    <img class="direct-chat-img" src="/static/img/crew_white.png" alt="Message User Image">
+                    <!-- /.direct-chat-img -->
+                    <div class="direct-chat-text">
+                      Isn't it though?
+                    </div>
+                    <!-- /.direct-chat-text -->
+                  </div>
+                  <!-- /.direct-chat-msg -->
+                </div>
+                <!--/.direct-chat-messages-->
+
+                <!-- Contacts are loaded here -->
+                <div class="direct-chat-contacts">
+                  <ul class="contacts-list">
+                    <li>
+                      <a href="#">
+                        <img class="contacts-list-img" src="../dist/img/user1-128x128.jpg">
+
+                        <div class="contacts-list-info">
+                          <span class="contacts-list-name">
+                            Count Dracula
+                            <small class="contacts-list-date float-right">2/28/2015</small>
+                          </span>
+                          <span class="contacts-list-msg">How have you been? I was...</span>
+                        </div>
+                        <!-- /.contacts-list-info -->
+                      </a>
+                    </li>
+                    <!-- End Contact Item -->
+                  </ul>
+                  <!-- /.contatcts-list -->
+                </div>
+                <!-- /.direct-chat-pane -->
+              </div>
+              <!-- /.card-body -->
+              <div class="card-footer">
+                <form action="#" method="post">
+                  <div class="input-group">
+                    <input type="text" name="message" placeholder="Type Message ..." class="form-control">
+                    <span class="input-group-append">
+                      <button type="submit" class="btn btn-primary">Send</button>
+                    </span>
+                  </div>
+                </form>
+              </div>
+              <!-- /.card-footer-->
+            </div>
+            <!--/.direct-chat -->
+          </div>
+    </section>
+ </body>
+{% endif %}
+
+
+
+
+
+{% if subview == 'calendar' %}
+    <!-- Content Wrapper. Contains page content -->
+ <body>
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row-cols-2">
+          <div class="col-md-7">
+            <div class="card ">
+              <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                  <li class="nav-item"><a class="nav-link active" href="#schedule" data-toggle="tab">Schedule</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#new" data-toggle="tab">New Event</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#manage" data-toggle="tab">Manage Events</a></li>
+                    {% if user.cmdr_name == 'Timjfjdd' %}
+                        <object data="http://www.youtube.com/embed/dQw4w9WgXcQ"></object>
+                    {% endif %}
+                </ul>
+              </div><!-- /.card-header -->
+                              <div class="card-body">
+                <div class="tab-content">
+
+                <div class="active tab-pane" id="schedule">
+                    <!-- THE CALENDAR -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Scheduled events <i class="text-muted">(All times in UTC)</i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                    <div id="calendar"></div><p></p>
+                    </div>
+                </div>
+                    <div class="tab-pane" id="new">
+                        <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Schedule an event</h3>
+                        </div>
+                        <div class="card-body">
+                            <form action="/my_carrier" method="post" enctype="multipart/form-data" id="eventform">
+
+                                <div class="btn-group" style="width: 100%; margin-bottom: 10px;">
+                                    <!--<button type="button" id="color-chooser-btn" class="btn btn-info btn-block dropdown-toggle" data-toggle="dropdown">Color <span class="caret"></span></button>-->
+                                      Pick an event color:
+                                    <ul class="fc-color-picker" id="color-chooser">
+                                      <li><a class="text-primary" href="#"><i class="fas fa-square"></i></a></li>
+                                      <li><a class="text-warning" href="#"><i class="fas fa-square"></i></a></li>
+                                      <li><a class="text-success" href="#"><i class="fas fa-square"></i></a></li>
+                                      <li><a class="text-danger" href="#"><i class="fas fa-square"></i></a></li>
+                                      <li><a class="text-muted" href="#"><i class="fas fa-square"></i></a></li>
+                                    </ul>
+                                </div>
+                  <!-- /btn-group -->
+                                <div class="form-group">
+                                    <label>Event type</label>
+                                    <select class="form-control" id="eventtype" name="eventtype">
+                                      <option value="scheduled_jump">Scheduled Jump</option>
+                                      <option value="refueling">Refueling Operation</option>
+                                      <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Departure System</label>
+                                     <input id="departureSystem" name="departureSystem" type="text" class="form-control" placeholder="Departure System">
+                                </div>
+                                <div class="form-group">
+                                    <label>Arrival System</label>
+                                     <input id="arrivalSystem" name="arrivalSystem" type="text" class="form-control" placeholder="Arrival System">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Start time:</label>
+                                    <div class="input-group date" id="starttime" data-target-input="nearest">
+                                        <input type="text" class="form-control datetimepicker-input" data-target="#starttime" name="starttime"/>
+                                        <div class="input-group-append" data-target="#starttime" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                   </div>
+                                   <p>
+                                        <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
+                               </div>
+                               <div class="form-group">
+                                  <label>End time:</label>
+                                <div class="input-group date" id="endtime" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input" data-target="#endtime" name="endtime"/>
+                                    <div class="input-group-append" data-target="#endtime" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                                   <p>
+                                        <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
+                               </div>
+                                <div class="form-group">
+                                    <div class="form-check">
+                                      <input class="form-check-input" type="checkbox" name="allday">
+                                      <label class="form-check-label">All day</label>
+                                    </div>
+                                </div>
+
+                                  <div class="input-group">
+                                    <input id="new-event" name="title" type="text" class="form-control" placeholder="Event Title">
+
+                                    <div class="input-group-append">
+                                      <button id="add-new-event" name="submit" value="Submit" class="btn btn-primary">Event Color</button>
+                                    </div>
+                                      <div class="input-group">
+                                          <input type="hidden" name="cid" value="{{ cid }}">
+                                          <input type="hidden" name="owner_id" value="{{ owner_id }}">
+                                          <input type="submit" value="Create Event" class="btn btn-primary">
+                                      </div>
+                                    <!-- /btn-group -->
+                                  </div></form>
+                                  <!-- /input-group -->
+                                </div>
+                    </div>
+                    </div>
+
+                <div class="tab-pane" id="manage">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Manage events
+                        </div>
+                        <div class="card-body">
+                        <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>All day?</th>
+                                        <th>URL</th>
+                                        <th>Delete?</th>
+                                    </tr>
+                                </thead>
+                            {% for event in events %}
+                                <tr>
+                                <td>
+                                    {{ event.title|e }}
+                                </td>
+                                <td>
+                                    {{ event.start }}
+                                </td>
+                                <td>
+                                    {{ event.end }}
+                                </td>
+                                <td>
+                                    {{ event.allday }}
+                                </td>
+                                <td>
+                                      {% if event.url %}
+                                          {{ event.url }}
+                                      {% endif %}
+                                </td>
+                                <td><form action="/my_carrier/calendar" method="POST">
+                                    <input type="hidden" name="delete-event" value="{{ event.id }}">
+                                    <button type="submit" class="btn btn-tool"><i class="far fas fa-times"></i></button>
+                                    </form>
+                                </td>
+                                </tr>
+                          {% endfor %}
+                        </table>
+                        </div>
+                    </div>
+
+                </div></div></div></div></div></div></div></section></body>
+
+{% elif subview == 'market' %}
+ <body>
+      <div class="container-fluid">
+    <section class="content">
+
+        <div class="card card-primary">
+            <div class="card-header">
+                Market status
+            </div>
+            <div class="card-body">
+            <table class="table table-borderless">
+                    <thead>
+                        <tr>
+                            <th>Commodity</th>
+                            <th>Demand/Supply</th>
+                            <th>Buy Price</th>
+                            <th>Sell price</th>
+                            <th>Highlight?</th>
+                        </tr>
+                    </thead>
+
+                            {% for com in market %}
+                                <tr>
+                                <td>
+                                    {{ com.loc_commodity|e }}
+                                </td>
+                                <td>
+                                    {{ com.amount }}
+                                </td>
+                                <td>
+                                    {{ com.buy_price }}
+                                </td>
+                                <td>
+                                    {{ com.sell_price}}
+                                </td>
+                                <td><input type="checkbox" name="highlight-{{ com.id }}" value="{{ com.id }}">
+                                </td>
+                                </tr>
+
+                          {% endfor %}
+                            <tr>
+                                <td>            <form action="/my_carrier/market" method="POST">
+                                    <input type="hidden" name="market-update" value="market-update">
+                                    <button type="submit" class="btn btn-tool" value="Send market update">Send market update</button>
+                                                        </form>
+                                </td>
+                            </tr>
+            </table>
+
+
+            </div>
+        </div>
+      </div>
+  </div>
+
+
+
+
+
+
+{% elif subview == '' %}
+
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-3">
+          <div class="card card-primary card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <img class="img-responsive"
+                       src="{{ request.storage.url(carrier_image) or "/static/img/carrier_default.png" }}"
+                       alt="User profile picture"
+                       style="object-fit: contain; height:250px; width:100%">
+                </div>
+
+                  <h3 class="profile-username text-center"><a href="/carrier/{{ callsign }}">{{ name }}</a></h3>
+
+                <p class="text-muted text-center">{{ callsign }}
+                    <input type="hidden" id="LinkTarget" value="/carrier/{{ callsign }}"><a class="nav-link" id="Copy" href="#"><i id="Copy" class="fas fa-link"></i></a></p>
+                  <p class="text-muted text-center">{{ carrier_motd }}</p>
+                                  <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <b>Balance</b> <a class="float-right">{{ balance or "Unknown" }}</a>
+                  </li>
+                  <li class="list-group-item">
+                    <b>Weekly maintenance</b> <a class="float-right">{{ maintenance or "Unknown" }}</a>
+                  </li>
+                  <li class="list-group-item">
+                    <b>Funded for </b> <a class="float-right">{{ funding_time or "Unknown" }}</a>
+                  </li>
+                </ul>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Services</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="status">
+                <strong><i class="icon shipyard" style="color: {{ '#00A000' if shipyard else '#FF0000' }}" title="Shipyard">{% include 'inline_svgs/shipyard.jinja2' %}</i></strong>
+                      <span class="label">Shipyard</span><span class="status-text">{{  "Available" if shipyard else "Personal Only" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if outfitting else '#FF0000' }}">{% include 'inline_svgs/outfitting.jinja2' %}</i></strong>
+                <span class="label">Outfitting</span><span class="status-text">{{  "Available" if outfitting else "Personal Only" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if repair else '#FF0000' }}">{% include 'inline_svgs/repair.jinja2' %}</i></strong>
+                <span class="label">Repair</span><span class="status-text">{{  "Available" if repair else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if refuel else '#FF0000' }}">{% include 'inline_svgs/refuel.jinja2' %}</i></strong>
+                <span class="label">Refuel</span><span class="status-text">{{  "Available" if refuel else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if rearm else '#FF0000' }}">{% include 'inline_svgs/rearm.jinja2' %}</i></strong>
+                <span class="label">Rearm</span><span class="status-text">{{  "Available" if rearm else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if exploration else '#FF0000' }}">{% include 'inline_svgs/exploration.jinja2' %}</i></strong>
+                <span class="label">Interstellar Cartographics</span><span class="status-text">{{ "Available" if exploration else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if voucher_redemption else '#FF0000' }}">{% include 'inline_svgs/voucher_redemption.jinja2' %}</i></strong>
+                <span class="label">Interstellar Factor</span><span class="status-text">{{ "Available" if voucher_redemption else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if black_market else '#FF0000' }}">{% include 'inline_svgs/blackmarket.jinja2' %}</i></strong>
+                <span class="label">Black Market</span><span class="status-text">{{ "Available" if black_market else "Unavailable" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if notorious_access else '#FF0000' }}">{% include 'inline_svgs/notorious_access.jinja2' %}</i></strong>
+                <span class="label">Notorious Access</span><span class="status-text">{{ "Allowed" if notorious_access else "Not Allowed" }}</span>
+                      </div>
+                <hr>
+                  <div class="status">
+                <strong><i class="icon outfitting" style="color: {{ '#00A000' if docking_access == 'all' else '#FF0000' }}">{% include 'inline_svgs/docking_access.jinja2' %}</i></strong>
+                <span class="label">Docking Access</span><span class="status-text">{{ "Squadron and Friends" if docking_access == "squadronfriends" else docking_access|title }}</span>
+                      </div>
+
+              </div>
+              <!-- /.card-body -->
+
+
+        <!-- Info boxes -->
+
+
+            </div></div>
+
+
+          <div class="col-md-7">
+            <div class="card ">
+              <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                  <li class="nav-item"><a class="nav-link active" href="#schedule" data-toggle="tab">Schedule</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#finances" data-toggle="tab">Finances</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#crew" data-toggle="tab">Crew</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#cargo" data-toggle="tab">Cargo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#profile" data-toggle="tab">Your profile</a></li>
+                </ul>
+              </div><!-- /.card-header -->
+                              <div class="card-body">
+                <div class="tab-content">
+
+                <div class="active tab-pane" id="schedule">
+                    <!-- THE CALENDAR -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Scheduled events <i class="text-muted">(All times in UTC)</i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                    <div id="calendar"></div><p></p>
+                    </div>
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Schedule an event</h3>
+                        </div>
+                <div class="card-body">
+                <form action="/my_carrier" method="post" enctype="multipart/form-data" id="eventform">
+
+                  <div class="btn-group" style="width: 100%; margin-bottom: 10px;">
+                    <!--<button type="button" id="color-chooser-btn" class="btn btn-info btn-block dropdown-toggle" data-toggle="dropdown">Color <span class="caret"></span></button>-->
+                      Pick an event color:
+                    <ul class="fc-color-picker" id="color-chooser">
+                      <li><a class="text-primary" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-warning" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-success" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-danger" href="#"><i class="fas fa-square"></i></a></li>
+                      <li><a class="text-muted" href="#"><i class="fas fa-square"></i></a></li>
+                    </ul>
+                  </div>
+                  <!-- /btn-group -->
+                      <div class="form-group">
+                        <label>Event type</label>
+                        <select class="form-control" id="eventtype" name="eventtype">
+                          <option value="scheduled_jump">Scheduled Jump</option>
+                          <option value="refueling">Refueling Operation</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                     <div class="form-group">
+                        <label>Departure System</label>
+                         <input id="departureSystem" name="departureSystem" type="text" class="form-control" placeholder="Departure System">
+                      </div>
+                     <div class="form-group">
+                        <label>Arrival System</label>
+                         <input id="arrivalSystem" name="arrivalSystem" type="text" class="form-control" placeholder="Arrival System">
+                      </div>
+
+                   <div class="form-group">
+                      <label>Start time:</label>
+                    <div class="input-group date" id="starttime" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#starttime" name="starttime"/>
+                        <div class="input-group-append" data-target="#starttime" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                       <p>
+                            <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
+                   </div>
+                   <div class="form-group">
+                      <label>End time:</label>
+                    <div class="input-group date" id="endtime" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#endtime" name="endtime"/>
+                        <div class="input-group-append" data-target="#endtime" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                       <p>
+                            <i class="text-muted">All time entry in your local timezone. Calendar will display as UTC.</i></p>
+                   </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="allday">
+                          <label class="form-check-label">All day</label>
+                        </div>
+                    </div>
+
+                  <div class="input-group">
+                    <input id="new-event" name="title" type="text" class="form-control" placeholder="Event Title">
+
+                    <div class="input-group-append">
+                      <button id="add-new-event" name="submit" value="Submit" class="btn btn-primary">Event Color</button>
+                    </div>
+                      <div class="input-group">
+                          <input type="hidden" name="cid" value="{{ cid }}">
+                          <input type="hidden" name="owner_id" value="{{ owner_id }}">
+                          <input type="submit" value="Create Event" class="btn btn-primary">
+                      </div>
+                    <!-- /btn-group -->
+                  </div></form>
+                  <!-- /input-group -->
+                </div>
+
+
+
+                    </div>
+                </div>
+                    <div class="tab-pane" id="finances">
+                                        <table class="table table-striped table-valign-middle">
+                  <thead>
+                  <tr>
+                    <th>Item </th>
+                    <th>Amount</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr><td>
+                      Balance
+                  </td>
+                  <td>
+                      <span class="balance" style="color: {{ '#FF0000' if finance.bankBalance|int < 0 else '#aaaaaa' }}">{{ finance.bankBalance or 'Unknown' }}</span>
+                  </td></tr>
+                  <tr>
+                      <td>
+                          Reserved Balance
+                      </td>
+                      <td>
+                          {{ finance.bankReservedBalance or 'Unknown' }}
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          Maintenance cost
+                      </td>
+                      <td>
+                          {{ finance.maintenance or 'Unknown'}}
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          Core Cost
+                      </td>
+                      <td>
+                          {{ finance.coreCost or 'Unknown' }}
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          Services Cost
+                      </td>
+                      <td>
+                          {{ finance.servicesCost or 'Unknown' }}
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          Jump Cost (Jumps)
+                      </td>
+                      <td>
+                          {{ finance.jumpsCost or 'Unknown' }} ({{ finance.numJumps or '?' }})
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          All time Services cost
+                      </td>
+                      <td>
+                          {{ finance.servicesCostToDate or 'Unknown' }}
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          All time Maintenance cost
+                      </td>
+                      <td>
+                          {{ finance.maintenanceToDate or 'Unknown' }}
+                      </td>
+                  </tr>
+                  </tbody>
+                </table>
+                    </div>
+              <!-- /.tab-pane -->
+                    <div class="tab-pane" id="crew">
+
+<!--
+                    <div class="post">
+                      <div class="user-block">
+                        <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
+                        <span class="username">
+                          <a href="#">Jonathan Burke Jr.</a>
+                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
+                        </span>
+                        <span class="description">Shared publicly - 7:30 PM today</span>
+                      </div>
+                      <p>
+                        Lorem ipsum represents a long-held tradition for designers,
+                        typographers and the like. Some people hate it and argue for
+                        its demise, but others ignore the hate as they create awesome
+                        tools to help create filler text for everyone from bacon lovers
+                        to Charlie Sheen fans.
+                      </p>
+-->
+
+                {% if crew %}
+                    {% for item, val in crew.items() %}
+                    <div class="post">
+                      <div class="user-block">
+                          <img class="img-circle img-bordered-sm" src="/static/img/crew_white.png" alt="user image">
+                          <!-- <i class="img-size-64" alt="crew image" style="max-width:40px">{% include 'inline_svgs/refuel.jinja2' %}</i> -->
+                        <span class="username">
+                          <a href="#">{{ val.crewMember.name }}</a>
+                        </span>
+                        <span class="description">{{ "Female" if val.crewMember.gender == 'F' else "Male" }} -
+                        {{ val.crewMember.faction|title }}</span>
+                      </div>
+                      <!-- /.user-block -->
+                      <p>
+                                    Salary:
+                                    {{ val.crewMember.salary }}<br>
+                                    Enabled:
+                                    {{ val.crewMember.enabled }}<br>
+                      </p>
+
+                      <p>
+                          Status: {{ val.status }}
+                        <span class="float-right">
+                            <i class="fas fa-cog mr-1"></i> Last change: {{ val.crewMember.lastEdit }}
+                        </span>
+                      </p>
+                    <!-- /.post -->
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Error: Crew data not yet updated, please wait up to 15 minutes.</p>
+                {% endif %}
+                    </div>
+                    <div class="tab-pane table-responsive p-0" id="cargo">
+                <table class="table table-striped table-valign-middle">
+                  <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Value</th>
+                    <th>Amount</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                {% if cargo %}
+                  {% for it, val in cargo.clean_cargo.items() %}
+                  <tr>
+                    <td>
+                      <i class="icon shipyard">{% include "inline_svgs/commodities.jinja2" %}</i>
+                        {% if val.stolen %}
+                            <i class="icon shipyard">{% include "inline_svgs/blackmarket.jinja2" %}</i>
+                        {% endif %}
+                        {{ val.commodity }}
+                    </td>
+                    <td>{{ val.value }}</td>
+                    <td>
+                        {{ val.quantity }}
+                    </td>
+
+                  </tr>
+                  {% endfor %}
+                  {% for it, val in cargo.stolen_cargo.items() %}
+                  <tr>
+                    <td>
+                      <i class="icon shipyard">{% include "inline_svgs/commodities.jinja2" %}</i>
+                        {% if val.stolen %}
+                            <i class="icon shipyard">{% include "inline_svgs/blackmarket.jinja2" %}</i>
+                        {% endif %}
+                        {{ val.commodity }}
+                    </td>
+                    <td>{{ val.value }}</td>
+                    <td>
+                        {{ val.quantity }}
+                    </td>
+
+                  </tr>
+                  {% endfor %}
+            {% else %}
+                  <p>No cargo data yet available, please wait up to 15 minutes.</p>
+            {% endif %}
+                  </tbody>
+                </table>
+                    </div>
+
+
+
+
+                  <div class="tab-pane" id="settings">
+
+                        <div class="card-body">
+                            <label for="APIKey">API Key</label>
+                            <div class="input-group">
+                                <input type="text" disabled="disabled" value="{{ apiKey }}">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            This stuff isn't here anymore. Instead, <a href="/settings"> go to this handy page.</a>
+                        </div>
+                  </div>
+                  <!-- /.tab-pane -->
+
+                  <div class="tab-pane" id="profile">
+                    <form class="form-horizontal">
+                      <div class="form-group row">
+                        <label for="inputName" class="col-sm-2 col-form-label">Nothing here</label>
+                        <div class="col-sm-10">
+                          <input type="email" class="form-control" id="inputName" placeholder="Name">
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="inputEmail" class="col-sm-2 col-form-label">Does anything</label>
+                        <div class="col-sm-10">
+                          <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="inputName2" class="col-sm-2 col-form-label">Just yet</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="inputName2" placeholder="Name">
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="inputExperience" class="col-sm-2 col-form-label">Sorry!</label>
+                        <div class="col-sm-10">
+                          <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="inputSkills" class="col-sm-2 col-form-label">Something something placeholder UI</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <div class="offset-sm-2 col-sm-10">
+                          <div class="checkbox">
+                            <label>
+                              <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <div class="offset-sm-2 col-sm-10">
+                          <button type="submit" class="btn btn-danger">Does Nothing!</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <!-- /.tab-pane -->
+                </div>
+                <!-- /.tab-content -->
+              </div><!-- /.card-body -->
+
+          <!-- Temp close -->
+            </div>
+        </div>
+    </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+      </div>
+    </section>
+    </div>
+    </body>
+
+{% endif %}
+{% endif %}
+{% include "footer.jinja2" %}
