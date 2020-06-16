@@ -186,7 +186,7 @@ def populate_subview(request, cid, subview):
     if subview == 'shipyard':
         ships = request.dbsession.query(Ship).filter(Ship.carrier_id == cid)
         for sp in ships:
-            res.append({'col1_svg': 'inline_svgs/shipyard.jinja2', 'col1': sp.name, 'col2': sp.basevalue,
+            res.append({'col1_svg': 'inline_svgs/shipyard.jinja2', 'col1': translation.localize_shipyard(sp.name), 'col2': sp.basevalue,
                         'col3': sp.stock, 'col4': '<i class="fas fa-search"></i>'})
         headers = {'col1_header': 'Name', 'col2_header': 'Value', 'col3_header': 'stock',
                    'col4_header': 'Coriolis'}
