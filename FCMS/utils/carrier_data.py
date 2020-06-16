@@ -466,7 +466,7 @@ def update_carrier(request, cid, user):
                                                == mycarrier.id).delete()
         print(jcarrier['modules'])
         if 'modules' in jcarrier:
-            for item, it in jcarrier['modules'].items():
+            for it in jcarrier['modules']:
                 md = Module(carrier_id=mycarrier.id, category=it['category'],
                             name=it['name'], cost=it['cost'], stock=it['stock'],
                             module_id=it['id'])
