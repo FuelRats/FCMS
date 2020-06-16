@@ -2859,10 +2859,11 @@ def localize_commodity(shortname):
     loc = next((item for item in commodities if item['symbol'] == shortname), None)
     if loc:
         return loc['name']
-    return None
+    return shortname
 
 
 def localize_outfitting(shortname):
     loc = next((item for item in outfitting if item['symbol'] == shortname), None)
     if loc:
         return f"{loc['name']} ({loc['class']}{loc['rating']} {loc['mount']})"
+    return shortname
