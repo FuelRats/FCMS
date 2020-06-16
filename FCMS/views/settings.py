@@ -11,7 +11,7 @@ from ..utils.util import object_as_dict
 from ..utils import user as usr, menu, carrier_data
 from ..models import Carrier, CarrierExtra, Calendar, Webhook
 import logging
-
+import pyramid.httpexceptions as exc
 log = logging.getLogger(__name__)
 
 
@@ -93,6 +93,8 @@ def settings_view(request):
     extraform = Form(extraschema, buttons=('submit',), use_ajax=True, formid='extraform')
 
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.owner == request.user.id).one_or_none()
+    if not mycarrier:
+        return exc.HTTPFound(request.route_url('login'))
     myextra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == mycarrier.id).one_or_none()
     myhooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == mycarrier.id).all()
 

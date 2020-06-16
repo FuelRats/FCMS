@@ -383,8 +383,9 @@ def update_carrier(request, cid, user):
                 log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
                           f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username}.")
                 # Doublecheck that the owner is equal to the carrier.
-                if request.user.id == mycarrier.owner:
-                    log.warning("Proceeding with update to carrier ID.")
+                if request.user:
+                    if request.user.id == mycarrier.owner:
+                        log.warning("Proceeding with update to carrier ID.")
                 else:
                     return None
         except KeyError:
