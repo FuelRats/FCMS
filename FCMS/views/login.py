@@ -3,7 +3,7 @@ import os
 import smtplib
 import urllib
 from binascii import hexlify
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
 from pyramid.view import view_config
@@ -81,7 +81,7 @@ def login_view(request):
         res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()
         if res:
             if pwd_context.verify(request.params['pass'], res.password):
-                if request.params['remember']:
+                if 'remember' in request.params:
                     headers = remember(request, res.id, max_age=2629800)
                 else:
                     headers = remember(request, res.id, max_age=3600)
