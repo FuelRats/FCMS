@@ -16,7 +16,7 @@ def carrier_subview(request):
     mymenu = menu.populate_sidebar(request)
     # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
     if not cid:
-        log.error(f"Attempt to call subview for invalid carrier: {cid}")
+        log.error(f"Attempt to call subview for invalid carrier: {cid} by {request.client_addr}.")
         return {'error': 'Invalid carrier.', 'sidebar': mymenu, 'user': userdata}
     owner = request.dbsession.query(user.User).filter(user.User.id == cid.owner).one_or_none()
     if not owner:
