@@ -27,6 +27,7 @@ body {
   position: sticky;
   margin-left: 0 !important;
   z-index: 1039;
+  max-height: 250px;
 }
 
 .login-page .main-footer, .register-page .main-footer {

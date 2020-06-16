@@ -125,7 +125,7 @@ def market_update(request, cid, items, webhook_url):
         if item.demand > 0:
             embed.add_embed_field(name='Buying', value=item.name)
             embed.add_embed_field(name='For', value=item.buyPrice)
-            embed.add_embed_field(name='Quantity', value=item.stock)
+            embed.add_embed_field(name='Quantity', value=item.demand)
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Docking Access',
                           value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())
