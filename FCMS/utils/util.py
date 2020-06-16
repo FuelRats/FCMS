@@ -1,5 +1,12 @@
+import base64
 import codecs
+import smtplib
+
 from sqlalchemy import inspect
+from email.mime.text import MIMEText
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def from_hex(mystr):
@@ -49,3 +56,22 @@ def clean_market_data(obj):
             if commodity['categoryname'] != 'NonMarketable':
                 r.append(commodity)
         return r
+
+
+def send_email(target, subject, body):
+    """
+    Sends an email through GMail to a user.
+    :param target: Target email address
+    :param subject: Subject line
+    :param body: Body of email
+    :return: SMTP status
+    """
+    msg = f"From: FCMS@fuelrats.com\r\nTo: {target}\r\nSubject: {subject}\r\n{body}"
+    try:
+        server = smtplib.SMTP('smtp-relay.gmail.com', 587)
+        print(server.ehlo('fuelrats.com'))
+        print(server.starttls())
+        log.debug(f"Sending email... {server.sendmail('FCMS@fuelrats.com', target, msg)}")
+        server.close()
+    except smtplib.SMTPSenderRefused as e:
+        print(f"Well, that didn't work... {e}")

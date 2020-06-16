@@ -6,7 +6,7 @@ from datetime import datetime
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar, CarrierExtra
 import pyramid.httpexceptions as exc
-from ..utils import util, sapi, user as usr, menu
+from ..utils import util, sapi, user as usr, menu, translation
 from humanfriendly import format_timespan, format_number
 import logging
 
@@ -34,7 +34,8 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
-                             'url': event.url
+                             'url': event.url,
+                             'id': event.id,
                              })
             else:
                 data.append({'title': event.title,
@@ -43,6 +44,7 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
+                             'id': event.id,
                              })
         calendar = request.dbsession.query(Calendar).filter(Calendar.is_global).all()
         for event in calendar:
@@ -54,7 +56,8 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
-                             'url': event.url
+                             'url': event.url,
+                             'id': event.id,
                              })
             else:
                 data.append({'title': event.title,
@@ -63,6 +66,7 @@ def populate_calendar(request, cid):
                              'backgroundColor': event.bgcolor,
                              'borderColor': event.fgcolor,
                              'allday': event.allday,
+                             'id': event.id,
                              })
 
         return data
@@ -128,9 +132,9 @@ def get_cargo(request, cid):
                 if cg.commodity in stolen_cargo.keys():
                     stolen_cargo[cg.commodity]['quantity'] = stolen_cargo[cg.commodity]['quantity'] + cg.quantity
                 else:
-                    stolen_cargo[cg.commodity] = {'commodity': cg.commodity,
+                    stolen_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
                                                   'quantity': cg.quantity,
-                                                  'value': cg.value,
+                                                  'value': format_number(cg.value),
                                                   'stolen': cg.stolen,
                                                   'locname': cg.locName
                                                   }
@@ -138,14 +142,35 @@ def get_cargo(request, cid):
                 if cg.commodity in clean_cargo.keys():
                     clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
                 else:
-                    clean_cargo[cg.commodity] = {'commodity': cg.commodity,
+                    clean_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
                                                  'quantity': cg.quantity,
-                                                 'value': cg.value,
+                                                 'value': format_number(cg.value),
                                                  'stolen': cg.stolen,
                                                  'locname': cg.locName
                                                  }
         data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
         return data
+
+
+def get_market(request, cid):
+    """
+    Populates the market list for a carrier
+    :param request: The request object
+    :param cid: Carrier ID to populate
+    :return: A dict of market data
+    """
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    market = request.dbsession.query(Market).filter(Market.carrier_id == cid)
+    res = []
+    for mk in market:
+        if mk.categoryname != 'NonMarketable':
+            res.append({'amount': (format_number(mk.demand) if mk.demand else format_number(mk.stock)),
+                        'loc_commodity': translation.localize_commodity(mk.name),
+                        'commodity': mk.name,
+                        'buy_price': format_number(mk.buyPrice),
+                        'sell_price': format_number(mk.sellPrice),
+                        'id': mk.id})
+    return res
 
 
 def populate_subview(request, cid, subview):
@@ -192,15 +217,17 @@ def populate_subview(request, cid, subview):
             market = []
         for mk in market:
             if mk.categoryname != 'NonMarketable':
-                res.append({'col1_svg': 'inline_svgs/commodities.jinja2', 'col1': (mk.demand if mk.demand else mk.stock),
-                            'col2': mk.name, 'col3': mk.buyPrice, 'col4': mk.sellPrice})
+                res.append({'col1_svg': 'inline_svgs/commodities.jinja2',
+                            'col1': (format_number(mk.demand) if mk.demand else format_number(mk.stock)),
+                            'col2': translation.localize_commodity(mk.name), 'col3': format_number(mk.buyPrice),
+                            'col4': format_number(mk.sellPrice)})
         headers = {'col1_header': 'Demand/Supply', 'col2_header': 'Commodity', 'col3_header': 'Buy price',
                    'col4_header': 'Sell price'}
     if subview == 'outfitting':
         module = request.dbsession.query(Module).filter(Module.carrier_id == cid)
         for md in module:
-            res.append({'col1_svg': 'inline_svgs/outfitting.jinja2', 'col1': md.stock, 'col2': md.category,
-                        'col3': md.name, 'col4': md.cost})
+            res.append({'col1_svg': 'inline_svgs/outfitting.jinja2', 'col1': format_number(md.stock), 'col2': md.category,
+                        'col3': translation.localize_outfitting(md.name), 'col4': format_number(md.cost)})
         headers = {'col1_header': 'Stock', 'col2_header': 'Category', 'col3_header': 'Name',
                    'col4_header': 'Cost'}
     if subview == 'calendar':
@@ -397,6 +424,7 @@ def update_carrier(request, cid, user):
         mycarrier.trackedOnly = False
         mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
+        request.dbsession.autoflush=False
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
         for item in jcarrier['itinerary']['completed']:
@@ -404,12 +432,14 @@ def update_carrier(request, cid, user):
                             departureTime=item['departureTime'], arrivalTime=item['arrivalTime'],
                             visitDurationSeconds=item['visitDurationSeconds'])
             request.dbsession.add(itm)
+
         request.dbsession.query(Cargo).filter(Cargo.carrier_id
                                               == mycarrier.id).delete()
         for item in jcarrier['cargo']:
             cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
                        quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
-            request.dbsession.add(cg)
+
+        request.dbsession.flush()
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
         for item in jcarrier['market']['commodities']:
@@ -419,6 +449,7 @@ def update_carrier(request, cid, user):
                         sellPrice=item['sellPrice'], demand=item['demand'],
                         locName=item['locName'])
             request.dbsession.add(mk)
+
         request.dbsession.query(Ship).filter(Ship.carrier_id
                                              == mycarrier.id).delete()
         if 'ships' in jcarrier:
@@ -430,14 +461,17 @@ def update_carrier(request, cid, user):
                               ship_id=it['id'], basevalue=it['basevalue'],
                               stock=it['stock'])
                     request.dbsession.add(sp)
-                request.dbsession.query(Module).filter(Module.carrier_id
-                                                       == mycarrier.id).delete()
-            print(jcarrier['modules'])
-        if jcarrier['modules']:
+
+        request.dbsession.query(Module).filter(Module.carrier_id
+                                               == mycarrier.id).delete()
+        print(jcarrier['modules'])
+        if 'modules' in jcarrier:
             for item, it in jcarrier['modules'].items():
                 md = Module(carrier_id=mycarrier.id, category=it['category'],
                             name=it['name'], cost=it['cost'], stock=it['stock'],
                             module_id=it['id'])
                 request.dbsession.add(md)
+        request.dbsession.flush()
+        request.dbsession.autoflush = True
         return jcarrier or None
     return None

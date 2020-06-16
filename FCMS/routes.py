@@ -7,6 +7,7 @@ def includeme(config):
     config.add_route('oauth_callback', '/oauth/callback')
     config.add_route('oauth', '/oauth')
     config.add_route('my_carrier', '/my_carrier')
+    config.add_route('my_carrier_subview', '/my_carrier/{subview}')
     config.add_route('carrier', '/carrier/{cid}')
     config.add_route('carrier_subview', '/carrier/{cid}/{subview}')
     config.add_route('oauth_finalize', '/oauth/finalize')
@@ -16,3 +17,4 @@ def includeme(config):
     config.add_route('settings', '/settings')
     config.add_route('terms', '/terms')
     config.add_route('api', '/api')
+    config.add_route('forgot-password', '/forgot-password')

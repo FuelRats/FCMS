@@ -17,6 +17,71 @@ import logging
 log = logging.getLogger(__name__)
 
 
+@view_config(route_name='my_carrier_subview', renderer='../templates/my_carrier_subview.jinja2')
+def carrier_subview(request):
+    modal_data = None
+    userdata = usr.populate_user(request)
+    mymenu = menu.populate_sidebar(request)
+    mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
+    if 'delete-event' in request.POST:
+        event = request.dbsession.query(Calendar).filter(Calendar.id == request.POST['delete-event']).one_or_none()
+        if event:
+            if event.owner_id == request.user.id:
+                request.dbsession.query(Calendar).filter(Calendar.id == request.POST['delete-event']).delete()
+                request.dbsession.flush()
+                modal_data = {'load_fire': {'icon': 'success', 'message': 'Calendar event deleted!'}}
+    elif 'market-update' in request.POST:
+        items = []
+        for control in request.POST:
+            if control.startswith('highlight'):
+                items.append(control.split('-')[1])
+        hooks = webhooks.get_webhooks(request, mycarrier.id)
+        if hooks:
+            for hook in hooks:
+                log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
+                if hook['webhook_type'] == 'discord':
+                    if hook['marketEvents']:
+                        webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'])
+                        modal_data = {'load_fire': {'icon': 'success', 'message': 'Market update sent!'}}
+    # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
+    view = request.matchdict['subview']
+    if view == 'messages':
+        data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+
+        data['formadvanced'] = True
+        data['apiKey'] = request.user.apiKey
+        data['sidebar'] = menu.populate_sidebar(request)
+        data['subview'] = 'messages'
+        data['current_view'] = 'messages'
+        return data
+    if view == 'calendar':
+        data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+
+        data['calendar'] = carrier_data.populate_calendar(request,mycarrier.id)
+        data['formadvanced'] = True
+        data['apiKey'] = request.user.apiKey
+        data['sidebar'] = menu.populate_sidebar(request)
+        data['subview'] = 'calendar'
+        data['current_view'] = 'calendar'
+        return data
+    if view == 'market':
+        data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+
+        data['market'] = carrier_data.get_market(request, mycarrier.id)
+        data['formadvanced'] = True
+        data['apiKey'] = request.user.apiKey
+        data['sidebar'] = menu.populate_sidebar(request)
+        data['subview'] = 'market'
+        data['current_view'] = 'market'
+        return data
+
+
 @view_config(route_name='my_carrier', renderer='../templates/my_carrier.jinja2')
 def mycarrier_view(request):
     modal_data = None
@@ -34,14 +99,12 @@ def mycarrier_view(request):
             else:
                 allday = False
             if request.POST['eventtype'] == 'scheduled_jump':
-                print("In scheduled jump newevent.")
                 newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
                                     title=request.POST['title'], start=starttime, end=endtime,
                                     allday=allday, fgcolor="#00AA00", bgcolor="#00FF00",
                                     departureSystem=request.POST['departureSystem'],
                                     arrivalSystem=request.POST['arrivalSystem'])
             else:
-                print("In calendar newevent.")
                 newevent = Calendar(carrier_id=request.POST['cid'], owner_id=request.POST['owner_id'],
                                     title=request.POST['title'], start=starttime, end=endtime,
                                     allday=allday, fgcolor="#00AA00", bgcolor="#00FF00")
@@ -98,6 +161,7 @@ def mycarrier_view(request):
         events = carrier_data.populate_calendar(request, mycarrier.id)
         crew = carrier_data.get_crew(request, mycarrier.id)
         cargo = carrier_data.get_cargo(request, mycarrier.id)
+        market = carrier_data.get_market(request, mycarrier.id)
         if modal_data:
             data['modal'] = modal_data
 
