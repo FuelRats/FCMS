@@ -150,15 +150,20 @@ def oauth_finalize(request):
     try:
         jcarrier = capi.get_carrier(user)
         services = jcarrier['market']['services']
-        oc = request.dbsession.query(carrier.Carrier).filter(
-            carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
-        if oc:
-            log.warning(f"User {user.username} completed OAuth, but we already have their carrier. Update it.")
-            if oc.owner != user.id:
-                log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
-                oc.owner = user.id
-            return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
-                    'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
+        if request.user.carrierid:
+            oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.id == request.user.carrierid).one_or_none()
+            if not oc:
+                log.error("User has a carrier ID stored, but carrier table is missing that ID. Readd.")
+        else:
+            oc = request.dbsession.query(carrier.Carrier).filter(
+                carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
+            if oc:
+                log.warning(f"User {user.username} completed OAuth, but we already have their carrier. Update it.")
+                if oc.owner != user.id:
+                    log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
+                    oc.owner = user.id
+                return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
+                        'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
         if not coords:
             coords = {"x": 0, "y": 0, "z": 0}
@@ -183,6 +188,7 @@ def oauth_finalize(request):
                                      hasBlackMarket=True if services['blackmarket'] == 'ok' else False,
                                      hasVoucherRedemption=True if services['voucherredemption'] == 'ok' else False,
                                      hasExploration=True if services['exploration'] == 'ok' else False,
+                                     marketId=jcarrier['market']['id'],
                                      cachedJson=json.dumps(jcarrier),
                                      x=coords['x'],
                                      y=coords['y'],
@@ -202,4 +208,4 @@ def oauth_finalize(request):
                            'If you purchase one, go to your /my_carrier page and click the button there, '
                            'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
     return {'project': 'OAuth flow completed. Carrier added.',
-            'meta': {'refresh': True, 'target': 'my_carrier', 'delay': 5}}
+            'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
