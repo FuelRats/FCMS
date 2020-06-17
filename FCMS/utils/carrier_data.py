@@ -383,11 +383,16 @@ def update_carrier(request, cid, user):
                 log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
                           f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username if request.user else 'Not logged in'}.")
                 # Doublecheck that the owner is equal to the carrier.
-                if request.user:
-                    if request.user.id == mycarrier.owner:
-                        log.warning("Proceeding with update to carrier ID.")
+                if mycarrier.owner:
+                    ow = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
+                    if ow:
+                        if ow.id == mycarrier.owner:
+                            log.warning("Proceeding with update to carrier ID.")
+                    else:
+                        log.error("Owner ID does NOT match, something has gone wrong. Abort.")
+                        return None
                 else:
-                    return None
+                    log.error("Couldn't find owner row, this means bad things. Abort.")
         except KeyError:
             log.error(
                 f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
