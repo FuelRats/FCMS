@@ -91,7 +91,8 @@ def settings_view(request):
     carrierform = Form(carrierschema, buttons=('submit',), use_ajax=True, formid='carrierform')
     webhookform = Form(hooksschema, buttons=('submit',), use_ajax=True, formid='webhookform')
     extraform = Form(extraschema, buttons=('submit',), use_ajax=True, formid='extraform')
-
+    if not request.user:
+        return exc.HTTPFound(request.route_url('login'))
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.owner == request.user.id).one_or_none()
     if not mycarrier:
         return exc.HTTPFound(request.route_url('login'))

@@ -45,7 +45,8 @@ def carrier_subview(request):
                 log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
                 if hook['webhook_type'] == 'discord':
                     if hook['marketEvents']:
-                        webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'])
+                        webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'],
+                                               message=hook['message'] if 'message' in hook else None)
                         modal_data = {'load_fire': {'icon': 'success', 'message': 'Market update sent!'}}
     # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
     view = request.matchdict['subview']

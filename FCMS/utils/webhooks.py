@@ -100,7 +100,7 @@ def schedule_jump(request, calendar_id, webhook_url):
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
-def market_update(request, cid, items, webhook_url):
+def market_update(request, cid, items, webhook_url, message=None):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     embed = DiscordEmbed(title='Priority Market Update',
@@ -132,6 +132,8 @@ def market_update(request, cid, items, webhook_url):
     embed.add_embed_field(name='Docking Access',
                           value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())
     embed.set_timestamp()
+    if message:
+        embed.add_embed_field(name='Message', value=message)
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
 
 
