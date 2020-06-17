@@ -65,6 +65,7 @@ class Carrier(Base):
     trackedOnly = Column(Boolean)
     lastUpdated = Column(DateTime)
     cachedJson = Column(Text)
+    marketId = Column(BigInteger)
 
 
 Index('carrier_index', Carrier.id, unique=True)

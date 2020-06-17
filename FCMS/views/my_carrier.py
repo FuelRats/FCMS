@@ -26,7 +26,7 @@ def carrier_subview(request):
     mymenu = menu.populate_sidebar(request)
     mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
     if not mycarrier:
-        return exc.HTTPFound(request.route_url('/my_carrier'))
+        return exc.HTTPFound(request.route_url('my_carrier'))
     if 'delete-event' in request.POST:
         event = request.dbsession.query(Calendar).filter(Calendar.id == request.POST['delete-event']).one_or_none()
         if event:
@@ -46,7 +46,7 @@ def carrier_subview(request):
                 if hook['webhook_type'] == 'discord':
                     if hook['marketEvents']:
                         webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'],
-                                               message=hook['message'] if 'message' in hook else None)
+                                               message=request.POST['message'] if 'message' in request.POST else None)
                         modal_data = {'load_fire': {'icon': 'success', 'message': 'Market update sent!'}}
     # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
     view = request.matchdict['subview']

@@ -20,7 +20,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 from FCMS.models import (
     get_engine,
     get_session_factory,
-    get_tm_session,
+    get_tm_session, Market,
 )
 
 from FCMS.models.carrier import Carrier
@@ -30,7 +30,10 @@ __timeoutEDDN = 600000
 __scoopable = ['K', 'G', 'B', 'F', 'O', 'A', 'M']
 
 __allowedSchema = [
-    "https://eddn.edcd.io/schemas/journal/1"
+    "https://eddn.edcd.io/schemas/journal/1",
+    "https://eddn.edcd.io/schemas/commodity/1",
+    "https://eddn.edcd.io/schemas/commodity/2",
+    "https://eddn.edcd.io/schemas/commodity/3"
 ]
 
 __blockedSoftware = [
@@ -54,6 +57,9 @@ BASEVERSION = re.compile(
     """,
     re.VERBOSE,
 )
+
+carrier_rs = '^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$'
+carrier_r = re.compile(carrier_rs)
 
 
 def coerce(version):
@@ -158,6 +164,7 @@ def main(argv=None):
     messages = 0
     totmsg = 0
     hmessages = 0
+    mkupdates = 0
     print("Starting EDDN client.")
     while True:
         try:
@@ -174,19 +181,55 @@ def main(argv=None):
                 __json = simplejson.loads(__message)
                 totmsg = totmsg + 1
                 print(f"EDDN Client running. Messages: {messages:10} New carriers: {ncarcount:10} "
-                      f"Updated carriers: {ucarcount:10}\r",
+                      f"Updated carriers: {ucarcount:10}  Market updates: {mkupdates}\r",
                       end='')
                 if validsoftware(__json['header']['softwareName'], __json['header']['softwareVersion']) \
                         and __json['$schemaRef'] in __allowedSchema:
                     hmessages = hmessages + 1
                     data = __json['message']
                     messages = messages + 1
+                    if 'commodities' in data and carrier_r.search(data['stationName']):
+                        print("Carrier market!")
+                        print(data)
+                        oc = session.query(Carrier).filter(Carrier.callsign == data['stationName']).one_or_none()
+                        if oc:
+                            session.query(Market).filter(Market.carrier_id == oc.id).delete()
+                            for commodity in data['commodities']:
+                                nc = Market(carrier_id=oc.id, commodity_id=0, name=commodity['name'], stock=commodity['stock'],
+                                            buyPrice=commodity['buyPrice'], sellPrice=commodity['sellPrice'], demand=commodity['demand'])
+                                print(f"Add {commodity['name']} to market {oc.id}.")
+                                session.add(nc)
+                                mkupdates = mkupdates+1
+                            transaction.commit()
+                        else:
+                            newcarrier = Carrier(callsign=data['stationName'],
+                                                 name="Unknown Name", lastUpdated=data['timestamp'],
+                                                 currentStarSystem=data['systemName'],
+                                                 hasShipyard=False,
+                                                 hasOutfitting=False,
+                                                 hasCommodities=False,
+                                                 hasRefuel=False,
+                                                 hasRepair=False,
+                                                 hasRearm=False,
+                                                 trackedOnly=True,
+                                                 )
+                            session.add(newcarrier)
+                            ncarcount = ncarcount + 1
+                            mkupdates = mkupdates + 1
+                            session.flush()
+                            session.refresh(newcarrier)
+                            for commodity in data['commodities']:
+                                nc = Market(carrier_id=newcarrier.id, commodity_id=0, name=commodity['name'], stock=commodity['stock'],
+                                            buyPrice=commodity['buyPrice'], sellPrice=commodity['sellPrice'],
+                                            demand=commodity['demand'])
+                                session.add(nc)
+                            session.flush()
                     if 'event' in data:
                         if data['event'] in {'Docked', 'CarrierJump'} and data['StationType'] == 'FleetCarrier':
-                            print(f"Raw docked/jump carrier: {data}")
                             try:
                                 oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
                                 if oldcarrier:
+                                    print("Old carrier detected.")
                                     oldcarrier.currentStarSystem = data['StarSystem']
                                     oldcarrier.hasShipyard = True if 'shipyard' in data['StationServices'] else False
                                     oldcarrier.hasOutfitting = True if 'outfitting' in data[
@@ -200,6 +243,7 @@ def main(argv=None):
                                     oldcarrier.x = data['StarPos'][0]
                                     oldcarrier.y = data['StarPos'][1]
                                     oldcarrier.z = data['StarPos'][2]
+
                                     ucarcount = ucarcount + 1
                                 else:
                                     newcarrier = Carrier(callsign=data['StationName'],
@@ -223,9 +267,10 @@ def main(argv=None):
                                     ncarcount = ncarcount + 1
                                 transaction.commit()
                             except DataError:
-                                print("Failed to add a carrier! Invalid data passed")
                                 transaction.abort()
                         # TODO: Handle other detail Carrier events, such as Stats.
+                    else:
+                        print(f"non-event: {data}")
                 sys.stdout.flush()
 
         except zmq.ZMQError as e:
