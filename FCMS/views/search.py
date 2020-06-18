@@ -98,6 +98,7 @@ def search_view(request):
                 'col4_header': 'Distance', 'items': items, 'result_header': f'DSSA Carriers',
                 'carrier_search': True, 'sidebar': mymenu}
     if 'type' in request.params:
+        sys = None
         if request.params['type'].lower() == 'closest':
             if request.user:
                 usr = capi.get_cmdr(request.user)
