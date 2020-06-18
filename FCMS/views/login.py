@@ -155,6 +155,9 @@ def oauth_finalize(request):
                 carrier.Carrier.id == request.user.carrierid).one_or_none()
             if not oc:
                 log.error("User has a carrier ID stored, but carrier table is missing that ID. Readd.")
+            else:
+                return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
+                        'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         else:
             # Do we have an owner link from the carrier?
             oc = request.dbsession.query(carrier.Carrier).fitler(carrier.Carrier.owner == user.id).one_or_none()
