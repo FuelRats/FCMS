@@ -67,15 +67,20 @@ def capi(endpoint, user):
     if not user:
         return None
     log.debug(f"User is of type {type(user)}")
-    if isinstance(user.access_token, str):
-        client.token = ast.literal_eval(user.access_token)
-        refresh_token = ast.literal_eval(user.access_token)['refresh_token']
-    elif isinstance(user.access_token, dict):
-        client.token = user.access_token
-        refresh_token = None
-    else:
-        refresh_token = None
-    log.debug(f"CAPI Refresh token: {refresh_token}")
+    try:
+        if isinstance(user.access_token, str):
+            client.token = ast.literal_eval(user.access_token)
+            refresh_token = ast.literal_eval(user.access_token)['refresh_token']
+        elif isinstance(user.access_token, dict):
+            client.token = user.access_token
+            refresh_token = None
+        else:
+            refresh_token = None
+        log.debug(f"CAPI Refresh token: {refresh_token}")
+    except SyntaxError:
+        log.error("Horribly wrong token string. Have you been setting empty string instead of NULL?")
+        user.access_token = None
+        client.token = None
     if client.token:
         log.debug(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
         if client.token.is_expired():
