@@ -1,5 +1,6 @@
 import ast
 import json
+from json import JSONDecodeError
 from urllib.parse import urljoin
 import requests
 from authlib.integrations.base_client import UnsupportedTokenTypeError
@@ -35,9 +36,10 @@ def update_token(token, ref_token=None, user=None):
                 log.debug(f"Manual refresh: {new_token}")
                 return new_token
             else:
-                log.error(f"Couldn't refresh authentication token. {r.status_code}: {r.content}")
+                log.error(f"Couldn't refresh authentication token for {user.username}. {r.status_code}: {r.content}")
+                return None
         else:
-            log.info(f"Authentication token refreshed for {user}")
+            log.info(f"Authentication token refreshed for {user.username}")
             return new_token
     except UnsupportedTokenTypeError:
         # Failed, let's do it manually.
@@ -102,16 +104,21 @@ def capi(endpoint, user):
             if res.status_code == 401:
                 log.warning(f"CAPI request for {user.cmdr_name} unauthorized. Attempting to refresh token.")
                 newtoken = update_token(client.token, ref_token=refresh_token, user=user)
-                log.debug(f"New token for {user.cmdr_name}: {newtoken}")
-                client.token = newtoken
-                user.access_token = str(dict(client.token))
-                user.refresh_token = client.token['refresh_token']
-                user.token_expiration = client.token['expires_at']
+                if newtoken:
+                    log.debug(f"New token for {user.cmdr_name}: {newtoken}")
+                    client.token = newtoken
+                    user.access_token = str(dict(client.token))
+                    user.refresh_token = client.token['refresh_token']
+                    user.token_expiration = client.token['expires_at']
+                else:
+                    log.error(f"Failed to get new token for {user.cmdr_name} ({user.username}). Bailing.")
+                    return None
             log.error(f"Failed to get CAPI resource! {err}: {res.content}")
+            if res.status_code == 204:
+                log.warning(f"No content for {user.cmdr_name} ({user.username}). No fleet carrier?")
             return None
     else:
         log.warning(f"No CAPI token for user {user.cmdr_name}. Bailing.")
-
         return None
 
 
@@ -124,8 +131,10 @@ def get_carrier(user):
     try:
         return json.loads(capi('/fleetcarrier', user))
     except TypeError:
-        log.error(f"CAPI: User {user} - failed to fetch /fleetcarrier endpoint.")
+        log.error(f"CAPI: User {user.username} - failed to fetch /fleetcarrier endpoint.")
         return None
+    except JSONDecodeError:
+        log.error(f"Invalid CAPI data for {user.username} - Possibly 204?")
 
 
 def get_cmdr(user):
