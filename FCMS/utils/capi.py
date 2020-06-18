@@ -69,9 +69,11 @@ def capi(endpoint, user):
     log.debug(f"User is of type {type(user)}")
     try:
         if isinstance(user.access_token, str):
+            log.debug(f"User has an access token of type str. {user.access_token}")
             client.token = ast.literal_eval(user.access_token)
             refresh_token = ast.literal_eval(user.access_token)['refresh_token']
         elif isinstance(user.access_token, dict):
+            log.debug(f"User has an access token of type dict. {user.access_token}")
             client.token = user.access_token
             refresh_token = None
         else:
@@ -133,6 +135,7 @@ def get_cmdr(user):
     :return: A dict with player information.
     """
     try:
+        log.debug(f"Loading CMDR profile for {user.cmdr_name}")
         return json.loads(capi('/profile', user))
     except TypeError:
         log.error(f"CAPI: User {user} - failed to fetch /profile endpoint.")

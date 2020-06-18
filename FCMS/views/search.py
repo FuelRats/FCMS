@@ -78,8 +78,10 @@ def search_view(request):
     items = []
     cube = 5000
     if request.user:
+        log.debug(f"In search.py for user {request.user.cmdr_name}")
         userdata = myuser.populate_user(request)
     else:
+        log.debug(f"In search.py for unauthenticated user.")
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png', 'link': '/login'}
     if 'searchform' in request.params:
         return {'searchform': True, 'user': userdata, 'sidebar': mymenu}
@@ -97,11 +99,14 @@ def search_view(request):
                 'carrier_search': True, 'sidebar': mymenu}
     if 'type' in request.params:
         if request.params['type'].lower() == 'closest':
-            usr = capi.get_cmdr(request.user)
-            if not usr:
-                sys = 'Sol'
-            else:
-                sys = usr['lastSystem']['name']
+            if request.user:
+                usr = capi.get_cmdr(request.user)
+                if not usr:
+                    sys = 'Sol'
+                else:
+                    sys = usr['lastSystem']['name']
+            if 'error' in coords:
+                log.debug("Failed to get coords for unknown user.")
             coords = sapi.get_coords(sys)
             x = coords['x']
             y = coords['y']
