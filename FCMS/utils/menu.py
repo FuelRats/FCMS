@@ -118,17 +118,17 @@ def populate_sidebar(request):
     sidebar_menuitems=[
         {
             'name': 'DSSA Carriers',
-            'link': '/search?dssa=True',
+            'link': '/search/dssa',
             'icon': 'inline_svgs/dssa.jinja2'
         },
         {
             'name': 'Nearest Carriers',
-            'link': '/search?type=Closest',
+            'link': '/search/closest',
             'icon': 'inline_svgs/starsystem.jinja2'
         },
         {
             'name': 'System Search',
-            'link': '/search?searchform=True',
+            'link': '/search',
             'icon': 'inline_svgs/itinerary.jinja2'
         }
     ]

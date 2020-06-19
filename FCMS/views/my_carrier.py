@@ -19,10 +19,14 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='my_carrier_subview', renderer='../templates/my_carrier_subview.jinja2')
 def carrier_subview(request):
+    if not request.user:
+        return exc.HTTPFound(request.route_url('login'))
     modal_data = None
     userdata = usr.populate_user(request)
     mymenu = menu.populate_sidebar(request)
     mycarrier = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
+    if not mycarrier:
+        return exc.HTTPFound(request.route_url('my_carrier'))
     if 'delete-event' in request.POST:
         event = request.dbsession.query(Calendar).filter(Calendar.id == request.POST['delete-event']).one_or_none()
         if event:
@@ -41,7 +45,8 @@ def carrier_subview(request):
                 log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
                 if hook['webhook_type'] == 'discord':
                     if hook['marketEvents']:
-                        webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'])
+                        webhooks.market_update(request, mycarrier.id, items, webhook_url=hook['webhook_url'],
+                                               message=request.POST['message'] if 'message' in request.POST else None)
                         modal_data = {'load_fire': {'icon': 'success', 'message': 'Market update sent!'}}
     # log.debug(f"Populated menu: {menu.populate_sidebar(request)}")
     view = request.matchdict['subview']
