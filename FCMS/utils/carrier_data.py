@@ -186,7 +186,7 @@ def populate_subview(request, cid, subview):
     if subview == 'shipyard':
         ships = request.dbsession.query(Ship).filter(Ship.carrier_id == cid)
         for sp in ships:
-            res.append({'col1_svg': 'inline_svgs/shipyard.jinja2', 'col1': sp.name, 'col2': sp.basevalue,
+            res.append({'col1_svg': 'inline_svgs/shipyard.jinja2', 'col1': translation.localize_shipyard(sp.name), 'col2': sp.basevalue,
                         'col3': sp.stock, 'col4': '<i class="fas fa-search"></i>'})
         headers = {'col1_header': 'Name', 'col2_header': 'Value', 'col3_header': 'stock',
                    'col4_header': 'Coriolis'}
@@ -381,8 +381,18 @@ def update_carrier(request, cid, user):
         try:
             if mycarrier.callsign != jcarrier['name']['callsign']:
                 log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
-                          f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username}.")
-                return None
+                          f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username if request.user else 'Not logged in'}.")
+                # Doublecheck that the owner is equal to the carrier.
+                if mycarrier.owner:
+                    ow = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
+                    if ow:
+                        if ow.id == mycarrier.owner:
+                            log.warning("Proceeding with update to carrier ID.")
+                    else:
+                        log.error("Owner ID does NOT match, something has gone wrong. Abort.")
+                        return None
+                else:
+                    log.error("Couldn't find owner row, this means bad things. Abort.")
         except KeyError:
             log.error(
                 f"No callsign set on already existing carrier? Requested CID: {cid} new carrier: {jcarrier['name']['callsign']} ")
@@ -417,6 +427,7 @@ def update_carrier(request, cid, user):
         mycarrier.hasExploration = True if services['exploration'] == 'ok' else False
         mycarrier.hasRepair = True if services['repair'] == 'ok' else False
         mycarrier.hasRefuel = True if services['refuel'] == 'ok' else False
+        mycarrier.marketId = jcarrier['market']['id']
         if 'error' not in coords:
             mycarrier.x = coords['x']
             mycarrier.y = coords['y']
@@ -424,7 +435,7 @@ def update_carrier(request, cid, user):
         mycarrier.trackedOnly = False
         mycarrier.cachedJson = json.dumps(jcarrier)
         mycarrier.lastUpdated = datetime.now()
-        request.dbsession.autoflush=False
+        request.dbsession.autoflush = False
         request.dbsession.query(Itinerary).filter(Itinerary.carrier_id
                                                   == mycarrier.id).delete()
         for item in jcarrier['itinerary']['completed']:
@@ -438,7 +449,7 @@ def update_carrier(request, cid, user):
         for item in jcarrier['cargo']:
             cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
                        quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
-
+            request.dbsession.add(cg)
         request.dbsession.flush()
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
@@ -466,11 +477,14 @@ def update_carrier(request, cid, user):
                                                == mycarrier.id).delete()
         print(jcarrier['modules'])
         if 'modules' in jcarrier:
-            for item, it in jcarrier['modules'].items():
-                md = Module(carrier_id=mycarrier.id, category=it['category'],
-                            name=it['name'], cost=it['cost'], stock=it['stock'],
-                            module_id=it['id'])
-                request.dbsession.add(md)
+            try:
+                for item, it in jcarrier['modules'].items():
+                    md = Module(carrier_id=mycarrier.id, category=it['category'],
+                                name=it['name'], cost=it['cost'], stock=it['stock'],
+                                module_id=it['id'])
+                    request.dbsession.add(md)
+            except:
+                log.debug("Failed to get modules from jcarrier?!")
         request.dbsession.flush()
         request.dbsession.autoflush = True
         return jcarrier or None

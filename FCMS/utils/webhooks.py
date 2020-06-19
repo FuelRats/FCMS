@@ -2,6 +2,8 @@
 
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
+from humanfriendly import format_number
+
 from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User
 from ..utils import util
 import json
@@ -83,7 +85,7 @@ def schedule_jump(request, calendar_id, webhook_url):
     if not cdata:
         return None
     embed = DiscordEmbed(title='Scheduled Jump',
-                         description=f'{util.from_hex(mycarrier.name)} has scheduled a jump.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has scheduled a jump.', color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:
@@ -98,11 +100,12 @@ def schedule_jump(request, calendar_id, webhook_url):
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
-def market_update(request, cid, items, webhook_url):
+def market_update(request, cid, items, webhook_url, message=None):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     embed = DiscordEmbed(title='Priority Market Update',
-                         description=f'{util.from_hex(mycarrier.name)} has new items on buy order.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has issued a market '
+                                     f'notification.', color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:
@@ -120,16 +123,18 @@ def market_update(request, cid, items, webhook_url):
             continue
         if item.stock > 0:
             embed.add_embed_field(name='Selling', value=item.name)
-            embed.add_embed_field(name='For', value=item.sellPrice)
-            embed.add_embed_field(name='Quantity', value=item.stock)
+            embed.add_embed_field(name='For', value=format_number(item.buyPrice))
+            embed.add_embed_field(name='Quantity', value=format_number(item.stock))
         if item.demand > 0:
             embed.add_embed_field(name='Buying', value=item.name)
-            embed.add_embed_field(name='For', value=item.buyPrice)
-            embed.add_embed_field(name='Quantity', value=item.demand)
+            embed.add_embed_field(name='For', value=format_number(item.sellPrice))
+            embed.add_embed_field(name='Quantity', value=format_number(item.demand))
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Docking Access',
                           value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())
     embed.set_timestamp()
+    if message:
+        embed.add_embed_field(name='Message', value=message, inline=False)
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
 
 
@@ -137,7 +142,7 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     embed = DiscordEmbed(title='Frame Shift Drive Charging',
-                         description=f'{util.from_hex(mycarrier.name)} is jumping.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is jumping.', color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:
@@ -186,7 +191,7 @@ def calendar_event(request, calendar_id, webhook_url):
     if not cdata:
         return None
     embed = DiscordEmbed(title='Event Scheduled',
-                         description=f'{util.from_hex(mycarrier.name)} has scheduled an event.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has scheduled an event.', color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:

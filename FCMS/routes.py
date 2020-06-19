@@ -18,3 +18,6 @@ def includeme(config):
     config.add_route('terms', '/terms')
     config.add_route('api', '/api')
     config.add_route('forgot-password', '/forgot-password')
+    config.add_route('dssa', '/search/dssa')
+    config.add_route('closest_search', '/search/closest')
+    config.add_route('search_system', '/search/system')
