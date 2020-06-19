@@ -22,10 +22,12 @@ from FCMS.models import (
     get_session_factory,
     get_tm_session, Market,
 )
-
+from FCMS.utils.eddn import process_eddn
 from FCMS.models.carrier import Carrier
 
 __relayEDDN = 'tcp://eddn.edcd.io:9500'
+__replayEDDN = 'tcp://localhost:9500'
+
 __timeoutEDDN = 600000
 __scoopable = ['K', 'G', 'B', 'F', 'O', 'A', 'M']
 
@@ -159,17 +161,18 @@ def main(argv=None):
 
     subscriber.setsockopt(zmq.SUBSCRIBE, b"")
     subscriber.setsockopt(zmq.RCVTIMEO, __timeoutEDDN)
+
     ncarcount = 0
     ucarcount = 0
     messages = 0
     totmsg = 0
     hmessages = 0
     mkupdates = 0
+    rpmsg = 0
     print("Starting EDDN client.")
     while True:
         try:
             subscriber.connect(__relayEDDN)
-
             while True:
                 __message = subscriber.recv()
 
@@ -188,89 +191,10 @@ def main(argv=None):
                     hmessages = hmessages + 1
                     data = __json['message']
                     messages = messages + 1
-                    if 'commodities' in data and carrier_r.search(data['stationName']):
-                        print("Carrier market!")
-                        print(data)
-                        oc = session.query(Carrier).filter(Carrier.callsign == data['stationName']).one_or_none()
-                        if oc:
-                            session.query(Market).filter(Market.carrier_id == oc.id).delete()
-                            for commodity in data['commodities']:
-                                nc = Market(carrier_id=oc.id, commodity_id=0, name=commodity['name'], stock=commodity['stock'],
-                                            buyPrice=commodity['buyPrice'], sellPrice=commodity['sellPrice'], demand=commodity['demand'])
-                                print(f"Add {commodity['name']} to market {oc.id}.")
-                                session.add(nc)
-                                mkupdates = mkupdates+1
-                            transaction.commit()
-                        else:
-                            newcarrier = Carrier(callsign=data['stationName'],
-                                                 name="Unknown Name", lastUpdated=data['timestamp'],
-                                                 currentStarSystem=data['systemName'],
-                                                 hasShipyard=False,
-                                                 hasOutfitting=False,
-                                                 hasCommodities=False,
-                                                 hasRefuel=False,
-                                                 hasRepair=False,
-                                                 hasRearm=False,
-                                                 trackedOnly=True,
-                                                 )
-                            session.add(newcarrier)
-                            ncarcount = ncarcount + 1
-                            mkupdates = mkupdates + 1
-                            session.flush()
-                            session.refresh(newcarrier)
-                            for commodity in data['commodities']:
-                                nc = Market(carrier_id=newcarrier.id, commodity_id=0, name=commodity['name'], stock=commodity['stock'],
-                                            buyPrice=commodity['buyPrice'], sellPrice=commodity['sellPrice'],
-                                            demand=commodity['demand'])
-                                session.add(nc)
-                            session.flush()
-                    if 'event' in data:
-                        if data['event'] in {'Docked', 'CarrierJump'} and data['StationType'] == 'FleetCarrier':
-                            try:
-                                oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
-                                if oldcarrier:
-                                    print("Old carrier detected.")
-                                    oldcarrier.currentStarSystem = data['StarSystem']
-                                    oldcarrier.hasShipyard = True if 'shipyard' in data['StationServices'] else False
-                                    oldcarrier.hasOutfitting = True if 'outfitting' in data[
-                                        'StationServices'] else False
-                                    oldcarrier.hasCommodities = True if 'commodities' in data[
-                                        'StationServices'] else False
-                                    oldcarrier.hasRefuel = True if 'refuel' in data['StationServices'] else False
-                                    oldcarrier.hasRepair = True if 'repair' in data['StationServices'] else False
-                                    oldcarrier.hasRearm = True if 'rearm' in data['StationServices'] else False
-                                    oldcarrier.lastUpdated = data['timestamp']
-                                    oldcarrier.x = data['StarPos'][0]
-                                    oldcarrier.y = data['StarPos'][1]
-                                    oldcarrier.z = data['StarPos'][2]
-
-                                    ucarcount = ucarcount + 1
-                                else:
-                                    newcarrier = Carrier(callsign=data['StationName'],
-                                                         name="Unknown Name", lastUpdated=data['timestamp'],
-                                                         currentStarSystem=data['StarSystem'],
-                                                         hasShipyard=True if 'shipyard' in data['StationServices']
-                                                         else False,
-                                                         hasOutfitting=True if 'outfitting' in data['StationServices']
-                                                         else False,
-                                                         hasCommodities=True if 'commodities' in data['StationServices']
-                                                         else False,
-                                                         hasRefuel=True if 'refuel' in data['StationServices'] else False,
-                                                         hasRepair=True if 'repair' in data['StationServices'] else False,
-                                                         hasRearm=True if 'rearm' in data['StationServices'] else False,
-                                                         trackedOnly=True,
-                                                         x=data['StarPos'][0],
-                                                         y=data['StarPos'][1],
-                                                         z=data['StarPos'][2]
-                                                         )
-                                    session.add(newcarrier)
-                                    ncarcount = ncarcount + 1
-                                transaction.commit()
-                            except DataError:
-                                transaction.abort()
-                        # TODO: Handle other detail Carrier events, such as Stats.
-                    else:
-                        print(f"non-event: {data}")
+                    upd = process_eddn(session, data)
+                    mkupdates = mkupdates + upd['new_commodities']
+                    ucarcount = ucarcount + upd['updated_carriers']
+                    ncarcount = ncarcount + upd['new_carriers']
                 sys.stdout.flush()
 
         except zmq.ZMQError as e:
