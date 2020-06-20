@@ -25,11 +25,18 @@ class Search(colander.MappingSchema):
 def fill_data(candidates, source):
     items = []
     for row in candidates:
-        print(f"Source is {source}")
-        target = numpy.array((row.x, row.y, row.z))
-        dist = numpy.linalg.norm(source - target)
-        system = sapi.get_system_by_name(row.currentStarSystem)
-        print(system)
+        log.debug(f"Source is {source}")
+        try:
+            if row.x and row.y and row.z:
+                target = numpy.array((row.x, row.y, row.z))
+                dist = numpy.linalg.norm(source - target)
+            else:
+                dist = 99999
+            system = sapi.get_system_by_name(row.currentStarSystem)
+        except TypeError:
+            log.debug(f"Failed to get a distance, row x: {row.x} system: {row.currentStarSystem}")
+            dist = 99999
+            system = sapi.get_system_by_name(row.currentStarSystem)
         if row.taxation:
             taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 0 \
                 else "#FFC4505F" if 50 > row.taxation > 26 else "#FF0000"
