@@ -150,6 +150,7 @@ def system_view(request):
 
 @view_config(route_name='closest_search', renderer='../templates/search.jinja2')
 def closest_view(request):
+    extra = None
     if request.user:
         usr = capi.get_cmdr(request.user)
         log.debug(f"In search.py for user {request.user.cmdr_name}")
