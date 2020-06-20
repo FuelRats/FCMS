@@ -29,7 +29,7 @@ def carrier_subview(request):
         headers, data = carrier_data.populate_subview(request, cid.id, view)
     elif view in ['map']:
         pins = []
-        pins.append({'title': f'{cid.callsign} - {from_hex(cid.name)} ({cid.currentStarSystem})', 'x': cid.x, 'y': cid.y})
+        pins.append({'title': f'{cid.callsign} - {from_hex(cid.name)} ({cid.currentStarSystem})', 'x': cid.x, 'y': cid.z})
         return {'map': {'pins': pins, 'focus': {'x': 0, 'y': 0, 'zoom': -5}}, 'sidebar': mymenu, 'user': userdata, 'current_view': 'map'}
 
     log.debug(f"Carrier subview data for {cid}: {data}")
