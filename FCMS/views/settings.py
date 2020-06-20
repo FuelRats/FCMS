@@ -293,5 +293,5 @@ def settings_view(request):
 
     return {**cdata,
             **{'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True, 'carrier_settings': carrier_settings,
-               'webhooks_settings': webhook_settings, 'extra_settings': extra_settings,
+               'webhooks_settings': webhook_settings, 'extra_settings': extra_settings,'deform': True,
                'carrier_image': myextra.carrier_image if myextra else None, 'subview': 'settings', 'view': 'settings'}}
