@@ -62,6 +62,8 @@ class WebhookSchema(colander.Schema):
                                        widget=widget.CheckboxWidget(template="bootstrap"), required=False)
     calendarEvents = colander.SchemaNode(colander.Boolean(),
                                          widget=widget.CheckboxWidget(template="bootstrap"), required=False)
+    description = colander.SchemaNode(colander.String(),
+                                      widget=widget.TextInputWidget(), required=False)
     id = colander.SchemaNode(colander.Integer(),
                              widget=widget.HiddenWidget(),
                              required=False, default=None, missing=colander.drop)
@@ -113,6 +115,7 @@ def settings_view(request):
                          'marketEvents': hook.marketEvents,
                          'calendarEvents': hook.calendarEvents,
                          'id': hook.id,
+                         'description': hook.description,
                          'owner_id': hook.owner_id,
                          'carrier_id': hook.carrier_id})
 
@@ -226,7 +229,6 @@ def settings_view(request):
                     if 'id' in hook:
                         hookids.append(hook['id'])
                     if 'id' in hook:
-                        print(f"Update old hook with {hook['calendarEvents']}")
                         oldhook = request.dbsession.query(Webhook).filter(Webhook.id == hook['id']).one_or_none()
                         oldhook.enabled = hook['enabled']
                         oldhook.hook_url = hook['hook_url']
@@ -234,15 +236,15 @@ def settings_view(request):
                         oldhook.jumpEvents = hook['jumpEvents']
                         oldhook.marketEvents = hook['marketEvents']
                         oldhook.calendarEvents = hook['calendarEvents']
+                        oldhook.description = hook['description']
                         print("Flush hook")
                         request.dbsession.flush()
                         request.dbsession.refresh(oldhook)
                     else:
-                        print(f"Make new hook with {hook['calendarEvents']}")
                         newhook = Webhook(owner_id=request.user.id, carrier_id=mycarrier.id, hook_url=hook['hook_url'],
                                           hook_type=hook['hook_type'], enabled=hook['enabled'],
                                           calendarEvents=hook['calendarEvents'], jumpEvents=hook['jumpEvents'],
-                                          marketEvents=hook['marketEvents'])
+                                          marketEvents=hook['marketEvents'], description=hook['description'])
                         request.dbsession.add(newhook)
                         request.dbsession.flush()
                         request.dbsession.refresh(newhook)
@@ -269,6 +271,7 @@ def settings_view(request):
                                      'marketEvents': hook.marketEvents,
                                      'calendarEvents': hook.calendarEvents,
                                      'id': hook.id,
+                                     'description': hook.description,
                                      'owner_id': hook.owner_id,
                                      'carrier_id': hook.carrier_id})
 
