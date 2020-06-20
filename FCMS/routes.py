@@ -22,3 +22,4 @@ def includeme(config):
     config.add_route('closest_search', '/search/closest')
     config.add_route('search_system', '/search/system')
     config.add_route('galmap', 'galmap')
+    config.add_route('route_search', '/search/route')

@@ -1,4 +1,5 @@
 # Webhooks for carrier events. Can fire from EDDN hits or calendar create/delete events.
+from datetime import datetime
 
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
@@ -164,6 +165,29 @@ def market_update(request, cid, items, webhook_url, message=None):
     if message:
         embed.add_embed_field(name='Message', value=message, inline=False)
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
+
+
+def announce_route_scheduled(request, cid, webhook_url):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    embed = DiscordEmbed(title='Route Departure Scheduled',
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is traveling a planned route.', color=242424,
+                         url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}/route/')
+    embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    if extra:
+        embed.set_image(url=request.storage.url(extra.carrier_image))
+    else:
+        embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
+    embed.add_embed_field(name='Departing from', value='The Bubble')
+    embed.add_embed_field(name='Headed to', value='Galactic Centre')
+    embed.add_embed_field(name='Starting from', value='Fuelum')
+    embed.add_embed_field(name='Waypoint 1', value='MCC 811')
+    embed.add_embed_field(name='Waypoint 2', value='Rodentia')
+    embed.add_embed_field(name='Final Destination', value='Sagittarius A*')
+    embed.add_embed_field(name='Departure Time', value=str(datetime.now()))
+    embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
+    embed.set_timestamp()
+    return send_webhook(webhook_url, 'Carrier Route announced', hooktype='discord', myembed=embed)
 
 
 def announce_jump(request, cid, target, webhook_url, body=None):

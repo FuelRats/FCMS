@@ -147,45 +147,44 @@ def oauth_callback(request):
 @view_config(route_name='oauth_finalize', renderer='../templates/login.jinja2')
 def oauth_finalize(request):
     try:
-        log.debug(f"Attempting to get carrier to finalize oauth for {request.user.username}")
-        jcarrier = capi.get_carrier(request.user)
-        log.debug(f"jcarrier is {jcarrier}")
+        jcarrier = capi.get_carrier(user)
         services = jcarrier['market']['services']
         if request.user.carrierid:
-            log.debug(f"user {request.user.username} has carrierid {request.user.carrierid}")
+            log.debug(f"User {request.user.username} already has a carrierid {request.user.carrierid}")
             oc = request.dbsession.query(carrier.Carrier).filter(
                 carrier.Carrier.id == request.user.carrierid).one_or_none()
             if not oc:
                 log.error("User has a carrier ID stored, but carrier table is missing that ID. Readd.")
             else:
+                log.debug(f"User {request.user.username} completed Oauth reauthentication.")
                 return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                         'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         else:
             log.debug("Looking for owner links...")
             # Do we have an owner link from the carrier?
             oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == user.id).one_or_none()
-            log.debug(f"OC: {oc}")
             if oc:
                 log.warning("We have an old carrier but no link from owner to it. Add.")
                 user.carrierid = oc.id
+                return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
+                        'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
             else:
                 log.debug("No link, look for callsign...")
                 oc = request.dbsession.query(carrier.Carrier).filter(
                     carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
                 if oc:
-                    log.warning(f"User {user.username} completed OAuth, but we already have their carrier. Update it.")
+                    log.warning(f"User {request.user.username} completed OAuth, but we already have their carrier. Update it.")
                     if oc.owner != user.id:
                         log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
                         oc.owner = user.id
                     log.debug(f"Returning from update carrier case.")
                     return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                             'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
-        log.warning(f"No registered carrier for {user.username}. Add it.")
+        log.warning(f"No registered carrier for {request.user.username}. Add it.")
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
-        log.debug(f"Fetched coords from SAPI. {coords}")
         if not coords:
             coords = {"x": 0, "y": 0, "z": 0}
-        newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'],
+        newcarrier = carrier.Carrier(owner=request.user.id, callsign=jcarrier['name']['callsign'],
                                      name=jcarrier['name']['vanityName'],
                                      currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
                                      fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],

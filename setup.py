@@ -74,6 +74,7 @@ setup(
         'console_scripts': [
             'initialize_FCMS_db=FCMS.scripts.initialize_db:main',
             'eddn_client=FCMS.scripts.eddn_client:main',
+            'load_regions=FCMS.scripts.load_regions:main',
         ],
     },
 )

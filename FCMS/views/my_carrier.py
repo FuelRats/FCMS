@@ -1,13 +1,15 @@
 import os
 from binascii import hexlify
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
+import colander
+from deform import widget, Form
 from pyramid.view import view_config
 
 import pyramid.httpexceptions as exc
 from pyramid_storage.exceptions import FileNotAllowed
 
-from ..models import carrier, CarrierExtra, Calendar, Webhook
+from ..models import carrier, CarrierExtra, Calendar, Webhook, Region
 
 from ..utils import carrier_data
 from ..utils import menu, user as usr, webhooks
@@ -66,7 +68,7 @@ def carrier_subview(request):
         if modal_data:
             data['modal'] = modal_data
 
-        data['calendar'] = carrier_data.populate_calendar(request,mycarrier.id)
+        data['calendar'] = carrier_data.populate_calendar(request, mycarrier.id)
         data['formadvanced'] = True
         data['apiKey'] = request.user.apiKey
         data['sidebar'] = menu.populate_sidebar(request)
@@ -84,6 +86,77 @@ def carrier_subview(request):
         data['sidebar'] = menu.populate_sidebar(request)
         data['subview'] = 'market'
         data['current_view'] = 'market'
+        return data
+    if view == 'routes':
+        choices = []
+        for choice in request.dbsession.query(Region).all():
+            choices.append((choice.name.lower().translate(str.maketrans({" ": "_", "'": ""})), choice.name))
+
+        class WaypointSchema(colander.Schema):
+            system = colander.SchemaNode(colander.String(),
+                                         widget=widget.AutocompleteInputWidget(
+                                             values='https://system.api.fuelrats.com/typeahead', min_length=3
+                                         ), id='systemfield')
+            duration = colander.SchemaNode(colander.Time(),
+                                           widget=widget.TimeInputWidget(),
+                                           title='Duration of stay', default=time(hour=0, minute=20))
+        class WaypointSequence(colander.SequenceSchema):
+            waypoints = WaypointSchema(title=None)
+
+        class RouteSchema(colander.Schema):
+            id = colander.SchemaNode(colander.Integer(),
+                                     widget=widget.HiddenWidget(),
+                                     required=False, default=None, missing=colander.drop)
+            carrier_id = colander.SchemaNode(colander.Integer(),
+                                             widget=widget.HiddenWidget(),
+                                             required=True, default=mycarrier.id)
+            routeName = colander.SchemaNode(colander.String(),
+                                            widget=widget.TextInputWidget(),
+                                            title="Name your route")
+            startRegion = colander.SchemaNode(colander.String(),
+                                              widget=widget.Select2Widget(
+                                                  values=choices
+                                              ), title="Starting Region")
+            startSystem = colander.SchemaNode(colander.String(),
+                                              widget=widget.AutocompleteInputWidget(
+                                                  values='https://system.api.fuelrats.com/typeahead', min_length=3
+                                              ), title="Starting system", id='startingsystem')
+            waypoints = WaypointSequence(title='Waypoints')
+            endRegion = colander.SchemaNode(colander.String(),
+                                            widget=widget.Select2Widget(
+                                                values=choices
+                                            ), title="Ending Region")
+            endSystem = colander.SchemaNode(colander.String(),
+                                            widget=widget.AutocompleteInputWidget(
+                                                values='https://system.api.fuelrats.com/typeahead', min_length=3
+                                            ), title="Destination System", id='destinationsystem')
+            description = colander.SchemaNode(colander.String(),
+                                              widget=widget.TextInputWidget(), title='Route description',
+                                              missing=colander.drop)
+
+        schema = RouteSchema()
+        form = Form(schema, buttons=('submit',), formid='routeform')
+        if request.POST:
+            print(request.POST)
+            appstruct = form.validate(request.POST.items())
+            print(appstruct)
+            # hooks = webhooks.get_webhooks(request, mycarrier.id)
+            # if hooks:
+            #     for hook in hooks:
+            #         log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
+            #         if hook['webhook_type'] == 'discord':
+            #             webhooks.announce_route_scheduled(request, mycarrier.id, hook['webhook_url'])
+
+        data = carrier_data.populate_view(request, mycarrier.id, request.user)
+        if modal_data:
+            data['modal'] = modal_data
+        data['apiKey'] = request.user.apiKey
+        data['sidebar'] = menu.populate_sidebar(request)
+        data['subview'] = 'routes'
+        data['current_view'] = 'routes'
+        data['formadvanced'] = True
+        data['deform'] = True
+        data['form'] = form.render()
         return data
 
 

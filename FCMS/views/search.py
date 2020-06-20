@@ -8,6 +8,7 @@ from pyramid.security import remember, forget
 from sqlalchemy import text
 
 from ..models import user, carrier
+from ..models import Region
 from ..utils import capi, sapi, util, menu
 from ..utils import user as myuser
 import re
@@ -26,10 +27,14 @@ def fill_data(candidates, source):
     items = []
     for row in candidates:
         print(f"Source is {source}")
-        target = numpy.array((row.x, row.y, row.z))
-        dist = numpy.linalg.norm(source - target)
-        system = sapi.get_system_by_name(row.currentStarSystem)
-        print(system)
+        try:
+            target = numpy.array((row.x, row.y, row.z))
+            dist = numpy.linalg.norm(source - target)
+            system = sapi.get_system_by_name(row.currentStarSystem)
+        except TypeError:
+            log.debug("Couldn't get system distance.")
+            dist = 99999
+            system = sapi.get_system_by_name(row.currentStarSystem)
         if row.taxation:
             taxcolor = "#00AA000" if row.taxation == 0 else "#DAD55E" if 25 > row.taxation > 0 \
                 else "#FFC4505F" if 50 > row.taxation > 26 else "#FF0000"
@@ -74,6 +79,24 @@ def fill_data(candidates, source):
                                     'title': f'Taxation is {row.taxation}%'}
                                    ]})
     return items
+
+
+@view_config(route_name='route_search', renderer='../templates/uploadtest.jinja2')
+def route_search_view(request):
+    choices=[]
+    for choice in request.dbsession.query(Region).all():
+        choices.append((choice.name.lower().translate(str.maketrans({" ": "_", "'": ""})), choice.name))
+    print(choices)
+
+    class Route(colander.MappingSchema):
+        startregion = colander.SchemaNode(colander.String(),
+                                          widget=widget.Select2Widget(
+                                              values=choices), title="I want to go from...")
+        endregion = colander.SchemaNode(colander.String(),
+                                        widget=widget.Select2Widget(
+                                            values=choices), title="I want to go to...")
+    myform = Form(schema=Route(), buttons=('Find a route!',))
+    return {'form': myform.render()}
 
 
 @view_config(route_name='dssa', renderer='../templates/dssa.jinja2')
