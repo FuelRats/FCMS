@@ -3,13 +3,13 @@ from binascii import hexlify
 from datetime import datetime, timedelta, time
 
 import colander
-from deform import widget, Form
+from deform import widget, Form, ValidationFailure
 from pyramid.view import view_config
 
 import pyramid.httpexceptions as exc
 from pyramid_storage.exceptions import FileNotAllowed
 
-from ..models import carrier, CarrierExtra, Calendar, Webhook, Region
+from ..models import carrier, CarrierExtra, Calendar, Webhook, Region, Route
 
 from ..utils import carrier_data
 from ..utils import menu, user as usr, webhooks
@@ -138,8 +138,16 @@ def carrier_subview(request):
         form = Form(schema, buttons=('submit',), formid='routeform')
         if request.POST:
             print(request.POST)
-            appstruct = form.validate(request.POST.items())
-            print(appstruct)
+            try:
+                appstruct = form.validate(request.POST.items())
+                print(appstruct)
+                newroute = Route(route_name=appstruct['routeName'], start_region=appstruct['startRegion'],
+                                 startPoint=appstruct['startSystem'], waypoints=appstruct['waypoints'],
+                                 endPoint=appstruct['endSystem'], end_region=appstruct['endRegion'],
+                                 description=appstruct['description'])
+                request.dbsession.add(newroute)
+            except ValidationFailure as e:
+                log.debug(f"Route form submission validation failed. {appstruct}")
             # hooks = webhooks.get_webhooks(request, mycarrier.id)
             # if hooks:
             #     for hook in hooks:
