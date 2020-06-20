@@ -146,11 +146,13 @@ def oauth_callback(request):
 
 @view_config(route_name='oauth_finalize', renderer='../templates/login.jinja2')
 def oauth_finalize(request):
-    user = request.user
     try:
-        jcarrier = capi.get_carrier(user)
+        log.debug(f"Attempting to get carrier to finalize oauth for {request.user.username}")
+        jcarrier = capi.get_carrier(request.user)
+        log.debug(f"jcarrier is {jcarrier}")
         services = jcarrier['market']['services']
         if request.user.carrierid:
+            log.debug(f"user {request.user.username} has carrierid {request.user.carrierid}")
             oc = request.dbsession.query(carrier.Carrier).filter(
                 carrier.Carrier.id == request.user.carrierid).one_or_none()
             if not oc:
