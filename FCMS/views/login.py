@@ -223,7 +223,7 @@ def oauth_finalize(request):
         return {'project': 'OAuth flow completed. Carrier added.',
                 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
 
-    except:
+    except AttributeError as e:
         user.no_carrier = True
         return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
                            'If you purchase one, go to your /my_carrier page and click the button there, '
