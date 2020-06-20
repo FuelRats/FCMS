@@ -161,12 +161,14 @@ def oauth_finalize(request):
                 return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                         'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         else:
+            log.debug("Looking for owner links...")
             # Do we have an owner link from the carrier?
             oc = request.dbsession.query(carrier.Carrier).fitler(carrier.Carrier.owner == user.id).one_or_none()
             if oc:
                 log.warning("We have an old carrier but no link from owner to it. Add.")
                 user.carrierid = oc.id
             else:
+                log.debug("No link, look for callsign...")
                 oc = request.dbsession.query(carrier.Carrier).filter(
                     carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
                 if oc:
