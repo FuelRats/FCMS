@@ -26,13 +26,16 @@ class Search(colander.MappingSchema):
 def fill_data(candidates, source):
     items = []
     for row in candidates:
-        print(f"Source is {source}")
+        log.debug(f"Source is {source}")
         try:
-            target = numpy.array((row.x, row.y, row.z))
-            dist = numpy.linalg.norm(source - target)
+            if row.x and row.y and row.z:
+                target = numpy.array((row.x, row.y, row.z))
+                dist = numpy.linalg.norm(source - target)
+            else:
+                dist = 99999
             system = sapi.get_system_by_name(row.currentStarSystem)
         except TypeError:
-            log.debug("Couldn't get system distance.")
+            log.debug(f"Failed to get a distance, row x: {row.x} system: {row.currentStarSystem}")
             dist = 99999
             system = sapi.get_system_by_name(row.currentStarSystem)
         if row.taxation:
