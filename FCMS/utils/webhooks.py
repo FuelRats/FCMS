@@ -3,6 +3,7 @@
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from humanfriendly import format_number
+from sqlalchemy import or_
 
 from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User
 from ..utils import util
@@ -85,7 +86,8 @@ def schedule_jump(request, calendar_id, webhook_url):
     if not cdata:
         return None
     embed = DiscordEmbed(title='Scheduled Jump',
-                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has scheduled a jump.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has scheduled a jump.',
+                         color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:
@@ -98,6 +100,32 @@ def schedule_jump(request, calendar_id, webhook_url):
     embed.add_embed_field(name='Departure time', value=str(cdata.start))
     embed.set_timestamp()
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
+
+
+def generic_market_update(request, cid, items, webhook_url, message=None):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    market = request.dbsession.query(Market).filter(Market.carrier_id == cid).all()
+    data = {}
+
+    for item in market:
+
+        if item.categoryname == 'NonMarketable':
+            continue
+        if items and str(item.id) not in items:
+            continue
+
+        if item.stock > 0:
+            ldata = {'Selling': item.name, 'For': item.buyPrice, 'Quantity': item.stock}
+            data[item.name] = ldata
+        if item.demand > 0:
+            ldata = {'Buying': item.name, 'For': item.sellPrice, 'Quantity': item.deman}
+            data[item.name] = ldata
+    data['Current Location'] = mycarrier.currentStarSystem
+    data['Docking Access'] = mycarrier.dockingAccess
+    if message:
+        data['Message'] = message
+    return send_webhook(webhook_url, data, hooktype='generic')
 
 
 def market_update(request, cid, items, webhook_url, message=None):
@@ -191,7 +219,8 @@ def calendar_event(request, calendar_id, webhook_url):
     if not cdata:
         return None
     embed = DiscordEmbed(title='Event Scheduled',
-                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has scheduled an event.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} has scheduled an event.',
+                         color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:
@@ -213,7 +242,7 @@ def get_webhooks(request, cid):
     :param cid: Carrier ID
     :return: A list of webhooks, or false if none are set.
     """
-    hooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == cid).all()
+    hooks = request.dbsession.query(Webhook).filter(or_(Webhook.carrier_id == cid, Webhook.isGlobal)).all()
     if hooks:
         data = []
         for row in hooks:

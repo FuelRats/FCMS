@@ -380,6 +380,7 @@ def update_carrier(request, cid, user):
                 return None
         try:
             if mycarrier.callsign != jcarrier['name']['callsign']:
+                # Actually, it may very well happen, because FDev decided to CHANGE ALL THE NAMES!
                 log.error(f"Carrier callsign has changed! This should not happen! {mycarrier.callsign} "
                           f"stored, update has {jcarrier['name']['callsign']}. Refresh initiated by user {request.user.username if request.user else 'Not logged in'}.")
                 # Doublecheck that the owner is equal to the carrier.
@@ -389,6 +390,7 @@ def update_carrier(request, cid, user):
                         if ow.id == mycarrier.owner:
                             log.warning("Proceeding with update to carrier ID.")
                     else:
+                        # What? HOW THE FUCK does this happen? Verily it does, though.
                         log.error("Owner ID does NOT match, something has gone wrong. Abort.")
                         return None
                 else:

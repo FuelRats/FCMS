@@ -38,6 +38,8 @@ class Webhook(Base):
     jumpEvents = Column(Boolean, default=True)
     marketEvents = Column(Boolean, default=True)
     calendarEvents = Column(Boolean, default=True)
+    isGlobal = Column(Boolean, default=False)
+    description = Column(Text)
 
 
 Index('webhooks_index', Webhook.id, unique=True)

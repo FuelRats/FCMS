@@ -213,7 +213,10 @@ def oauth_finalize(request):
         user.carrierid = newcarrier.id
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.
-    except:
+        return {'project': 'OAuth flow completed. Carrier added.',
+                'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+
+    except AttributeError as e:
         user.no_carrier = True
         return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
                            'If you purchase one, go to your /my_carrier page and click the button there, '

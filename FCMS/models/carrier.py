@@ -3,13 +3,22 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    Binary,
     Boolean,
     DateTime,
     ForeignKey, Float, BigInteger,
 )
 
 from .meta import Base
+
+
+class EDDNCarrier(Base):
+    __tablename__ = 'carrier_eddn'
+    id = Column(Integer, primary_key=True)
+    carrier_id = Column(Integer, ForeignKey('carriers.id'))
+    createdAt = Column(DateTime)
+    updatedAt = Column(DateTime)
+    generatedAt = Column(DateTime)
+    sentAt = Column(DateTime)
 
 
 class CarrierExtra(Base):

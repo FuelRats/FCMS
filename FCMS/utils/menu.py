@@ -113,22 +113,27 @@ def populate_sidebar(request):
                      'selected_icon': 'fa-ship',
                      'unselected_icon': 'fa-ship',
                      },
+                    {'view': 'map',
+                     'name': 'Map',
+                     'linktarget': request.route_url('carrier_subview', cid=cid, subview='map'),
+                     'selected_icon': 'fa-map-marked-alt',
+                     'unselected_icon': 'fa-map'}
                 ]
         }
     sidebar_menuitems=[
         {
             'name': 'DSSA Carriers',
-            'link': '/search?dssa=True',
+            'link': '/search/dssa',
             'icon': 'inline_svgs/dssa.jinja2'
         },
         {
             'name': 'Nearest Carriers',
-            'link': '/search?type=Closest',
+            'link': '/search/closest',
             'icon': 'inline_svgs/starsystem.jinja2'
         },
         {
             'name': 'System Search',
-            'link': '/search?searchform=True',
+            'link': '/search',
             'icon': 'inline_svgs/itinerary.jinja2'
         }
     ]
