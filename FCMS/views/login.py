@@ -164,6 +164,7 @@ def oauth_finalize(request):
             log.debug("Looking for owner links...")
             # Do we have an owner link from the carrier?
             oc = request.dbsession.query(carrier.Carrier).fitler(carrier.Carrier.owner == user.id).one_or_none()
+            log.debug(f"OC: {oc}")
             if oc:
                 log.warning("We have an old carrier but no link from owner to it. Add.")
                 user.carrierid = oc.id
@@ -176,10 +177,12 @@ def oauth_finalize(request):
                     if oc.owner != user.id:
                         log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
                         oc.owner = user.id
+                    log.debug(f"Returning from update carrier case.")
                     return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                             'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         log.warning(f"No registered carrier for {user.username}. Add it.")
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
+        log.debug(f"Fetched coords from SAPI. {coords}")
         if not coords:
             coords = {"x": 0, "y": 0, "z": 0}
         newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'],
@@ -217,10 +220,11 @@ def oauth_finalize(request):
         user.carrierid = newcarrier.id
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.
+        return {'project': 'OAuth flow completed. Carrier added.',
+                'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+
     except:
         user.no_carrier = True
         return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
                            'If you purchase one, go to your /my_carrier page and click the button there, '
                            'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
-    return {'project': 'OAuth flow completed. Carrier added.',
-            'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
