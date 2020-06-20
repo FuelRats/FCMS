@@ -140,12 +140,13 @@ def settings_view(request):
                                     'carrier_settings': carrier_settings,
                                     'extra_settings': extra_settings,
                                     'carrier_image': myextra.carrier_image if myextra else None,
-                                    'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
+                                    'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings',
+                                    'deform': True}}
             except ValidationFailure as e:
                 carrier_settings = e.render()
                 logging.error(f"Carrier Validation failed! {e.error}")
                 # modal_data = {'load_fire', {'icon': 'error', 'message': 'Carrier settings invalid!'}}
-                return {{**cdata, 'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True,
+                return {{**cdata, 'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True, 'deform': True,
                          'carrier_settings': carrier_settings,
                          'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
                          'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
@@ -206,7 +207,7 @@ def settings_view(request):
                 extra_settings = e.render()
                 # modal_data = {'load_fire', {'icon': 'error', 'message': 'Something went wrong with that file upload.'}}
                 return {'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True,
-                        'carrier_settings': carrier_settings,
+                        'carrier_settings': carrier_settings, 'deform': True,
                         'extra_settings': extra_settings, 'carrier_image': myextra.carrier_image,
                         'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}
             request.dbsession.flush()
@@ -214,7 +215,7 @@ def settings_view(request):
                 request.dbsession.refresh(cex)
             return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
                                 'carrier_settings': carrier_settings,
-                                'extra_settings': extra_settings,
+                                'extra_settings': extra_settings, 'deform': True,
                                 'carrier_image': myextra.carrier_image if myextra else None,
                                 'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
 
