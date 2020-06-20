@@ -50,7 +50,9 @@
         {% endif %}
 
 {% endif %}
-
+{% if map %}
+{% include 'elements/map.jinja2' %}
+{% endif %}
 <script>
 function makeCarrierLink() {
   /* Get the text field */

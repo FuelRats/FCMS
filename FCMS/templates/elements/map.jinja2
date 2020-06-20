@@ -1,0 +1,33 @@
+<script>
+
+    var map = L.map('mapid', { crs: L.CRS.Simple, minZoom: -5, center: [0, 0] });
+    var bounds = [[-24000, -50000], [76000, 50000]];
+    var image = L.imageOverlay('/static/img/galaxy-with-regions.jpg', bounds).addTo(map);
+
+    map.fitBounds(bounds);
+    var yx = L.latLng;
+
+    function galmapCoords(mapx, mapy) {
+        let x = (mapx);
+        let y = (mapy) - 1750;
+
+        return L.latLng([y, x]);
+    }
+
+    function createGalmapMarker(title, x, y) {
+        let pinCoords = galmapCoords(x, y);
+
+        let html = title;
+        html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
+
+        L.marker(pinCoords, { title: title, alt: title, riseOnHover: true }).addTo(map).bindPopup(title);
+
+    }
+    createGalmapMarker("Sol", 0, 0);
+    {% if map.focus %}
+    map.setView([{{ map.focus.x }}, {{ map.focus.y }}], {{ map.focus.zoom }})
+    {% endif %}
+    {% for pin in map.pins %}
+    createGalmapMarker("{{pin.title}}", {{ pin.x }}, {{ pin.y }});
+    {% endfor %}
+</script>

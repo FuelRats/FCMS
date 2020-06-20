@@ -113,6 +113,11 @@ def populate_sidebar(request):
                      'selected_icon': 'fa-ship',
                      'unselected_icon': 'fa-ship',
                      },
+                    {'view': 'map',
+                     'name': 'Map',
+                     'linktarget': request.route_url('carrier_subview', cid=cid, subview='map'),
+                     'selected_icon': 'fa-map-marked-alt',
+                     'unselected_icon': 'fa-map'}
                 ]
         }
     sidebar_menuitems=[
