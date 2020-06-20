@@ -163,7 +163,7 @@ def oauth_finalize(request):
         else:
             log.debug("Looking for owner links...")
             # Do we have an owner link from the carrier?
-            oc = request.dbsession.query(carrier.Carrier).fitler(carrier.Carrier.owner == user.id).one_or_none()
+            oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == user.id).one_or_none()
             log.debug(f"OC: {oc}")
             if oc:
                 log.warning("We have an old carrier but no link from owner to it. Add.")
