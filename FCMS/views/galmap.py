@@ -19,7 +19,7 @@ def carrier_subview(request):
     for row in cs:
         if row.x == 0 and row.y == 0 and row.z == 0 or not row.z or not row.y or not row.x:
             continue
-        pins.append({'title': f'{row.callsign} - {from_hex(row.name)} ({row.currentStarSystem})', 'x': row.x, 'y': row.y})
+        pins.append({'title': f'{row.callsign} - {from_hex(row.name)} ({row.currentStarSystem})', 'x': row.x, 'y': row.z})
     print(pins)
     return {'map': {'pins': pins, 'focus': {'x': 0, 'y': 0, 'zoom': -5}}, 'user': userdata, 'sidebar': mymenu}
 
