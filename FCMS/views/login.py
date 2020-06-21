@@ -148,86 +148,99 @@ def oauth_callback(request):
 
 @view_config(route_name='oauth_finalize', renderer='../templates/login.jinja2')
 def oauth_finalize(request):
-
-    try:
-        jcarrier = capi.get_carrier(user)
-        services = jcarrier['market']['services']
-        if request.user.carrierid:
-            oc = request.dbsession.query(carrier.Carrier).filter(
-                carrier.Carrier.id == request.user.carrierid).one_or_none()
-            if not oc:
-                log.error("User has a carrier ID stored, but carrier table is missing that ID. Readd.")
-            else:
-                return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
-                        'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
+    if request.user.carrierid:
+        log.debug("User has a carrier ID stored. Check its integrity.")
+        oc = request.dbsession.query(carrier.Carrier).filter(
+            carrier.Carrier.id == request.user.carrierid).one_or_none()
+        if not oc:
+            log.error("User has a carrier ID stored, but carrier table is missing that ID. Readd.")
         else:
-            # Do we have an owner link from the carrier?
-            oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
-            if oc:
-                log.warning("We have an old carrier but no link from owner to it. Add.")
-                request.user.carrierid = oc.id
-                return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
-                        'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
-            else:
-                oc = request.dbsession.query(carrier.Carrier).filter(
-                    carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
-                if oc:
-                    log.warning(f"User {request.user.username} completed OAuth, but we already have their carrier. "
-                                f"Update it.")
-                    if oc.owner != request.user.id:
-                        log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
-                        oc.owner = request.user.id
-                    return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
-                            'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
-        log.warning(f"No registered carrier for {request.user.username}. Add it.")
-        coords = sapi.get_coords(jcarrier['currentStarSystem'])
-        if not coords:
-            coords = {"x": 0, "y": 0, "z": 0}
-        newcarrier = carrier.Carrier(owner=request.user.id, callsign=jcarrier['name']['callsign'],
-                                     name=jcarrier['name']['vanityName'],
-                                     currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
-                                     fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],
-                                     dockingAccess=jcarrier['dockingAccess'],
-                                     notoriousAccess=jcarrier['notoriousAccess'],
-                                     totalDistanceJumped=jcarrier['itinerary']['totalDistanceJumpedLY'],
-                                     currentJump=jcarrier['itinerary']['currentJump'],
-                                     taxation=jcarrier['finance']['taxation'], coreCost=jcarrier['finance']['coreCost'],
-                                     servicesCost=jcarrier['finance']['servicesCost'],
-                                     jumpsCost=jcarrier['finance']['jumpsCost'],
-                                     numJumps=jcarrier['finance']['numJumps'], hasCommodities=True,
-                                     hasCarrierFuel=True,
-                                     hasRearm=True if services['rearm'] == 'ok' else False,
-                                     hasRepair=True if services['repair'] == 'ok' else False,
-                                     hasRefuel=True if services['refuel'] == 'ok' else False,
-                                     hasShipyard=True if services['shipyard'] == 'ok' else False,
-                                     hasOutfitting=True if services['outfitting'] == 'ok' else False,
-                                     hasBlackMarket=True if services['blackmarket'] == 'ok' else False,
-                                     hasVoucherRedemption=True if services['voucherredemption'] == 'ok' else False,
-                                     hasExploration=True if services['exploration'] == 'ok' else False,
-                                     marketId=jcarrier['market']['id'],
-                                     cachedJson=json.dumps(jcarrier),
-                                     x=coords['x'],
-                                     y=coords['y'],
-                                     z=coords['z'],
-                                     trackedOnly=False,
-                                     lastUpdated=datetime.now())
-        request.user.no_carrier = False
-        request.dbsession.add(newcarrier)
-        request.dbsession.flush()
-        request.dbsession.refresh(newcarrier)
-        request.user.carrierid = newcarrier.id
-        # TODO: Inject rest of the data too.
-        # TODO: Redirect to my_carrier after delay.
-        return {'project': 'OAuth flow completed. Carrier added.',
-                'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+            log.warning("User has a carrier ID, and it's good to go. Go back to home page, with refreshed keys.")
+            return {'project': 'OAuth tokens have been refreshed. Taking you back to your carrier.',
+                    'meta': {'refresh': True, 'target': request.route_url('my_carrier'), 'delay': 5}}
 
-    except AttributeError as e:
-        request.user.no_carrier = True
-        log.debug(f"AttributeError Exception in Oauth finalize: {e}")
-        return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
-                           'If you purchase one, go to your /my_carrier page and click the button there, '
-                           'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
-    except IntegrityError as e:
-        log.debug(f"IntegrityError Exception in OAuth finalize: {e}")
-        return {'project': 'We\'re not sure what just happened! But we\'re trying to fix the problem, stand by...',
-                'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+    elif request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none():
+        log.debug("Carrier table has a carrier that refers to the user. Reset the ownership link.")
+        oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
+        request.user.carrierid = oc.id
+        return {'project': 'We found a carrier that seems to belong to you, but was not assigned correctly. This '
+                           'should now be fixed.',
+                'meta': {'refresh': True, 'target': request.route_url('my_carrier'), 'delay': 5}}
+    else:
+        jcarrier = capi.get_carrier(request.user)
+        if jcarrier:
+            cs = jcarrier['name']['callsign']
+            oc = request.dbsession.query(carrier.Carrier).filter(
+                carrier.Carrier.callsign == cs).one_or_none()
+            if oc:
+                log.debug("We have a carrier with a matching callsign.")
+                if oc.owner:
+                    log.debug(f"Carrier {oc.callsign} already claimed by {oc.owner}!")
+                    return {'project': 'Error: Your carrier seems to already be claimed by another account! Please report this.',
+                            'meta': {'refresh': True, 'target': request.route_url('my_carrier'), 'delay': 5}}
+                elif oc.trackedOnly:
+                    log.debug("Carrier is a tracked only carrier with no owner. Claim it.")
+                    oc.owner = request.user.id
+                    request.user.carrierid = oc.id
+                    return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
+                            'meta': {'refresh': True, 'target': request.route_url('my_carrier'), 'delay': 5}}
+        else:
+            log.debug(f"CAPI did not return a carrier for user. {user.request.username}")
+            return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
+                               'If you purchase one, go to your /my_carrier page and click the button there, '
+                               'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+
+        log.debug(f"We should be confident we're dealing with a new carrier at this point. Add for {request.user.username}")
+        try:
+            services = jcarrier['market']['services']
+            coords = sapi.get_coords(jcarrier['currentStarSystem'])
+            if not coords:
+                coords = {"x": 0, "y": 0, "z": 0}
+            newcarrier = carrier.Carrier(owner=request.user.id, callsign=jcarrier['name']['callsign'],
+                                         name=jcarrier['name']['vanityName'],
+                                         currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
+                                         fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],
+                                         dockingAccess=jcarrier['dockingAccess'],
+                                         notoriousAccess=jcarrier['notoriousAccess'],
+                                         totalDistanceJumped=jcarrier['itinerary']['totalDistanceJumpedLY'],
+                                         currentJump=jcarrier['itinerary']['currentJump'],
+                                         taxation=jcarrier['finance']['taxation'], coreCost=jcarrier['finance']['coreCost'],
+                                         servicesCost=jcarrier['finance']['servicesCost'],
+                                         jumpsCost=jcarrier['finance']['jumpsCost'],
+                                         numJumps=jcarrier['finance']['numJumps'], hasCommodities=True,
+                                         hasCarrierFuel=True,
+                                         hasRearm=True if services['rearm'] == 'ok' else False,
+                                         hasRepair=True if services['repair'] == 'ok' else False,
+                                         hasRefuel=True if services['refuel'] == 'ok' else False,
+                                         hasShipyard=True if services['shipyard'] == 'ok' else False,
+                                         hasOutfitting=True if services['outfitting'] == 'ok' else False,
+                                         hasBlackMarket=True if services['blackmarket'] == 'ok' else False,
+                                         hasVoucherRedemption=True if services['voucherredemption'] == 'ok' else False,
+                                         hasExploration=True if services['exploration'] == 'ok' else False,
+                                         marketId=jcarrier['market']['id'],
+                                         cachedJson=json.dumps(jcarrier),
+                                         x=coords['x'],
+                                         y=coords['y'],
+                                         z=coords['z'],
+                                         trackedOnly=False,
+                                         lastUpdated=datetime.now())
+            request.user.no_carrier = False
+            request.dbsession.add(newcarrier)
+            request.dbsession.flush()
+            request.dbsession.refresh(newcarrier)
+            request.user.carrierid = newcarrier.id
+            # TODO: Inject rest of the data too.
+            # TODO: Redirect to my_carrier after delay.
+            return {'project': 'OAuth flow completed. Carrier added.',
+                    'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+
+        except AttributeError as e:
+            request.user.no_carrier = True
+            log.debug(f"AttributeError Exception in Oauth finalize: {e}")
+            return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
+                               'If you purchase one, go to your /my_carrier page and click the button there, '
+                               'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+        except IntegrityError as e:
+            log.debug(f"IntegrityError Exception in OAuth finalize: {e}")
+            return {'project': 'We\'re not sure what just happened! But we\'re trying to fix the problem, stand by...',
+                    'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
