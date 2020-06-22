@@ -26,3 +26,13 @@ class Region(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Text)
     isPOI = Column(Boolean)
+
+
+class RouteCalendar(Base):
+    __tablename__ = 'route_calendar'
+    id = Column(Integer, primary_key=True)
+    route_id = Column(Integer, ForeignKey('routes.id'))
+    scheduled_departure = Column(DateTime)
+    isActive = Boolean
+    currentWaypoint = Column(Text)
+    isReversed = Column(Boolean)

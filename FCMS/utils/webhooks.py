@@ -1,12 +1,12 @@
 # Webhooks for carrier events. Can fire from EDDN hits or calendar create/delete events.
-from datetime import datetime
 
+from datetime import datetime, timedelta
 import requests
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from humanfriendly import format_number
 from sqlalchemy import or_
 
-from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User
+from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User, Route, Region
 from ..utils import util
 import json
 import logging
@@ -62,7 +62,8 @@ def calendar_generic(request, calendar_id, webhook_url):
     calendar = request.dbsession.query(Calendar).filter(Calendar.id == calendar_id).one_or_none()
     if calendar:
         generic = populate_webhook(request, Calendar.owner_id)
-        data = {'calendar_title': calendar.title, 'calendar_start': str(calendar.start), 'calendar_end': str(calendar.end),
+        data = {'calendar_title': calendar.title, 'calendar_start': str(calendar.start),
+                'calendar_end': str(calendar.end),
                 'calendar_url': calendar.url, 'calendar_allday': calendar.allday,
                 'calendar_departureSystem': calendar.departureSystem,
                 'calendar_arrivalSystem': calendar.arrivalSystem}
@@ -167,23 +168,37 @@ def market_update(request, cid, items, webhook_url, message=None):
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
 
 
-def announce_route_scheduled(request, cid, webhook_url):
+def announce_route_scheduled(request, cid, routeid, webhook_url):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    route = request.dbsession.query(Route).filter(Route.id == routeid).one_or_none()
     embed = DiscordEmbed(title='Route Departure Scheduled',
-                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is traveling a planned route.', color=242424,
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is traveling a planned route.',
+                         color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}/route/')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
     if extra:
         embed.set_image(url=request.storage.url(extra.carrier_image))
     else:
         embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
-    embed.add_embed_field(name='Departing from', value='The Bubble')
-    embed.add_embed_field(name='Headed to', value='Galactic Centre')
-    embed.add_embed_field(name='Starting from', value='Fuelum')
-    embed.add_embed_field(name='Waypoint 1', value='MCC 811')
-    embed.add_embed_field(name='Waypoint 2', value='Rodentia')
-    embed.add_embed_field(name='Final Destination', value='Sagittarius A*')
+    sr = request.dbsession.query(Region).filter(Region.id == route.start_region).one_or_none()
+    er = request.dbsession.query(Region).filter(Region.id == route.end_region).one_or_none()
+    tod = datetime.now()
+
+    embed.add_embed_field(name='Departing from', value=sr.name)
+    embed.add_embed_field(name='Headed to', value=er.name)
+    embed.add_embed_field(name='Starting from', value=route.startPoint)
+    wpcount = 1
+    tod = datetime.now()
+    for wp in json.loads(route.waypoints):
+        embed.add_embed_field(name=f'Waypoint {wpcount}', value=wp['system'], inline=True)
+        embed.add_embed_field(name=f'Layover', value=wp['duration'], inline=True)
+        ter = datetime.strptime(wp['duration'], "%H:%M:%S")
+        eta = tod + timedelta(hours=ter.hour, minutes=ter.minute, seconds=ter.second)
+        embed.add_embed_field(name='ETA', value=f'{str(eta)}')
+        tod = eta
+        wpcount = wpcount+1
+    embed.add_embed_field(name='Final Destination', value=route.endPoint)
     embed.add_embed_field(name='Departure Time', value=str(datetime.now()))
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
     embed.set_timestamp()

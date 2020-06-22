@@ -218,7 +218,8 @@ def closest_view(request):
             'carrier_search': True, 'sidebar': mymenu, 'view': 'Closest Carriers', 'extra': extra if extra else None}
 
 
-# TODO: This shit is nuts and needs to die in a fire. FIX IT!
+# This shit is nuts and needs to die in a fire. FIX IT!
+# This shit is slightly less shit now.
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search_view(request):
     request.response.headers.update({
