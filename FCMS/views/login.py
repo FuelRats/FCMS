@@ -9,6 +9,8 @@ from urllib.parse import urljoin
 from pyramid.view import view_config
 import pyramid.httpexceptions as exc
 from pyramid.security import remember, forget
+from sqlalchemy.exc import IntegrityError
+
 from ..models import user, carrier, ResetToken
 from ..utils import capi, sapi, util
 from ..utils.encryption import pwd_context
@@ -111,6 +113,9 @@ def register_view(request):
         res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()
         if res:
             return {'reg_failure': True, 'message': 'User exists!'}
+        res = request.dbsession.query(user.User).filter(user.User.cmdr_name == request.params['cmdr_name']).one_or_none()
+        if res:
+            return {'reg_failure': True, 'message': 'There is already a CMDR with that name registered.'}
         cryptpass = pwd_context.hash(request.params['pass'])
         apikey = hexlify(os.urandom(64)).decode()
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1,
@@ -146,39 +151,49 @@ def oauth_callback(request):
 
 @view_config(route_name='oauth_finalize', renderer='../templates/login.jinja2')
 def oauth_finalize(request):
-    user = request.user
+
     try:
-        jcarrier = capi.get_carrier(user)
+        log.debug(f"Attempting to get carrier to finalize oauth for {request.user.username}")
+        jcarrier = capi.get_carrier(request.user)
+        log.debug(f"jcarrier is {jcarrier}")
         services = jcarrier['market']['services']
         if request.user.carrierid:
+            log.debug(f"User {request.user.username} already has a carrierid {request.user.carrierid}")
             oc = request.dbsession.query(carrier.Carrier).filter(
                 carrier.Carrier.id == request.user.carrierid).one_or_none()
             if not oc:
                 log.error("User has a carrier ID stored, but carrier table is missing that ID. Readd.")
             else:
+                log.debug(f"User {request.user.username} completed Oauth reauthentication.")
                 return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                         'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
         else:
+            log.debug("Looking for owner links...")
             # Do we have an owner link from the carrier?
-            oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == user.id).one_or_none()
+            oc = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.owner == request.user.id).one_or_none()
             if oc:
                 log.warning("We have an old carrier but no link from owner to it. Add.")
-                user.carrierid = oc.id
+                request.user.carrierid = oc.id
+                return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
+                        'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
             else:
+                log.debug("No link, look for callsign...")
                 oc = request.dbsession.query(carrier.Carrier).filter(
                     carrier.Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
                 if oc:
-                    log.warning(f"User {user.username} completed OAuth, but we already have their carrier. Update it.")
-                    if oc.owner != user.id:
+                    log.warning(f"User {request.user.username} completed OAuth, but we already have their carrier. "
+                                f"Update it.")
+                    if oc.owner != request.user.id:
                         log.warning(f"Carrier {oc.callsign} had no owner, setting it.")
-                        oc.owner = user.id
+                        oc.owner = request.user.id
                     return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                             'meta': {'refresh': True, 'target': request.route_url('/my_carrier'), 'delay': 5}}
-        log.warning(f"No registered carrier for {user.username}. Add it.")
+        log.warning(f"No registered carrier for {request.user.username}. Add it.")
         coords = sapi.get_coords(jcarrier['currentStarSystem'])
+        log.debug(f"Fetched coords from SAPI. {coords}")
         if not coords:
             coords = {"x": 0, "y": 0, "z": 0}
-        newcarrier = carrier.Carrier(owner=user.id, callsign=jcarrier['name']['callsign'],
+        newcarrier = carrier.Carrier(owner=request.user.id, callsign=jcarrier['name']['callsign'],
                                      name=jcarrier['name']['vanityName'],
                                      currentStarSystem=jcarrier['currentStarSystem'], balance=jcarrier['balance'],
                                      fuel=jcarrier['fuel'], state=jcarrier['state'], theme=jcarrier['theme'],
@@ -206,20 +221,23 @@ def oauth_finalize(request):
                                      z=coords['z'],
                                      trackedOnly=False,
                                      lastUpdated=datetime.now())
-        user.no_carrier = False
+        request.user.no_carrier = False
         request.dbsession.add(newcarrier)
         request.dbsession.flush()
         request.dbsession.refresh(newcarrier)
-        user.carrierid = newcarrier.id
+        request.user.carrierid = newcarrier.id
         # TODO: Inject rest of the data too.
         # TODO: Redirect to my_carrier after delay.
         return {'project': 'OAuth flow completed. Carrier added.',
                 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
 
     except AttributeError as e:
-        user.no_carrier = True
+        request.user.no_carrier = True
+        log.debug(f"AttributeError Exception in Oauth finalize: {e}")
         return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
                            'If you purchase one, go to your /my_carrier page and click the button there, '
                            'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
-    return {'project': 'OAuth flow completed. Carrier added.',
-            'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
+    except IntegrityError as e:
+        log.debug(f"IntegrityError Exception in OAuth finalize: {e}")
+        return {'project': 'We\'re not sure what just happened! But we\'re trying to fix the problem, stand by...',
+                'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}

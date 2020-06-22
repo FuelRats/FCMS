@@ -68,6 +68,12 @@ def populate_sidebar(request):
                      'selected_icon': 'fa-code',
                      'unselected_icon': 'fa-code',
                      },
+                    {'view': 'routes',
+                     'name': 'Routes',
+                     'linktarget': request.route_url('my_carrier_subview', subview='routes'),
+                     'selected_icon': 'fa-route',
+                     'unselected_icon': 'fa-route',
+                     },
                 ]
         }
 
@@ -135,6 +141,11 @@ def populate_sidebar(request):
             'name': 'System Search',
             'link': '/search',
             'icon': 'inline_svgs/itinerary.jinja2'
+        },
+        {
+            'name': 'Galaxy Map',
+            'link': '/galmap',
+            'icon': 'inline_svgs/exploration.jinja2'
         }
     ]
     sidebar = {

@@ -1,13 +1,16 @@
+import json
 import os
 from binascii import hexlify
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
+import colander
+from deform import widget, Form, ValidationFailure
 from pyramid.view import view_config
 
 import pyramid.httpexceptions as exc
 from pyramid_storage.exceptions import FileNotAllowed
 
-from ..models import carrier, CarrierExtra, Calendar, Webhook
+from ..models import carrier, CarrierExtra, Calendar, Webhook, Region, Route
 
 from ..utils import carrier_data
 from ..utils import menu, user as usr, webhooks
@@ -15,6 +18,19 @@ from humanfriendly import format_timespan
 import logging
 
 log = logging.getLogger(__name__)
+
+
+def populate_routes(request, cid):
+    routes = []
+    route = request.dbsession.query(Route).filter(Route.carrier_id == cid)
+    for rt in route:
+        print(f"Populate {rt.route_name}")
+        sr = request.dbsession.query(Region).filter(Region.id == rt.start_region).one()
+        er = request.dbsession.query(Region).filter(Region.id == rt.end_region).one()
+        routes.append({'name': rt.route_name, 'end': rt.endPoint,
+                       'start': rt.startPoint, 'waypoints': json.loads(rt.waypoints), 'startRegion': sr.name,
+                       'endRegion': er.name})
+    return routes
 
 
 @view_config(route_name='my_carrier_subview', renderer='../templates/my_carrier_subview.jinja2')
@@ -66,7 +82,7 @@ def carrier_subview(request):
         if modal_data:
             data['modal'] = modal_data
 
-        data['calendar'] = carrier_data.populate_calendar(request,mycarrier.id)
+        data['calendar'] = carrier_data.populate_calendar(request, mycarrier.id)
         data['formadvanced'] = True
         data['apiKey'] = request.user.apiKey
         data['sidebar'] = menu.populate_sidebar(request)
@@ -84,6 +100,121 @@ def carrier_subview(request):
         data['sidebar'] = menu.populate_sidebar(request)
         data['subview'] = 'market'
         data['current_view'] = 'market'
+        return data
+    if view == 'routes':
+        choices = []
+        routechoices = []
+        for choice in request.dbsession.query(Region).all():
+            choices.append((choice.id, choice.name))
+        for route in request.dbsession.query(Route).filter(Route.carrier_id == mycarrier.id).all():
+            print(f"Append {route.id} as {route.route_name}")
+            routechoices.append((route.id, route.route_name))
+
+        class ScheduleSchema(colander.Schema):
+            selectroute = colander.SchemaNode(colander.Integer(),
+                                              widget=widget.SelectWidget(values=routechoices),
+                                              required=True, title='Select route')
+            departure_time = colander.SchemaNode(colander.DateTime(),
+                                                 widget=widget.DateTimeInputWidget(id='departuretime'),
+                                                 required=True)
+            reverse_route = colander.SchemaNode(colander.Boolean(),
+                                                widget=widget.CheckboxWidget(id='reverseroute'), required=True,
+                                                default=False)
+
+        class WaypointSchema(colander.Schema):
+            system = colander.SchemaNode(colander.String(),
+                                         widget=widget.AutocompleteInputWidget(
+                                             values='https://system.api.fuelrats.com/typeahead', min_length=3
+                                         ), id='systemfield')
+            duration = colander.SchemaNode(colander.Time(),
+                                           widget=widget.TimeInputWidget(),
+                                           title='Duration of stay', default=time(hour=0, minute=20))
+
+        class WaypointSequence(colander.SequenceSchema):
+            waypoints = WaypointSchema(title=None)
+
+        class RouteSchema(colander.Schema):
+            id = colander.SchemaNode(colander.Integer(),
+                                     widget=widget.HiddenWidget(),
+                                     required=False, default=None, missing=colander.drop)
+            carrier_id = colander.SchemaNode(colander.Integer(),
+                                             widget=widget.HiddenWidget(),
+                                             required=True, default=mycarrier.id)
+            routeName = colander.SchemaNode(colander.String(),
+                                            widget=widget.TextInputWidget(),
+                                            title="Name your route")
+            startRegion = colander.SchemaNode(colander.String(),
+                                              widget=widget.Select2Widget(
+                                                  values=choices
+                                              ), title="Starting Region")
+            startSystem = colander.SchemaNode(colander.String(),
+                                              widget=widget.AutocompleteInputWidget(
+                                                  values='https://system.api.fuelrats.com/typeahead', min_length=3
+                                              ), title="Starting system", id='startingsystem')
+            waypoints = WaypointSequence(title='Waypoints')
+            endRegion = colander.SchemaNode(colander.String(),
+                                            widget=widget.Select2Widget(
+                                                values=choices
+                                            ), title="Ending Region")
+            endSystem = colander.SchemaNode(colander.String(),
+                                            widget=widget.AutocompleteInputWidget(
+                                                values='https://system.api.fuelrats.com/typeahead', min_length=3
+                                            ), title="Destination System", id='destinationsystem')
+            description = colander.SchemaNode(colander.String(),
+                                              widget=widget.TextInputWidget(), title='Route description',
+                                              missing=colander.drop)
+
+        schema = RouteSchema()
+        routeschema = ScheduleSchema()
+        newrouteform = Form(schema, buttons=('submit',), formid='routeform')
+        scheduleform = Form(routeschema, buttons=('submit',), formid='scheduleform')
+        if request.POST:
+            print(request.POST)
+            if request.POST['__formid__'] == 'scheduleform':
+                print("Got a schedule form submit.")
+                print(request.POST)
+                try:
+                    appstruct = scheduleform.validate(request.POST.items())
+                    print(f"Schedule appstruct: {appstruct}")
+                    hooks = webhooks.get_webhooks(request, mycarrier.id)
+                    if hooks:
+                        for hook in hooks:
+                            log.debug(f"Process hook {hook['webhook_url']} type {hook['webhook_type']}")
+                            if hook['webhook_type'] == 'discord':
+                                webhooks.announce_route_scheduled(request, mycarrier.id, appstruct['selectroute'], hook['webhook_url'])
+
+                except ValidationFailure as e:
+                    print(f"Validation failed! {e}")
+            if request.POST['__formid__'] == 'routeform':
+                print("Got a new route submit")
+                try:
+                    appstruct = newrouteform.validate(request.POST.items())
+                    print(appstruct)
+                    waypoints = []
+                    for wp in appstruct['waypoints']:
+                        waypoints.append({'system': wp['system'], 'duration': str(wp['duration'])})
+                    newroute = Route(route_name=appstruct['routeName'], start_region=appstruct['startRegion'],
+                                     startPoint=appstruct['startSystem'], waypoints=json.dumps(waypoints),
+                                     endPoint=appstruct['endSystem'], end_region=appstruct['endRegion'],
+                                     description=appstruct['description'], carrier_id=mycarrier.id)
+                    request.dbsession.add(newroute)
+                    modal_data = {'load_fire': {'icon': 'success', 'message': 'Route added!'}}
+                except ValidationFailure as e:
+                    log.debug(f"Route form submission validation failed. {e}")
+
+        data = {}
+        if modal_data:
+            data['modal'] = modal_data
+        data['apiKey'] = request.user.apiKey
+        data['sidebar'] = menu.populate_sidebar(request)
+        data['subview'] = 'routes'
+        data['current_view'] = 'routes'
+        data['routes'] = populate_routes(request, mycarrier.id)
+        print(data['routes'])
+        data['formadvanced'] = True
+        data['deform'] = True
+        data['newrouteform'] = newrouteform.render()
+        data['scheduleform'] = scheduleform.render()
         return data
 
 
