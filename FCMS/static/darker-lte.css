@@ -14,11 +14,23 @@ body {
 }
 
 .deform-seq-add{
-  color: #0e84b5;
+  color: #ab3f3f;
 }
 
 .deform-seq-add:visited {
-  color: #00bfff;
+  color: #ab3f3f;
+}
+
+.deform-seq-add:hover {
+  color: #d65050
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  background-color: #ab3f3f;
+}
+
+.nav-pills .nav-link:not(.active):hover {
+  color: #d65050;
 }
 
 .main-footer{
