@@ -275,3 +275,14 @@ a.text-muted:hover {
   background-color: #ab3f3f;
 }
 
+.twitter-typeahead .tt-hint {
+  border-radius: 3px;
+}
+
+.tt-dropdown-menu {
+  background-color: #2b2b2b;
+}
+
+.tt-suggestion.tt-is-under-cursor {
+  background: #ab3f3f;
+}

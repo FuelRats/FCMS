@@ -1,0 +1,196 @@
+:root {
+  --padding: 2rem;
+}
+
+body.landing {
+  margin: 0;
+
+  font-family: "Open Sans", sans-serif;
+
+  background: bottom right / cover url(abs-carrier-fuelrats.jpg) #000000 no-repeat;
+  color: #ffffff;
+}
+
+body.landing header {
+  display: flex;
+
+  flex-flow: row wrap;
+  justify-content: space-between;
+
+  padding: var(--padding);
+}
+
+body.landing .title {
+  font-family: "Euro Caps", sans-serif;
+  display: flex;
+  align-items: center;
+
+  font-size: 3rem;
+  line-height: 1;
+}
+
+body.landing .logo {
+  width: 6rem;
+  height: 6rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+body.landing .logo svg {
+  color: white;
+}
+
+body.landing .content {
+  display: grid;
+  grid-template:
+    "statistic statistic map" min-content
+    "searches searches map" min-content
+    ". . map" min-content
+    / minmax(100px, 1fr) minmax(100px, 1fr) 2fr;
+  justify-content: center;
+}
+
+body.landing .map {
+  display: flex;
+
+  grid-area: map;
+
+  justify-content: center;
+
+  max-width: fit-content;
+  max-height: 100vh;
+  margin: var(--padding);
+  padding: 1rem;
+
+  text-align: center;
+
+  border-radius: 0.5rem;
+
+  background: rgba(26, 26, 26, 0.4);
+  backdrop-filter: blur(5px);
+}
+
+body.landing .statistic {
+  text-align: center;
+  font-family: "Euro Caps", sans-serif;
+  font-size: clamp(10px, 2vw, 2rem);
+  padding: var(--padding);
+}
+
+body.landing .stat {
+  font-size: 6em;
+  line-height: 0.9;
+}
+
+body.landing .statistic .label {
+  white-space: nowrap;
+}
+
+body.landing .searches {
+  grid-area: searches;
+  padding: var(--padding);
+}
+
+body.landing .search {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+/* body.landing input,
+body.landing button {
+  padding: 0.5rem 1rem;
+  margin: 0.1rem;
+
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0.25rem;
+
+  font-family: "Open Sans", sans-serif;
+
+  color: white;
+} */
+
+/* body.landing input[type=submit],
+body.landing button {
+  background-color: #ab3f3f;
+  border-color: #ab3f3f;
+} */
+
+/* body.landing input[type=submit]:hover,
+body.landing button:hover {
+  background-color: #d65050;
+  border-color: #d65050;
+} */
+
+/* body.landing input[type=submit]:focus,
+body.landing button:focus {
+  background-color: #d65050;
+  border-color: white;
+  outline: none;
+} */
+
+/* body.landing input[type=submit]:active,
+body.landing button:active {
+  border-color: #d65050 #d65050 #ffffff #d65050;
+} */
+
+body.landing .search input[type=search] {
+  background: rgba(26, 26, 26, 0.4);
+  border-color: rgba(43, 43, 43, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+/* body.landing .search input[type=search]:focus {
+  outline: none;
+  border-color: #ab3f3f;
+} */
+
+body.landing form.search input[type=search] {
+  flex-grow: 1;
+}
+
+@media screen and (max-width: 900px) {
+  body.landing header {
+    flex-flow: column;
+  }
+
+  body.landing .title {
+    order: 1;
+  }
+
+  body.landing .user {
+    align-self: flex-end;
+    padding-bottom: 1rem;
+  }
+
+  body.landing .content {
+    grid-template:
+    "statistic statistic" min-content
+    "searches searches" min-content
+    "map map" min-content
+    / minmax(100px, 450px) minmax(100px, 450px);
+  }
+
+  body.landing .statistic {
+    font-size: clamp(10px, 3vw, 2rem);
+  }
+}
+
+@media screen and (max-width: 500px) {
+  :root {
+    --padding: 1rem;
+  }
+
+  body.landing .title {
+    flex-flow: row wrap;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .title {
+    font-size: clamp(20px, 10vw, 3rem);
+  }
+}

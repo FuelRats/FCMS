@@ -1,0 +1,42 @@
+{% include "header.jinja2" %}
+<body class="landing">
+  <header>
+    <div class="title">
+      <span class="logo">{% include 'inline_svgs/logo.jinja2' %}</span>
+      Fleet Carrier <br>Management System
+    </div>
+
+    <div class="user">
+      <a class="button" href="/login">Log in</a>
+      <a class="button" href="/register">Register</a>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="tracked-carriers statistic">
+      <div class="stat">537</div><!-- TODO get actual number of carriers tracked -->
+      <div class="label">Carriers Tracked</div>
+    </div>
+    
+    <div class="registered-carriers statistic">
+      <div class="stat">204</div><!-- TODO get actual number of carriers registered -->
+      <div class="label">Carriers Registered</div>
+    </div>
+
+    <div class="searches">
+      <form class="system search" action="/search">
+        <input type="search" name="systemSearch" placeholder="Search by System" class="form-control">
+        <button type="submit" value="Search" class="btn btn-primary">
+      </form>
+
+      <form class="carrier search" action="/search/system">
+        <input type="search" name="carrierSearch" placeholder="Search by Carrier ID or CMDR name" class="form-control">
+        <button type="submit" value="Search" class="btn btn-primary">
+      </form>
+    </div>
+
+    <div class="map">
+      <img src="galaxy_regions_4096x4096.jpg" style="max-height: 100vh; max-width: 100%;"><!-- TODO get dynamic map -->
+    </div>
+  </div>
+</body>
