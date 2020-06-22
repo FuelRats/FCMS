@@ -185,7 +185,7 @@ def oauth_finalize(request):
                     return {'project': 'Oauth complete. Redirecting you to carrier homepage.',
                             'meta': {'refresh': True, 'target': request.route_url('my_carrier'), 'delay': 5}}
         else:
-            log.debug(f"CAPI did not return a carrier for user. {user.request.username}")
+            log.debug(f"CAPI did not return a carrier for user. {request.user.username}")
             return {'project': 'Failed to retrieve your carrier. But no worries, you can still use our site! '
                                'If you purchase one, go to your /my_carrier page and click the button there, '
                                'and we will add it!', 'meta': {'refresh': True, 'target': '/my_carrier', 'delay': 5}}
