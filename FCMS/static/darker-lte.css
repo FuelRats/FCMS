@@ -513,7 +513,7 @@ body.landing .searches .form-control {
 }
 
 body.landing .searches input[type=search] {
-  background: rgba(26, 26, 26, 0.4);
+  background: rgba(26, 26, 26, 0.4) !important;
   border-color: rgba(43, 43, 43, 0.8);
   backdrop-filter: blur(5px);
 }
@@ -524,6 +524,30 @@ body.landing .searches input[type=search]:focus {
 
 body.landing .searches input[type=search] {
   flex-grow: 1;
+}
+
+body.landing .searches .item-system label {
+  display: none;
+}
+body.landing .searches .item-system {
+  margin: 0;
+}
+
+body.landing .form-control:focus {
+  border-color: #ab3f3f;
+}
+
+body.landing fieldset.deform-form-fieldset {
+  width: 100%;
+}
+
+body.landing input.tt-hint {
+  background: rgba(26, 26, 26, 0.4) !important;
+  backdrop-filter: blur(5px);
+}
+
+body.landing .tt-query {
+  border-color: rgba(43, 43, 43, 0.8);
 }
 
 @media screen and (max-width: 900px) {
