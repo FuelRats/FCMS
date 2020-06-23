@@ -131,44 +131,6 @@ body.landing .search .form-control {
   color: #dddddd;
 }
 
-/* body.landing input,
-body.landing button {
-  padding: 0.5rem 1rem;
-  margin: 0.1rem;
-
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 0.25rem;
-
-  font-family: "Open Sans", sans-serif;
-
-  color: white;
-} */
-
-/* body.landing input[type=submit],
-body.landing button {
-  background-color: #ab3f3f;
-  border-color: #ab3f3f;
-} */
-
-/* body.landing input[type=submit]:hover,
-body.landing button:hover {
-  background-color: #d65050;
-  border-color: #d65050;
-} */
-
-/* body.landing input[type=submit]:focus,
-body.landing button:focus {
-  background-color: #d65050;
-  border-color: white;
-  outline: none;
-} */
-
-/* body.landing input[type=submit]:active,
-body.landing button:active {
-  border-color: #d65050 #d65050 #ffffff #d65050;
-} */
-
 body.landing .search input[type=search] {
   background: rgba(26, 26, 26, 0.4);
   border-color: rgba(43, 43, 43, 0.8);
