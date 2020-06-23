@@ -1,6 +1,6 @@
 {% include "header.jinja2" %}
 <body class="landing">
-  <header>
+  <header class="landing-header">
     <div class="title">
       <span class="logo">{% include 'inline_svgs/logo.jinja2' %}</span>
       Fleet Carrier <br>Management System
@@ -39,4 +39,6 @@
       <img src="galaxy_regions_4096x4096.jpg" style="max-height: 100vh; max-width: 100%;"><!-- TODO get dynamic map -->
     </div>
   </div>
+
+  {% include "footer.jinja2" %}
 </body>
