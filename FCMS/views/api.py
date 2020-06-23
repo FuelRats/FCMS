@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 
 from pyramid.view import view_config
@@ -6,6 +7,7 @@ import pyramid.httpexceptions as exc
 from pyramid_storage.exceptions import FileNotAllowed
 
 from ..models import carrier, CarrierExtra, Calendar, Webhook, User, Carrier
+from ..models.routes import RouteCalendar, Route
 
 from ..utils import carrier_data
 from ..utils import menu, user as usr, webhooks
@@ -54,14 +56,38 @@ def api_view(request):
                             update_carrier(request, mycarrier.id, request.user)
                             request.dbsession.flush()
                             request.dbsession.refresh(mycarrier)
-                    if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
-                        if 'Body' in data:
-                            res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
-                                                         hook['webhook_url'], body=data['Body'])
-                        else:
-                            res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
-                                                         hook['webhook_url'])
-                        log.debug(f"Hook result: {res}")
+                    print("Check for route schedules...")
+                    rc = request.dbsession.query(RouteCalendar).filter(RouteCalendar.carrier_id == mycarrier.id)
+                    if rc:
+                        print(f"Have RC. {rc}")
+                        for row in rc:
+                            print(f"Process Calendar {row}")
+                            if row.isActive:
+                                print(f"Active route calendar.")
+                                route = request.dbsession.query(Route).filter(Route.id == row.route_id).one_or_none()
+                                waypoints = json.loads(route.waypoints)
+                                for wp in waypoints:
+                                    print(wp)
+                                    if wp['system'] == data['SystemName']:
+                                        print("System is on route!")
+                                        row.currentWaypoint = data['SystemName']
+                                        request.dbsession.flush()
+                                        request.dbsession.refresh(row)
+                                        # Jump is to a route waypoint, fire route jumps instead and update CWP.
+                                        if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
+                                            res = webhooks.announce_route_jump(request, mycarrier.id, row.id,
+                                                                               hook['webhook_url'])
+                                            log.debug(f"Route jump result: {res}")
+
+                    else:
+                        if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
+                            if 'Body' in data:
+                                res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
+                                                             hook['webhook_url'], body=data['Body'])
+                            else:
+                                res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
+                                                             hook['webhook_url'])
+                            log.debug(f"Hook result: {res}")
 
         elif data['event'] == 'CarrierJumpCancelled':
             print("Jump cancelled!")
