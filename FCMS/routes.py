@@ -24,3 +24,5 @@ def includeme(config):
     config.add_route('galmap', 'galmap')
     config.add_route('route_search', '/search/route')
     config.add_route('home', '/fallback')
+    config.add_route('routes', '/routes')
+    config.add_route('route_view', '/routes/{rid}')

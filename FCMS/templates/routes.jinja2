@@ -1,0 +1,203 @@
+{% include "header.jinja2" %}
+{% include "dynamic_sidebar.jinja2" %}
+
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-darker">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav navbar-darker">
+      <li class="nav-item navbar-darker">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/my_carrier" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="#" class="nav-link">Routes</a>
+      </li>
+    </ul>
+
+    <!-- SEARCH FORM -->
+    <form class="form-inline ml-3" action="/search">
+      <div class="input-group input-group-sm">
+        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" name="term">
+        <div class="input-group-append">
+          <button class="btn btn-navbar" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </nav>
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">Routes</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="/my_carrier">Home</a></li>
+              <li class="breadcrumb-item active">Routes</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+      <!-- Main content -->
+  {% if routes %}
+    <section class="content">
+      <div class="container-fluid">
+          <!-- .card -->
+          <div class="card primary">
+            <div class="card-header border-0">
+              <h3 class="card-title">Active Routes</h3>
+                {% if extra %}
+                    <br><span class="text-muted">{{ extra }}</span>
+                {% endif %}
+                <div class="card-tools">
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <a href="#" class="btn btn-tool btn-sm">
+                    <i class="fas fa-bars"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-striped table-valign-middle">
+                  <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Serviced by</th>
+                        <th>Owner</th>
+                        <th>Startpoint</th>
+                        <th>Destination</th>
+                        <th>Departure time</th>
+                    </tr>
+                  </thead>
+                    {% for route in routes %}
+                    <tr>
+                        <td><a href="/routes/{{ route.route_id }}">{{ route.route_name }}</a></td>
+                        <td><a href="/carrier/{{ route.carrier_callsign }}">{{ route.carrier_callsign }} {{ route.carrier_name }}</a></td>
+                        <td>{{ route.carrier_owner }}</td>
+                        <td><span class="text-muted">{{ route.start_region }}</span><br>{{ route.route_startPoint }}</td>
+                        <td><span class="text-muted">{{ route.end_region }}</span><br>{{ route.route_endPoint }}</td>
+                        <td>{{ route.scheduled_departure }}</td>
+                    </tr>
+                    {% endfor %}
+
+                </table>
+              </div>
+          </div>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+{% endif %}
+{% if route %}
+    <section class="content">
+      <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg">  <!-- .card -->
+          <div class="card primary">
+            <div class="card-header border-0">
+              <h3 class="card-title">Carrier Information</h3>
+              <div class="card-body table-responsive p-0">
+                  <div class="text-center text-primary">
+                      <p>{{ route.carrier_name }}</p>
+                  <img class="img-responsive"
+                       src="{{ request.storage.url(route.carrier_image) or "/static/img/carrier_default.png" }}"
+                       alt="User profile picture"
+                       style="object-fit: contain; height:250px; width:100%">
+                </div>
+                  <p class="text-muted text-center">{{ route.carrier_callsign }}
+                  <p class="text-muted text-center">{{ route.carrier_motd }}</p>
+                  <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <b>Owner</b> <a class="float-right">{{ route.carrier_owner or "Unknown" }}</a>
+                  </li>
+                  <li class="list-group-item">
+                    <b>Docking Access</b> <a class="float-right">{{ route.docking_access.title() or "Unknown" }}</a>
+                  </li>
+                  <li class="list-group-item">
+                    <b>Notorious Access</b> <a class="float-right">{{ "Yes" if route.notorious_access or "No" }}</a>
+                  </li>
+                  </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="col-lg">
+          <div class="card primary">
+            <div class="card-header border-0">
+              <h3 class="card-title">Route Information</h3>
+            </div>
+          <div class="card-body">
+              <div class="card-body table-responsive p-0">
+              <table class="table">
+                <thead>
+                <tr>
+                    <th>Waypoint</th>
+                    <th>Layover in system</th>
+                    <th>Estimated Time of Departure</th>
+
+                </tr>
+                </thead>
+                    {% if route.route_startPoint == route.currentWaypoint %}
+                    <tr style="color: #00A000">
+                    {% else %}
+                    <tr>
+                    {% endif %}
+                        <td>{{ route.route_startPoint }}</td>
+                        <td>---</td>
+                        <td>{{ route.scheduled_departure }}</td>
+                        {% set tod = route.scheduled_departure %}
+                    </tr>
+                    {% for waypoint in route.route_waypoints %}
+                    {% if waypoint.system == route.current_waypoint %}
+                    <tr style="color: #00A000">
+                    {% else %}
+                    <tr>
+                    {% endif %}
+                        <td>{{ waypoint.system }}</td>
+                        <td>{{ waypoint.duration }}</td>
+                        <td>{{ tod }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if route.endPoint == route.current_waypoint %}
+                    <tr style="color: #00A000">
+                    {% else %}
+                    <tr>
+                    {% endif %}
+                        <td>{{ route.route_endPoint }}</td>
+                        <td>---</td>
+                        <td>---</td>
+                    </tr>
+
+                    </table>
+</div>
+
+
+
+
+
+              </div>
+            </div>
+          </div>
+      </div>
+      </div>
+    </section>
+
+
+
+{% endif %}
+{% if error %}
+<p>Well, something went horribly wrong.</p>
+{% endif %}
+{% include "footer.jinja2" %}

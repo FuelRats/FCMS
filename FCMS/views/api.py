@@ -36,7 +36,7 @@ def api_view(request):
     if pvars['key'] != user.apiKey:
         print("Bad key.")
         raise exc.HTTPBadRequest(detail='Invalid API key.')
-    if pvars['cmdr'] != user.cmdr_name:
+    if pvars['cmdr'].lower() != user.cmdr_name.lower():
         print("CMDR name mismatch")
         raise exc.HTTPBadRequest(detail='Data not for correct CMDR.')
     else:

@@ -44,7 +44,7 @@ def populate_schedule(request, cid):
         rt = request.dbsession.query(Route).filter(Route.id == rc.route_id).one_or_none()
         routes.append({'name': rt.route_name, 'scheduled_departure': rc.scheduled_departure,
                        'currentWaypoint': rc.currentWaypoint, 'isReversed': rc.isReversed,
-                       'id': rc.id, 'is_active': rc.isActive})
+                       'id': rc.id, 'is_active': rc.isActive, 'url': f'/routes/{rc.route_id}'})
     return routes
 
 
@@ -235,7 +235,10 @@ def carrier_subview(request):
                                             title="Name your route")
             startRegion = colander.SchemaNode(colander.String(),
                                               widget=widget.Select2Widget(
-                                                  values=choices
+                                                  values=choices,
+                                                  css_class='select2 select2-container select2-container--default '
+                                                            'select2-container--below select2-container--focus ',
+                                                            style='width:100%'
                                               ), title="Starting Region")
             startSystem = colander.SchemaNode(colander.String(),
                                               widget=widget.AutocompleteInputWidget(
@@ -244,7 +247,10 @@ def carrier_subview(request):
             waypoints = WaypointSequence(title='Waypoints')
             endRegion = colander.SchemaNode(colander.String(),
                                             widget=widget.Select2Widget(
-                                                values=choices
+                                                values=choices,
+                                                css_class='select2 select2-container select2-container--default '
+                                                          'select2-container--below select2-container--focus',
+                                                style='width:100%'
                                             ), title="Ending Region")
             endSystem = colander.SchemaNode(colander.String(),
                                             widget=widget.AutocompleteInputWidget(
@@ -260,7 +266,7 @@ def carrier_subview(request):
         scheduleform = Form(routeschema, buttons=('submit',), formid='scheduleform')
         if request.POST:
             print(request.POST)
-            if request.POST['delete-event']:
+            if 'delete-event' in request.POST:
                 print("Got a delete request for a route.")
                 rt = request.dbsession.query(Route).filter(Route.id == request.POST['delete-event']).one_or_none()
                 if rt:
