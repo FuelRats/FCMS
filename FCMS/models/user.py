@@ -25,6 +25,9 @@ class User(Base):
     banned = Column(Boolean)
     cachedJson = Column(Text)
     apiKey = Column(Text)
+    avatar = Column(Text)
+    squadron = Column(Text)
+    squadron_decal = Column(Text)
     lastUpdated = Column(DateTime)
 
 

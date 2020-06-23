@@ -25,14 +25,16 @@ class Region(Base):
     __tablename__ = 'regions'
     id = Column(Integer, primary_key=True)
     name = Column(Text)
-    isPOI = Column(Boolean)
+    isPOI = Column(Boolean, default=False)
 
 
 class RouteCalendar(Base):
     __tablename__ = 'route_calendar'
     id = Column(Integer, primary_key=True)
     route_id = Column(Integer, ForeignKey('routes.id'))
+    carrier_id = Column(Integer, ForeignKey('carriers.id'))
     scheduled_departure = Column(DateTime)
-    isActive = Boolean
+    isActive = Column(Boolean, default=False)
     currentWaypoint = Column(Text)
-    isReversed = Column(Boolean)
+    isReversed = Column(Boolean, default=False)
+

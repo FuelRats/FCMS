@@ -7,6 +7,7 @@ from humanfriendly import format_number
 from sqlalchemy import or_
 
 from ..models import Carrier, Calendar, CarrierExtra, Webhook, Market, User, Route, Region
+from ..models.routes import RouteCalendar
 from ..utils import util
 import json
 import logging
@@ -168,12 +169,16 @@ def market_update(request, cid, items, webhook_url, message=None):
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
 
 
-def announce_route_scheduled(request, cid, routeid, webhook_url):
+def announce_route_activated(request, cid, routeid, webhook_url):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
-    route = request.dbsession.query(Route).filter(Route.id == routeid).one_or_none()
-    embed = DiscordEmbed(title='Route Departure Scheduled',
-                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is traveling a planned route.',
+    print(f"Schedule for RC {routeid}")
+    rc = request.dbsession.query(RouteCalendar).filter(RouteCalendar.id == routeid).one_or_none()
+    print(f"RC is {rc.route_id}")
+    route = request.dbsession.query(Route).filter(Route.id == rc.route_id).one_or_none()
+    print(f"Route is {route}")
+    embed = DiscordEmbed(title='Route Activated',
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is preparing to depart.',
                          color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}/route/')
     embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
@@ -183,13 +188,57 @@ def announce_route_scheduled(request, cid, routeid, webhook_url):
         embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
     sr = request.dbsession.query(Region).filter(Region.id == route.start_region).one_or_none()
     er = request.dbsession.query(Region).filter(Region.id == route.end_region).one_or_none()
-    tod = datetime.now()
+
+    embed.add_embed_field(name='Departing from', value=sr.name if not rc.isReversed else er.name)
+    embed.add_embed_field(name='Headed to', value=er.name)
+    embed.add_embed_field(name='Starting from', value=route.startPoint if not rc.isReversed else route.endPoint)
+    wpcount = 1
+    tod = rc.scheduled_departure
+    if rc.isReversed:
+        waypoints = reversed(json.loads(route.waypoints))
+    else:
+        waypoints = json.loads(route.waypoints)
+    for wp in waypoints:
+        embed.add_embed_field(name=f'Waypoint {wpcount}', value=wp['system'], inline=True)
+        embed.add_embed_field(name=f'Layover', value=wp['duration'], inline=True)
+        ter = datetime.strptime(wp['duration'], "%H:%M:%S")
+        eta = tod + timedelta(hours=ter.hour, minutes=ter.minute, seconds=ter.second)
+        embed.add_embed_field(name='ETA', value=f'{str(eta)}')
+        tod = eta
+        wpcount = wpcount + 1
+    embed.add_embed_field(name='Final Destination', value=route.endPoint if not rc.isReversed else route.startPoint)
+    embed.add_embed_field(name='Departure Time', value=str(rc.scheduled_departure))
+    embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
+    embed.set_timestamp()
+    return send_webhook(webhook_url, 'Carrier Route announced', hooktype='discord', myembed=embed)
+
+
+def announce_route_scheduled(request, cid, routeid, webhook_url):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    print(f"Routeid is {routeid}")
+    rc = request.dbsession.query(RouteCalendar).filter(RouteCalendar.id == routeid).one_or_none()
+    print(f"RC is {rc}")
+    route = request.dbsession.query(Route).filter(Route.id == rc.route_id).one_or_none()
+
+    embed = DiscordEmbed(title='Route Departure Scheduled',
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is traveling a planned '
+                                     f'route.',
+                         color=242424,
+                         url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}/routeschedule/{rc.id}')
+    embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    if extra:
+        embed.set_image(url=request.storage.url(extra.carrier_image))
+    else:
+        embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
+    sr = request.dbsession.query(Region).filter(Region.id == route.start_region).one_or_none()
+    er = request.dbsession.query(Region).filter(Region.id == route.end_region).one_or_none()
+    tod = rc.scheduled_departure
 
     embed.add_embed_field(name='Departing from', value=sr.name)
     embed.add_embed_field(name='Headed to', value=er.name)
     embed.add_embed_field(name='Starting from', value=route.startPoint)
     wpcount = 1
-    tod = datetime.now()
     for wp in json.loads(route.waypoints):
         embed.add_embed_field(name=f'Waypoint {wpcount}', value=wp['system'], inline=True)
         embed.add_embed_field(name=f'Layover', value=wp['duration'], inline=True)
@@ -197,9 +246,9 @@ def announce_route_scheduled(request, cid, routeid, webhook_url):
         eta = tod + timedelta(hours=ter.hour, minutes=ter.minute, seconds=ter.second)
         embed.add_embed_field(name='ETA', value=f'{str(eta)}')
         tod = eta
-        wpcount = wpcount+1
+        wpcount = wpcount + 1
     embed.add_embed_field(name='Final Destination', value=route.endPoint)
-    embed.add_embed_field(name='Departure Time', value=str(datetime.now()))
+    embed.add_embed_field(name='Departure Time', value=str(rc.scheduled_departure))
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
     embed.set_timestamp()
     return send_webhook(webhook_url, 'Carrier Route announced', hooktype='discord', myembed=embed)
@@ -223,6 +272,34 @@ def announce_jump(request, cid, target, webhook_url, body=None):
         embed.add_embed_field(name='Orbiting ', value=body)
     embed.set_timestamp()
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
+
+
+def announce_route_jump(request, cid, rid, webhook_url):
+    mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
+    rc = request.dbsession.query(RouteCalendar).filter(RouteCalendar.id == rid).one_or_none()
+    route = request.dbsession.query(Route).filter(Route.id == rc.route_id).one_or_none()
+    extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    sr = request.dbsession.query(Region).filter(Region.id == route.start_region).one_or_none()
+    er = request.dbsession.query(Region).filter(Region.id == route.end_region).one_or_none()
+
+    embed = DiscordEmbed(title='Route Jump Underway',
+                         description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is jumping.', color=242424,
+                         url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    embed.set_author(name='Fleetcarrier.space', url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
+    if extra:
+        embed.set_image(url=request.storage.url(extra.carrier_image))
+    else:
+        embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
+    embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
+    embed.add_embed_field(name='Departing from', value=mycarrier.currentStarSystem)
+    embed.add_embed_field(name='Headed to', value=rc.currentWaypoint)
+    embed.add_embed_field(name='Destination', value=route.endPoint)
+    embed.add_embed_field(name="Servicing route", value=route.route_name)
+    embed.add_embed_field(name="Start Region", value=sr.name)
+    embed.add_embed_field(name="Destination Region", value=er.name)
+    embed.add_embed_field(name="Planned time on station", value=None)
+    embed.set_timestamp()
+    return send_webhook(webhook_url, 'Carrier Jumping Route', hooktype='discord', myembed=embed)
 
 
 def cancel_jump(request, cid, webhook_url, override=False):
