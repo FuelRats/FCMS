@@ -223,7 +223,7 @@ body.landing form.search input[type=search] {
 }
 
 @media screen and (max-width: 400px) {
-  .title {
+  body.landing .title {
     font-size: clamp(20px, 10vw, 3rem);
   }
 }
