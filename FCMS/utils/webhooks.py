@@ -270,8 +270,8 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
     embed.add_embed_field(name='Departing from', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Headed to', value=target)
-    embed.add_embed_field(name='Estimated lockdown time', value=etl)
-    embed.add_embed_field(name='Estimated jump time', value=etd)
+    embed.add_embed_field(name='Estimated lockdown time', value=str(etl))
+    embed.add_embed_field(name='Estimated jump time', value=str(etd))
     if body:
         embed.add_embed_field(name='Orbiting ', value=body)
     embed.set_timestamp()
