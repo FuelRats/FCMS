@@ -526,6 +526,26 @@ body.landing .searches input[type=search] {
   flex-grow: 1;
 }
 
+body.landing .searches .item-system label {
+  display: none;
+}
+body.landing .searches .item-system {
+  margin: 0;
+}
+
+body.landing fieldset.deform-form-fieldset {
+  width: 100%;
+}
+
+body.landing input.tt-hint {
+  background: rgba(26, 26, 26, 0.4) !important;
+  backdrop-filter: blur(5px);
+}
+
+body.landing .tt-query {
+  border-color: rgba(43, 43, 43, 0.8);
+}
+
 @media screen and (max-width: 900px) {
   body.landing .landing-header {
     flex-flow: column;
