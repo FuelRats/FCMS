@@ -37,7 +37,7 @@ def populate_routes(request, cid):
 
 def populate_schedule(request, cid):
     routes = []
-    route = request.dbsession.query(RouteCalendar).filter(Route.carrier_id == cid)
+    route = request.dbsession.query(RouteCalendar).filter(RouteCalendar.carrier_id == cid)
     for rc in route:
         print(f"Populate RC {rc.id}")
         print(f"Reversed is {rc.isReversed}")

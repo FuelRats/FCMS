@@ -47,7 +47,7 @@ tests_require = [
 
 setup(
     name='FCMS',
-    version='1.0a',
+    version='1.1a',
     description='FCMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
