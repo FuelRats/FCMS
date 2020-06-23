@@ -513,7 +513,7 @@ body.landing .searches .form-control {
 }
 
 body.landing .searches input[type=search] {
-  background: rgba(26, 26, 26, 0.4);
+  background: rgba(26, 26, 26, 0.4) !important;
   border-color: rgba(43, 43, 43, 0.8);
   backdrop-filter: blur(5px);
 }
