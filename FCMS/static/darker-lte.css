@@ -352,13 +352,16 @@ a.text-muted:hover {
   border-color: #ab3f3f;
 }
 
-.form-control {
+.form-control,
+.input-group-text {
   border-color: #333333;
 }
 
 .form-control:focus:not(.tt-query),
 .form-control:not(.tt-query),
-.twitter-typeahead .tt-hint {
+.twitter-typeahead .tt-hint,
+.login-card-body .input-group .input-group-text,
+.register-card-body .input-group .input-group-text {
   background-color: #111111 !important;
   color: #dddddd;
 }
