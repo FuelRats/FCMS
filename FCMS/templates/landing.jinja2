@@ -15,20 +15,17 @@
 
   <div class="content">
     <div class="tracked-carriers statistic">
-      <div class="stat">537</div><!-- TODO get actual number of carriers tracked -->
+      <div class="stat">{{ tracked_carriers }}</div>
       <div class="label">Carriers Tracked</div>
     </div>
     
     <div class="registered-carriers statistic">
-      <div class="stat">204</div><!-- TODO get actual number of carriers registered -->
+      <div class="stat">{{ registered_carriers }}</div>
       <div class="label">Carriers Registered</div>
     </div>
 
     <div class="searches">
-      <form class="system search" action="/search/system" method="POST" enctype="multipart/form-data" accept-charset="utf-8">
-        <input type="search" placeholder="Search by System" class="form-control" name="system" aria-label="SystemSearch">
-        <button type="submit" class="btn btn-primary">Search</button>
-      </form>
+      {{ searchform|safe }}
 
       <form class="carrier search" action="/search">
         <input type="search" placeholder="Search by Carrier ID or CMDR name" class="form-control" aria-label="CarrierSearch" name="term">
@@ -37,7 +34,7 @@
     </div>
 
     <div class="map">
-      <img src="galaxy_regions_4096x4096.jpg" style="max-height: 100vh; max-width: 100%;"><!-- TODO get dynamic map -->
+      <div id="mapid"></div>
     </div>
   </div>
 
