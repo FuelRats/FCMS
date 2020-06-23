@@ -9,7 +9,7 @@ class Search(colander.MappingSchema):
     system = colander.SchemaNode(colander.String(),
                                  widget=widget.AutocompleteInputWidget(
                                      values='https://system.api.fuelrats.com/typeahead', min_length=3,
-                                 style='width:100%', css_class='textinput numberpi', placeholder='Search by System'))
+                                 style='width:100%', css_class='textinput numberpi', attributes={'placeholder': 'Search by System'}))
 
 
 @view_config(route_name='landing', renderer='../templates/landing.jinja2')

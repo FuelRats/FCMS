@@ -533,6 +533,10 @@ body.landing .searches .item-system {
   margin: 0;
 }
 
+body.landing .form-control:focus {
+  border-color: #ab3f3f;
+}
+
 body.landing fieldset.deform-form-fieldset {
   width: 100%;
 }
