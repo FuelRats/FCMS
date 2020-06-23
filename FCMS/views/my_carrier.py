@@ -309,7 +309,7 @@ def carrier_subview(request):
                         newroute = Route(route_name=appstruct['routeName'], start_region=appstruct['startRegion'],
                                          startPoint=appstruct['startSystem'], waypoints=json.dumps(waypoints),
                                          endPoint=appstruct['endSystem'], end_region=appstruct['endRegion'],
-                                         description=appstruct['description'], carrier_id=mycarrier.id)
+                                         description=appstruct['description'] if 'description' in appstruct else '', carrier_id=mycarrier.id)
                         request.dbsession.add(newroute)
                         modal_data = {'load_fire': {'icon': 'success', 'message': 'Route added!'}}
                     except ValidationFailure as e:
