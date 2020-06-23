@@ -257,6 +257,8 @@ def announce_route_scheduled(request, cid, routeid, webhook_url):
 def announce_jump(request, cid, target, webhook_url, body=None):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
+    etl = datetime.now() + timedelta(minutes=12)
+    etd = datetime.now() + timedelta(minutes=15)
     embed = DiscordEmbed(title='Frame Shift Drive Charging',
                          description=f'{mycarrier.callsign} {util.from_hex(mycarrier.name)} is jumping.', color=242424,
                          url=f'https://fleetcarrier.space/carrier/{mycarrier.callsign}')
@@ -268,6 +270,8 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
     embed.add_embed_field(name='Departing from', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Headed to', value=target)
+    embed.add_embed_field(name='Estimated lockdown time', value=etl)
+    embed.add_embed_field(name='Estimated jump time', value=etd)
     if body:
         embed.add_embed_field(name='Orbiting ', value=body)
     embed.set_timestamp()
