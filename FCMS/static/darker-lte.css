@@ -250,6 +250,33 @@ a.text-muted:hover {
   border-color: #d65050 #d65050 #ffffff #d65050;
 }
 
+.btn-secondary {
+  background-color: #685a5a;
+  border-color: #685a5a;
+}
+
+.btn-secondary:hover {
+  background-color: #7d6c6c;
+  border-color: #7d6c6c;
+}
+
+.btn-secondary:focus {
+  background-color: #7d6c6c;
+  border-color: #ffffff;
+}
+
+.btn-secondary.disabled .btn-secondary:disabled {
+  background-color: #574949;
+  border-color: #574949;
+}
+
+.btn-secondary:not(:disabled):not(.disabled):active, .btn-secondary:not(:disabled):not(.disabled).active, .show > .btn-secondary.dropdown-toggle {
+  background-color: #7d6c6c;
+  border-color: #685a5a #685a5a #ffffff #685a5a;
+}
+
+
+
 .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + label::before, .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + input[type="hidden"] + label::before {
   border-color: #ab3f3f;
 }
@@ -275,3 +302,14 @@ a.text-muted:hover {
   background-color: #ab3f3f;
 }
 
+.twitter-typeahead .tt-hint {
+  border-radius: 3px;
+}
+
+.tt-dropdown-menu {
+  background-color: #2b2b2b;
+}
+
+.tt-suggestion.tt-is-under-cursor {
+  background: #ab3f3f;
+}
