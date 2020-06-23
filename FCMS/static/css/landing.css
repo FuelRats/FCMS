@@ -7,6 +7,7 @@ body.landing {
 
   flex-flow: column nowrap;
 
+  min-height: 100vh;
   margin: 0;
 
   font-family: "Open Sans", sans-serif;
@@ -61,14 +62,15 @@ body.landing .content {
 
 body.landing .main-footer {
   flex-grow: 0;
-  background: rgba(0,0,0,0.3);
+
+  border-color: rgba(43, 43, 43, 0.8);
+
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(5px);
 }
 
 body.landing .main-footer {
   position: unset;
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(5px);
 }
 
 body.landing .map {
