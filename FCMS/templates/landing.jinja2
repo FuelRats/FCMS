@@ -24,12 +24,12 @@
     </div>
 
     <div class="searches">
-      <form class="system search" action="/search" method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+      <form class="system search" action="/search/system" method="POST" enctype="multipart/form-data" accept-charset="utf-8">
         <input type="search" placeholder="Search by System" class="form-control" name="system" aria-label="SystemSearch">
         <button type="submit" class="btn btn-primary">Search</button>
       </form>
 
-      <form class="carrier search" action="/search/system">
+      <form class="carrier search" action="/search">
         <input type="search" placeholder="Search by Carrier ID or CMDR name" class="form-control" aria-label="CarrierSearch" name="term">
         <button type="submit" class="btn btn-primary">Search</button>
       </form>
