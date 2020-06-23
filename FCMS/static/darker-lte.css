@@ -275,7 +275,10 @@ a.text-muted:hover {
   border-color: #685a5a #685a5a #ffffff #685a5a;
 }
 
-
+.btn-small {
+    padding: 0 0.3rem;
+    font-size: 0.9rem;
+}
 
 .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + label::before, .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + input[type="hidden"] + label::before {
   border-color: #ab3f3f;

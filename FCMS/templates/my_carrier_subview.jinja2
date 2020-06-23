@@ -222,7 +222,7 @@
                                             <td>{{ activeroute.startPoint }}</td>
                                             <td>---</td>
                                             <td>---</td>
-                                            <td><button id="setwp" class="button" onclick="window.location.href='/my_carrier/routes?setwp={{ activeroute.startPoint }}&route={{ activeroute.scheduleid }}'">Force</button></td>
+                                            <td><button id="setwp" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?setwp={{ activeroute.startPoint }}&route={{ activeroute.scheduleid }}'">Force</button></td>
                                         </tr>
                                         {% for waypoint in activeroute.waypoints %}
                                         {% if waypoint.system == activeroute.currentWaypoint %}
@@ -232,8 +232,8 @@
                                         {% endif %}
                                             <td>{{ waypoint.system }}</td>
                                             <td>{{ waypoint.duration }}</td>
-                                            <td><button id="jump" class="button" onclick="window.location.href='/my_carrier/routes?jump={{ waypoint.system }}&route={{ activeroute.scheduleid }}'">Announce</button></td>
-                                            <td><button id="setwp" class="button" onclick="window.location.href='/my_carrier/routes?setwp={{ waypoint.system }}&route={{ activeroute.scheduleid }}'">Force</button></td>
+                                            <td><button id="jump" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?jump={{ waypoint.system }}&route={{ activeroute.scheduleid }}'">Announce</button></td>
+                                            <td><button id="setwp" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?setwp={{ waypoint.system }}&route={{ activeroute.scheduleid }}'">Force</button></td>
                                         </tr>
                                         {% endfor %}
                                         {% if activeroute.endPoint == activeroute.currentWaypoint %}
@@ -244,7 +244,7 @@
                                             <td>{{ activeroute.endPoint }}</td>
                                             <td>---</td>
                                             <td>---</td>
-                                            <td><button id="setwp" class="button" onclick="window.location.href='/my_carrier/routes?setwp={{ activeroute.endPoint }}&route={{ activeroute.scheduleid }}'">Force</button></td>
+                                            <td><button id="setwp" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?setwp={{ activeroute.endPoint }}&route={{ activeroute.scheduleid }}'">Force</button></td>
                                         </tr>
 
                                         </table>
@@ -293,8 +293,6 @@
                                         <th>Start region</th>
                                         <th>End region</th>
                                         <th>Waypoints</th>
-                                        <th>Active?</th>
-                                        <th>URL</th>
                                         <th>Delete?</th>
                                     </tr>
                                 </thead>
@@ -318,18 +316,7 @@
                                     {% endfor %}<br>
                                     Destination: {{ event.end }}
                                 </td>
-                                <td>
-                                    {% if event.isActive %}
-                                        <span class="text-primary">Active</span>
-                                    {% else %}
-                                        <span class="text-muted">Inactive</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                      {% if event.url %}
-                                          {{ event.url }}
-                                      {% endif %}
-                                </td>
+
                                 <td><form action="/my_carrier/routes" method="POST">
                                     <input type="hidden" name="delete-event" value="{{ event.id }}">
                                     <button type="submit" class="btn btn-tool"><i class="far fas fa-times"></i></button>
@@ -357,6 +344,7 @@
                                         <th>Reversed?</th>
                                         <th>Active Waypoint</th>
                                         <th>Active route?</th>
+                                        <th>Route link</th>
                                     </tr>
                                 </thead>
                         {% if schedules %}
@@ -376,14 +364,14 @@
                                 </td>
                                 <td>
                                     {% if event.isActive %}
-                                        <button id="cancel" class="button" onclick="window.location.href='/my_carrier/routes?cancel={{ event.id }}'">Cancel</button>
+                                        <button id="cancel" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?cancel={{ event.id }}'">Cancel</button>
                                     {% else %}
-                                        <button id="activate" class="button" onclick="window.location.href='/my_carrier/routes?activate={{ event.id }}'">Activate</button>
+                                        <button id="activate" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?activate={{ event.id }}'">Activate</button>
                                     {% endif %}
                                 </td>
                                 <td>
                                       {% if event.url %}
-                                          {{ event.url }}
+                                          <a href="{{ event.url }}">https://fleetcarrier.space{{ event.url }}</a>
                                       {% endif %}
                                 </td>
                                 <td><form action="/my_carrier/routes" method="POST">

@@ -146,6 +146,11 @@ def populate_sidebar(request):
             'name': 'Galaxy Map',
             'link': '/galmap',
             'icon': 'inline_svgs/exploration.jinja2'
+        },
+        {
+            'name': 'Transport Routes',
+            'link': '/routes',
+            'icon': 'inline_svgs/distance_jumped.jinja2'
         }
     ]
     sidebar = {
