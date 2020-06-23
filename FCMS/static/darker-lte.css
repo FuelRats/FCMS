@@ -276,8 +276,8 @@ a.text-muted:hover {
 }
 
 .btn-small {
-    padding: 0 0.3rem;
-    font-size: 0.9rem;
+  padding: 0 0.3rem;
+  font-size: 0.9rem;
 }
 
 .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + label::before, .icheck-primary > input:first-child:not(:checked):not(:disabled):hover + input[type="hidden"] + label::before {
@@ -310,11 +310,69 @@ a.text-muted:hover {
 }
 
 .tt-dropdown-menu {
-  background-color: #2b2b2b;
+  background-color: #111111;
 }
 
 .tt-suggestion.tt-is-under-cursor {
   background: #ab3f3f;
+}
+
+.select2-dropdown, .select2-container--default .select2-dropdown {
+  background-color: #111111;
+  border-color: #333;
+}
+
+.select2-container--default .select2-results__option[aria-selected='true'] {
+  background-color: #ab3f3f;
+  color: inherit;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+  background-color: #d65050;
+}
+
+.select2-container--default .select2-selection--multiple, .select2-container--default .select2-selection--single {
+  background-color: #111111;
+  border-color: #333 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: #dddddd;
+}
+
+.select2-container--default .select2-dropdown .select2-search__field,
+.select2-container--default .select2-search--inline .select2-search__field {
+  background-color: #111111;
+  border-color: #333333;
+  color: #dddddd;
+}
+
+.select2-container--default .select2-dropdown .select2-search__field:focus,
+.select2-container--default .select2-search--inline .select2-search__field:focus {
+  border-color: #ab3f3f;
+}
+
+.form-control {
+  border-color: #333333;
+}
+
+.form-control:focus:not(.tt-query),
+.form-control:not(.tt-query),
+.twitter-typeahead .tt-hint {
+  background-color: #111111 !important;
+  color: #dddddd;
+}
+
+.tt-query {
+  color: #dddddd;
+}
+
+.tt-hint {
+  color: #666666 !important;
+}
+
+.form-control:focus {
+  color: inherit;
 }
 
 
@@ -424,7 +482,7 @@ body.landing .statistic {
 }
 
 body.landing .stat {
-  font-size: 6em;
+  font-size: 4em;
   line-height: 0.9;
 }
 
