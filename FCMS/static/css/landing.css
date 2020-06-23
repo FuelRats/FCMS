@@ -7,7 +7,7 @@ body.landing {
 
   font-family: "Open Sans", sans-serif;
 
-  background: bottom right / cover url(abs-carrier-fuelrats.jpg) #000000 no-repeat;
+  background: bottom right / cover url(/static/img/abs-carrier-fuelrats.jpg) #000000 no-repeat;
   color: #ffffff;
 }
 
