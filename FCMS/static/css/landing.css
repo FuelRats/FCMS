@@ -95,6 +95,11 @@ body.landing .search {
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
+  margin-bottom: 1rem;
+}
+
+body.landing .search .form-control {
+  width: auto;
 }
 
 /* body.landing input,
