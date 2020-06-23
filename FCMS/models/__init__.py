@@ -16,6 +16,7 @@ from .market import Market
 from .calendar import Calendar
 from .webhooks import Webhook
 from .resettokens import ResetToken
+from .routes import Route, Region
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

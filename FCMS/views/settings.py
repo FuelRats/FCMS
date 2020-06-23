@@ -278,7 +278,7 @@ def settings_view(request):
 
                 webhook_settings = webhookform.render({'hooks': tmphooks})
                 return {**cdata, **{'sidebar': sidebar, 'userdata': userdata, 'modal': modal_data, 'formadvanced': True,
-                                    'carrier_settings': carrier_settings,
+                                    'carrier_settings': carrier_settings, 'deform': True,
                                     'extra_settings': extra_settings,
                                     'carrier_image': myextra.carrier_image if myextra else None,
                                     'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
@@ -287,11 +287,11 @@ def settings_view(request):
                 logging.error(f"Webhooks validation failed! {e.error}")
                 # modal_data = {'load_fire', {'icon': 'error', 'message': 'Webhook settings invalid!'}}
                 return {**cdata, **{'formadvanced': True, 'carrier_settings': carrier_settings,
-                                    'extra_settings': extra_settings,
+                                    'extra_settings': extra_settings, 'deform': True,
                                     'carrier_image': myextra.carrier_image if myextra else None,
                                     'webhooks_settings': webhook_settings, 'subview': 'settings', 'view': 'settings'}}
 
     return {**cdata,
             **{'sidebar': sidebar, 'userdata': userdata, 'formadvanced': True, 'carrier_settings': carrier_settings,
-               'webhooks_settings': webhook_settings, 'extra_settings': extra_settings,'deform': True,
+               'webhooks_settings': webhook_settings, 'extra_settings': extra_settings, 'deform': True,
                'carrier_image': myextra.carrier_image if myextra else None, 'subview': 'settings', 'view': 'settings'}}

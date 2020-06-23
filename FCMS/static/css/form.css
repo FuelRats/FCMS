@@ -67,3 +67,11 @@ form .deform-readonly-text {
     /* symbol for "collapsed" panels */
     content: "\e114";
 }
+
+.form-group.deform-seq-item .col-xs-11 {
+    flex-grow: 1;
+}
+
+.form-group.deform-seq-item {
+    margin-left: 0;
+}

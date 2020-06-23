@@ -113,6 +113,9 @@ def register_view(request):
         res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()
         if res:
             return {'reg_failure': True, 'message': 'User exists!'}
+        res = request.dbsession.query(user.User).filter(user.User.cmdr_name == request.params['cmdr_name']).one_or_none()
+        if res:
+            return {'reg_failure': True, 'message': 'There is already a CMDR with that name registered.'}
         cryptpass = pwd_context.hash(request.params['pass'])
         apikey = hexlify(os.urandom(64)).decode()
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1,

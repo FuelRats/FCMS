@@ -8,6 +8,7 @@ from pyramid.security import remember, forget
 from sqlalchemy import text
 
 from ..models import user, carrier
+from ..models import Region
 from ..utils import capi, sapi, util, menu
 from ..utils import user as myuser
 import re
@@ -81,6 +82,24 @@ def fill_data(candidates, source):
                                     'title': f'Taxation is {row.taxation}%'}
                                    ]})
     return items
+
+
+@view_config(route_name='route_search', renderer='../templates/uploadtest.jinja2')
+def route_search_view(request):
+    choices=[]
+    for choice in request.dbsession.query(Region).all():
+        choices.append((choice.name.lower().translate(str.maketrans({" ": "_", "'": ""})), choice.name))
+    print(choices)
+
+    class Route(colander.MappingSchema):
+        startregion = colander.SchemaNode(colander.String(),
+                                          widget=widget.Select2Widget(
+                                              values=choices), title="I want to go from...")
+        endregion = colander.SchemaNode(colander.String(),
+                                        widget=widget.Select2Widget(
+                                            values=choices), title="I want to go to...")
+    myform = Form(schema=Route(), buttons=('Find a route!',))
+    return {'form': myform.render()}
 
 
 @view_config(route_name='dssa', renderer='../templates/dssa.jinja2')
@@ -199,7 +218,8 @@ def closest_view(request):
             'carrier_search': True, 'sidebar': mymenu, 'view': 'Closest Carriers', 'extra': extra if extra else None}
 
 
-# TODO: This shit is nuts and needs to die in a fire. FIX IT!
+# This shit is nuts and needs to die in a fire. FIX IT!
+# This shit is slightly less shit now.
 @view_config(route_name='search', renderer='../templates/search.jinja2')
 def search_view(request):
     request.response.headers.update({

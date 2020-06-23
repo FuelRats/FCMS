@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head  prefix="og: http://ogp.me/ns#">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{ subview if subview else view }} | Fleetcarrier.space </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+{% if meta %}
+    <!-- Meta -->
+    {% if meta.refresh %}
+        <!-- Refresh -->
+        <meta http-equiv="refresh" content="{{ meta.delay }};url={{ meta.target }}" />
+    {% endif %}
+{% endif %}
+
+{% if og_meta %}
+    {% include "elements/og_meta.jinja2" %}
+{% endif %}
+
+<!-- As-needed Stylesheets -->
+{% if map %}
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+{% endif %}
+
+
+{% if deform %}
+<!-- Deform stylesheets -->
+    <link href="/static/pickadate/themes/default.css" rel="stylesheet">
+    <link href="/static/pickadate/themes/default.date.css" rel="stylesheet">
+    <link href="/static/pickadate/themes/default.time.css" rel="stylesheet">
+    <link href="/static/css/pickadate-classic.date.min.css">
+    <link href="/static/css/pickadate-classic.min.css">
+    <link href="/static/css/beautify.css">
+    <link href="/static/css/typeahead.css" rel="stylesheet">
+    <link href="/static/css/form.css" rel="stylesheet">
+<!--     <link href="/static/css/bootstrap.min.css" rel="stylesheet"> -->
+{% endif %}
+
+
+{% if calendar %}
+<!-- fullCalendar stylesheets -->
+    <link rel="stylesheet" href="/static/plugins/fullcalendar/main.min.css">
+    <link rel="stylesheet" href="/static/plugins/fullcalendar-daygrid/main.min.css">
+    <link rel="stylesheet" href="/static/plugins/fullcalendar-timegrid/main.min.css">
+    <link rel="stylesheet" href="/static/plugins/fullcalendar-bootstrap/main.min.css">
+    <link rel="stylesheet" href="/static/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+    <!-- Tempusdominus Bbootstrap 4 -->
+    <link rel="stylesheet" href="/static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+{% endif %}
+
+
+{% if jsgrid %}
+<!-- jsGrid stylesheets -->
+    <link rel="stylesheet" href="/static/plugins/jsgrid/jsgrid.min.css">
+    <link rel="stylesheet" href="/static/plugins/jsgrid/jsgrid-theme.min.css">
+{% endif %}
+
+
+{% if modal %}
+<!-- Modal Alerts stylesheets -->
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="/static/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="/static/plugins/toastr/toastr.min.css">
+{% endif %}
+
+{% if formadvanced %}
+<!-- Advanced form stylesheets -->
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/plugins/select2/css/select2.min.css">
+  <link rel="stylesheet" href="/static/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+  <!-- Bootstrap4 Duallistbox -->
+  <link rel="stylesheet" href="/static/plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
+{% endif %}
+
+<!-- Global Stylesheets -->
+    <link rel="stylesheet" href="{{request.static_url('FCMS:static/plugins/fontawesome-free/css/all.min.css')}}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="{{request.static_url('FCMS:static/plugins/icheck-bootstrap/icheck-bootstrap.min.css')}}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{request.static_url('FCMS:static/dist/css/adminlte.css')}}">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+
+<!-- Scripts -->
+{% if deform %}
+    <!-- Deform -->
+   <script type="text/javascript"
+          src="/static/scripts/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript"
+          src="/static/scripts/deform.js"></script>
+    <script type="text/javascript"
+            src="/static/scripts/typeahead.min.js"></script>
+
+
+    <script type="text/javascript"
+            src="/static/scripts/modernizr.custom.input-types-and-atts.js"></script>
+   <script type="text/javascript"
+            src="/static/scripts/jquery.form.js"></script>
+    <script type="text/javascript"
+            src="/static/scripts/jquery.form-3.09.js"></script>
+    <script type="text/javascript"
+            src="/static/scripts/jquery.maskedinput-1.3.1.min.js"></script>
+    <script type="text/javascript"
+            src="/static/scripts/jquery.sortable.min.js"></script>
+    <script type="text/javascript"
+            src="/static/scripts/jquery-sortable.js"></script>
+
+    <script type="text/javascript"
+        src="/static/pickadate/picker.js"></script>
+    <script type="text/javascript"
+            src="/static/pickadate/picker.date.js"></script>
+    <script type="text/javascript"
+        src="/static/pickadate/picker.time.js"></script>
+{% endif %}
+{% if map %}
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+{% endif %}
+    <!-- FCMS AdminLTE3 overrides -->
+    <link rel="stylesheet" href="{{ request.static_url('FCMS:static/darker-lte.css')}}">

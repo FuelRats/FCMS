@@ -1,6 +1,6 @@
 def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_route('home', '/')
+    config.add_route('landing', '/')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('register', '/register')
@@ -22,3 +22,7 @@ def includeme(config):
     config.add_route('closest_search', '/search/closest')
     config.add_route('search_system', '/search/system')
     config.add_route('galmap', 'galmap')
+    config.add_route('route_search', '/search/route')
+    config.add_route('home', '/fallback')
+    config.add_route('routes', '/routes')
+    config.add_route('route_view', '/routes/{rid}')

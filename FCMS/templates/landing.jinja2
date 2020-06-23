@@ -1,0 +1,42 @@
+{% include "header.jinja2" %}
+<body class="landing">
+  <header class="landing-header">
+    <div class="title">
+      <span class="logo">{% include 'inline_svgs/logo.jinja2' %}</span>
+      Fleet Carrier <br>Management System
+    </div>
+
+    <div class="user">
+      <a class="btn btn-secondary" href="/terms">Terms</a>
+      <a class="btn btn-primary" href="/login">Log in</a>
+      <a class="btn btn-primary" href="/register">Register</a>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="tracked-carriers statistic">
+      <div class="stat">{{ tracked_carriers }}</div>
+      <div class="label">Carriers Tracked</div>
+    </div>
+    
+    <div class="registered-carriers statistic">
+      <div class="stat">{{ registered_carriers }}</div>
+      <div class="label">Carriers Registered</div>
+    </div>
+
+    <div class="searches">
+      {{ searchform|safe }}
+
+      <form class="carrier search" action="/search">
+        <input type="search" placeholder="Search by Carrier ID or CMDR name" class="form-control" aria-label="CarrierSearch" name="term">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+
+    <div class="map">
+      <div id="mapid"></div>
+    </div>
+  </div>
+
+  {% include "footer.jinja2" %}
+</body>

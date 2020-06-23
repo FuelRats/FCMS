@@ -1,4 +1,4 @@
-{% include "header.jinja2" %}
+{% include "header2.jinja2" %}
 {% if not upload_complete %}
 {% include "dynamic_sidebar.jinja2" %}
 {% endif %}
@@ -40,7 +40,7 @@
                   <div class="col-md-8">
                     <p class="text-center">
                         {% if request.user %}
-                        You don't have a carrier registered to your account. If you have aquired one recently,
+                        You don't have a carrier registered to your account. If you have acquired one recently,
                         click <a href="/oauth">here to retrieve it.</a>
                         {% else %}
                             You need to log in to this site before adding your carrier. Click <a href="/register">here</a>
@@ -102,6 +102,7 @@
           <!-- Temp close -->
       </div>
     </section>
+
 {% else %}
 
 {% if subview == 'messages' %}
@@ -171,6 +172,227 @@
     </section>
  </body>
 {% endif %}
+
+
+{% if subview == 'routes' %}
+
+<body>
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row-cols-2">
+          <div class="col-md-7">
+            <div class="card ">
+              <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                    {% if activeroute %}
+                        <li class="nav-item"><a class="nav-link active" href="#activeroute" data-toggle="tab">Active Route</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#schedule" data-toggle="tab">Schedule Route</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link active" href="#schedule" data-toggle="tab">Schedule Route</a></li>
+                    {% endif %}
+                  <li class="nav-item"><a class="nav-link" href="#new" data-toggle="tab">New Route</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#manageroutes" data-toggle="tab">Manage Routes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#manageschedule" data-toggle="tab">Manage Schedules</a></li>
+                </ul>
+              </div><!-- /.card-header -->
+              <div class="card-body">
+                <div class="tab-content">
+                    {% if activeroute %}
+                        <div class="active tab-pane" id="activeroute">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    Active Route - {{ activeroute.name }}<i class="text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="card-body"><p>
+                                Departure schedule: {{activeroute.departure_schedule}}</p>
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Waypoint</th>
+                                        <th>Time in system</th>
+                                        <th>Announce jump to WP</th>
+                                        <th>Force as current WP</th>
+                                    </tr>
+                                    </thead>
+                                        {% if activeroute.startPoint == activeroute.currentWaypoint %}
+                                        <tr style="color: #00A000">
+                                        {% else %}
+                                        <tr>
+                                        {% endif %}
+                                            <td>{{ activeroute.startPoint }}</td>
+                                            <td>---</td>
+                                            <td>---</td>
+                                            <td><button id="setwp" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?setwp={{ activeroute.startPoint }}&route={{ activeroute.scheduleid }}'">Force</button></td>
+                                        </tr>
+                                        {% for waypoint in activeroute.waypoints %}
+                                        {% if waypoint.system == activeroute.currentWaypoint %}
+                                        <tr style="color: #00A000">
+                                        {% else %}
+                                        <tr>
+                                        {% endif %}
+                                            <td>{{ waypoint.system }}</td>
+                                            <td>{{ waypoint.duration }}</td>
+                                            <td><button id="jump" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?jump={{ waypoint.system }}&route={{ activeroute.scheduleid }}'">Announce</button></td>
+                                            <td><button id="setwp" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?setwp={{ waypoint.system }}&route={{ activeroute.scheduleid }}'">Force</button></td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% if activeroute.endPoint == activeroute.currentWaypoint %}
+                                        <tr style="color: #00A000">
+                                        {% else %}
+                                        <tr>
+                                        {% endif %}
+                                            <td>{{ activeroute.endPoint }}</td>
+                                            <td>---</td>
+                                            <td>---</td>
+                                            <td><button id="setwp" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?setwp={{ activeroute.endPoint }}&route={{ activeroute.scheduleid }}'">Force</button></td>
+                                        </tr>
+
+                                        </table>
+                            <p>Current WP {{ activeroute.currentWaypoint }}</p></div>
+                        </div>
+                        <div class="tab-pane" id="schedule">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    Create Route Schedule <i class="text-muted">(All times in UTC)</i>
+                                </div>
+                            </div>
+                            <div class="card-body"><p>{{ scheduleform|safe }}</p></div>
+                        </div>
+
+                    {% else %}
+                    <div class="active tab-pane" id="schedule">
+                    <!-- THE CALENDAR -->
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                Create Route Schedule <i class="text-muted">(All times in UTC)</i>
+                            </div>
+                        </div>
+                        <div class="card-body"><p>{{ scheduleform|safe }}</p></div>
+                    </div>
+                    {% endif %}
+                    <div class="tab-pane" id="new">
+                        <div class="card card-primary">
+                          <div class="card-header">
+                                <h3 class="card-title">New Route</h3>
+                          </div>
+                            <div class="card-body">
+                                {{ newrouteform|safe }}
+                            </div>
+                        </div>
+                    </div>
+                <div class="tab-pane" id="manageroutes">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Manage routes
+                        </div>
+                        <div class="card-body">
+                        <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Route name</th>
+                                        <th>Start region</th>
+                                        <th>End region</th>
+                                        <th>Waypoints</th>
+                                        <th>Delete?</th>
+                                    </tr>
+                                </thead>
+                        {% if routes %}
+                            {% for event in routes %}
+                                <tr>
+                                <td>
+                                    {{ event.name|e }}
+                                </td>
+                                <td>
+                                    {{ event.startRegion }}
+                                </td>
+                                <td>
+                                    {{ event.endRegion }}
+                                </td>
+                                <td>
+                                    Starts in: {{ event.start }}<br>
+                                    Via:<br>
+                                    {% for wp in event.waypoints %}
+                                        {{ wp.system }}<br>
+                                    {% endfor %}<br>
+                                    Destination: {{ event.end }}
+                                </td>
+
+                                <td><form action="/my_carrier/routes" method="POST">
+                                    <input type="hidden" name="delete-event" value="{{ event.id }}">
+                                    <button type="submit" class="btn btn-tool"><i class="far fas fa-times"></i></button>
+                                    </form>
+                                </td>
+                                </tr>
+                          {% endfor %}
+                        {% endif %}
+                        </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="tab-pane" id="manageschedule">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            Manage Schedule
+                        </div>
+                        <div class="card-body">
+                        <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Route name</th>
+                                        <th>Scheduled departure</th>
+                                        <th>Reversed?</th>
+                                        <th>Active Waypoint</th>
+                                        <th>Active route?</th>
+                                        <th>Route link</th>
+                                    </tr>
+                                </thead>
+                        {% if schedules %}
+                            {% for event in schedules %}
+                                <tr>
+                                <td>
+                                    {{ event.name|e }}
+                                </td>
+                                <td>
+                                    {{ event.scheduled_departure }}
+                                </td>
+                                <td>
+                                    {{ event.isReversed }}
+                                </td>
+                                <td>
+                                    {{ event.currentWaypoint }}
+                                </td>
+                                <td>
+                                    {% if event.isActive %}
+                                        <button id="cancel" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?cancel={{ event.id }}'">Cancel</button>
+                                    {% else %}
+                                        <button id="activate" class="btn btn-primary btn-small" onclick="window.location.href='/my_carrier/routes?activate={{ event.id }}'">Activate</button>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                      {% if event.url %}
+                                          <a href="{{ event.url }}">https://fleetcarrier.space{{ event.url }}</a>
+                                      {% endif %}
+                                </td>
+                                <td><form action="/my_carrier/routes" method="POST">
+                                    <input type="hidden" name="delete-event" value="{{ event.id }}">
+                                    <button type="submit" class="btn btn-tool"><i class="far fas fa-times"></i></button>
+                                    </form>
+                                </td>
+                                </tr>
+                          {% endfor %}
+                        {% endif %}
+                        </table>
+                        </div>
+                    </div>
+                </div>
+                </div></div></div></div></div></div></section></body>
+
+
+{% endif %}
+
+
 
 
 

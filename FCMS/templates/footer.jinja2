@@ -1,6 +1,6 @@
   <footer class="main-footer" style="width:100%">
     <div class="float-right d-none d-sm-block">
-      <b>Version</b> {{ version or "0.5"}}
+      <b>Version</b> {{ version or "0.6a"}}
     </div>
     <strong>Copyright &copy; 2020 <a href="https://github.com/FuelRats">The Fuel Rats Mischief</a>.</strong> All rights
     reserved. | <a href="https://github.com/FuelRats/FCMS">Github</a> | <a href="https://fuelrats.com/">Fuel Rats</a>
@@ -8,10 +8,12 @@
     | I like jumping around on the screen a lot. I'll be fixed soon, don't report me as a bug.
   </footer>
 
-{% if not deform %}
+
 <!-- jQuery -->
+{% if not deform %}
 <script src="{{request.static_url('FCMS:static/plugins/jquery/jquery.min.js')}}"></script>
 {% endif %}
+
 <!-- Bootstrap 4 -->
 <script src="{{request.static_url('FCMS:static/plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 <!-- AdminLTE App -->
