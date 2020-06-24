@@ -468,8 +468,7 @@ def update_carrier(request, cid, user):
         if 'ships' in jcarrier:
             if jcarrier['ships']['shipyard_list']:
                 for item, it in jcarrier['ships']['shipyard_list'].items():
-                    print(item)
-                    print(it)
+
                     sp = Ship(carrier_id=mycarrier.id, name=it['name'],
                               ship_id=it['id'], basevalue=it['basevalue'],
                               stock=it['stock'])
@@ -477,7 +476,6 @@ def update_carrier(request, cid, user):
 
         request.dbsession.query(Module).filter(Module.carrier_id
                                                == mycarrier.id).delete()
-        print(jcarrier['modules'])
         if 'modules' in jcarrier:
             try:
                 for item, it in jcarrier['modules'].items():

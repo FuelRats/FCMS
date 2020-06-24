@@ -24,30 +24,27 @@ def api_view(request):
     print(f"Post: {request.json}")
     pvars = request.json
     if not pvars:
-        print("No Pvars")
+        log.warning(f"API: Empty request from {request.client_addr}")
         raise exc.HTTPBadRequest(detail='Invalid API request.')
     if 'user' not in pvars or 'key' not in pvars:
-        print("No user")
+        log.warning(f"API: Missing user information from {request.client_addr}")
         raise exc.HTTPBadRequest(detail='Invalid API request.')
     user = request.dbsession.query(User).filter(User.username == pvars['user']).one_or_none()
     if not user:
-        print("Bad user.")
+        log.error(f"API: Invalid username from {request.client_addr}: {pvars['user']}")
         raise exc.HTTPBadRequest(detail='Invalid API key.')
     if pvars['key'] != user.apiKey:
-        print("Bad key.")
+        log.error(f"API: Invalid API key from {request.client_addr} for user {pvars['user']}")
         raise exc.HTTPBadRequest(detail='Invalid API key.')
     if pvars['cmdr'].lower() != user.cmdr_name.lower():
-        print("CMDR name mismatch")
+        log.error(f"API: CMDR name does not match for user {user.cmdr_name}: Got {pvars['user']}")
         raise exc.HTTPBadRequest(detail='Data not for correct CMDR.')
     else:
         data = pvars['data']
-        print(f"Got valid data post: {data}")
         mycarrier = request.dbsession.query(Carrier).filter(Carrier.owner == user.id).one_or_none()
         if data['event'] == 'CarrierJumpRequest':
-            print("Jump request!")
             hooks = webhooks.get_webhooks(request, mycarrier.id)
             if hooks:
-                print("Have hook, will fire.")
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if mycarrier.lastUpdated:
@@ -56,20 +53,15 @@ def api_view(request):
                             update_carrier(request, mycarrier.id, request.user)
                             request.dbsession.flush()
                             request.dbsession.refresh(mycarrier)
-                    print("Check for route schedules...")
                     rc = request.dbsession.query(RouteCalendar).filter(RouteCalendar.carrier_id == mycarrier.id)
                     if rc:
-                        print(f"Have RC. {rc}")
                         for row in rc:
-                            print(f"Process Calendar {row}")
                             if row.isActive:
-                                print(f"Active route calendar.")
                                 route = request.dbsession.query(Route).filter(Route.id == row.route_id).one_or_none()
                                 waypoints = json.loads(route.waypoints)
                                 for wp in waypoints:
                                     print(wp)
                                     if wp['system'] == data['SystemName']:
-                                        print("System is on route!")
                                         row.currentWaypoint = data['SystemName']
                                         request.dbsession.flush()
                                         request.dbsession.refresh(row)
@@ -90,10 +82,8 @@ def api_view(request):
                         log.debug(f"Hook result: {res}")
 
         elif data['event'] == 'CarrierJumpCancelled':
-            print("Jump cancelled!")
             hooks = webhooks.get_webhooks(request, mycarrier.id)
             if hooks:
-                print("Have hook, will fire.")
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
@@ -102,7 +92,6 @@ def api_view(request):
         elif data['event'] == 'MarketUpdate':
             hooks = webhooks.get_webhooks(request, mycarrier.id)
             if hooks:
-                print("Have hook, will fire.")
                 for hook in hooks:
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if hook['webhook_type'] == 'discord' and hook['marketEvents']:

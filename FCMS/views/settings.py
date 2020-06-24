@@ -107,7 +107,6 @@ def settings_view(request):
     cdata = carrier_data.populate_view(request, mycarrier.id, request.user)
     tmphooks = []
     for hook in myhooks:
-        print(f"Loading calendarevents as {hook.calendarEvents}")
         tmphooks.append({'hook_url': hook.hook_url,
                          'hook_type': hook.hook_type,
                          'enabled': True,
@@ -195,7 +194,6 @@ def settings_view(request):
                             CarrierExtra.cid == mycarrier.id).one_or_none()
                         extra_settings = extraform.render({'carrier_motd': myextra.carrier_motd or ""})
                     if cex:
-                        print(f"CEX is {cex}")
                         request.dbsession.refresh(cex)
                 except FileNotAllowed:
                     log.error(
@@ -225,7 +223,6 @@ def settings_view(request):
                 appstruct = webhookform.validate(controls)
                 hookids = []
                 newids = []
-                print(f"Load appstruct {appstruct}")
                 for hook in appstruct['hooks']:
                     if 'id' in hook:
                         hookids.append(hook['id'])
@@ -238,7 +235,6 @@ def settings_view(request):
                         oldhook.marketEvents = hook['marketEvents']
                         oldhook.calendarEvents = hook['calendarEvents']
                         oldhook.description = hook['description']
-                        print("Flush hook")
                         request.dbsession.flush()
                         request.dbsession.refresh(oldhook)
                     else:
@@ -263,7 +259,6 @@ def settings_view(request):
                 myhooks = request.dbsession.query(Webhook).filter(Webhook.carrier_id == mycarrier.id)
                 tmphooks = []
                 for hook in myhooks:
-                    print(f"Refresh form with {hook.calendarEvents}")
                     request.dbsession.refresh(hook)
                     tmphooks.append({'hook_url': hook.hook_url,
                                      'hook_type': hook.hook_type,

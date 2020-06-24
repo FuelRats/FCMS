@@ -89,7 +89,6 @@ def route_search_view(request):
     choices=[]
     for choice in request.dbsession.query(Region).all():
         choices.append((choice.name.lower().translate(str.maketrans({" ": "_", "'": ""})), choice.name))
-    print(choices)
 
     class Route(colander.MappingSchema):
         startregion = colander.SchemaNode(colander.String(),
@@ -192,7 +191,6 @@ def closest_view(request):
         log.debug(f"In search.py for unauthenticated user.")
         userdata = {'cmdr_name': 'Not logged in', 'cmdr_image': '/static/dist/img/avatar.png', 'link': '/login'}
     mymenu = menu.populate_sidebar(request)
-    print(sys)
     coords = sapi.get_coords(sys)
     if 'error' in coords:
         log.debug("Failed to get coords for unknown user.")
