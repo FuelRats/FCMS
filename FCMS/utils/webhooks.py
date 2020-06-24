@@ -101,7 +101,7 @@ def schedule_jump(request, calendar_id, webhook_url):
     embed.add_embed_field(name='Departing from', value=cdata.departureSystem)
     embed.add_embed_field(name='Headed to', value=cdata.arrivalSystem)
     embed.add_embed_field(name='Departure time', value=str(cdata.start))
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
@@ -163,7 +163,7 @@ def market_update(request, cid, items, webhook_url, message=None):
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Docking Access',
                           value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     if message:
         embed.add_embed_field(name='Message', value=message, inline=False)
     return send_webhook(webhook_url, 'Priority Market Update', hooktype='discord', myembed=embed)
@@ -209,7 +209,7 @@ def announce_route_activated(request, cid, routeid, webhook_url):
     embed.add_embed_field(name='Final Destination', value=route.endPoint if not rc.isReversed else route.startPoint)
     embed.add_embed_field(name='Departure Time', value=str(rc.scheduled_departure))
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Route announced', hooktype='discord', myembed=embed)
 
 
@@ -250,7 +250,7 @@ def announce_route_scheduled(request, cid, routeid, webhook_url):
     embed.add_embed_field(name='Final Destination', value=route.endPoint)
     embed.add_embed_field(name='Departure Time', value=str(rc.scheduled_departure))
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Route announced', hooktype='discord', myembed=embed)
 
 
@@ -274,7 +274,7 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     embed.add_embed_field(name='Estimated jump time', value=str(etd))
     if body:
         embed.add_embed_field(name='Orbiting ', value=body)
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
@@ -302,7 +302,7 @@ def announce_route_jump(request, cid, rid, webhook_url):
     embed.add_embed_field(name="Start Region", value=sr.name)
     embed.add_embed_field(name="Destination Region", value=er.name)
     embed.add_embed_field(name="Planned time on station", value=None)
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Jumping Route', hooktype='discord', myembed=embed)
 
 
@@ -321,7 +321,7 @@ def cancel_jump(request, cid, webhook_url, override=False):
         embed.set_image(url='https://media.giphy.com/media/B9NG8QJWN6pnG/giphy.gif')
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
     embed.add_embed_field(name='Staying right here in ', value=mycarrier.currentStarSystem)
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Jump cancelled', hooktype='discord', myembed=embed)
 
 
@@ -351,7 +351,7 @@ def calendar_event(request, calendar_id, webhook_url):
     embed.add_embed_field(name='Starting at', value=str(cdata.start))
     embed.add_embed_field(name='Ending at', value=str(cdata.end))
     embed.add_embed_field(name='Title', value=str(cdata.title))
-    embed.set_timestamp(datetime.utcnow())
+    embed.set_timestamp(datetime.utcnow().timestamp())
     return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
 
 
