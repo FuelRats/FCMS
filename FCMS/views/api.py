@@ -52,8 +52,8 @@ def api_view(request):
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if mycarrier.lastUpdated:
                         if mycarrier.lastUpdated < datetime.now() - timedelta(minutes=15):
-                            log.debug("Refreshing carrier data before sending webhook.")
-                            update_carrier(request, mycarrier.id, request.user)
+                            log.debug("Refreshing carrier data before sending webhook. (Temp. disabled)")
+                            # update_carrier(request, mycarrier.id, request.user)
                             request.dbsession.flush()
                             request.dbsession.refresh(mycarrier)
                     print("Check for route schedules...")
@@ -78,7 +78,7 @@ def api_view(request):
                                             res = webhooks.announce_route_jump(request, mycarrier.id, row.id,
                                                                                hook['webhook_url'])
                                             log.debug(f"Route jump result: {res}")
-                            return {'status': 'OK'}
+                                        return {'status': 'OK'}
 
                     if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
                         if 'Body' in data:
