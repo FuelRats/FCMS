@@ -1,5 +1,5 @@
 # TFRM Systems API helper code.
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 import requests
 
 
@@ -15,7 +15,7 @@ def query_sapi(endpoint, filter, query, includes):
     url = 'https://systems.api.fuelrats.com/api/'
     if endpoint not in ['systems', 'populated_systems']:
         return None
-    r = requests.get(urljoin(url, f"{endpoint}?filter[{filter}]={query}&include={includes}"))
+    r = requests.get(urljoin(url, f"{endpoint}?filter[{filter}]={quote(query)}&include={includes}"))
     r.raise_for_status()
     return r.json()
 
