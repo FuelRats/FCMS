@@ -15,7 +15,7 @@ def query_sapi(endpoint, filter, query, includes):
     url = 'https://systems.api.fuelrats.com/api/'
     if endpoint not in ['systems', 'populated_systems']:
         return None
-    r = requests.get(urljoin(url, f"{endpoint}?filter[{filter}]={query}&include={includes}"))
+    r = requests.get(urljoin(url, f"{endpoint}"), params={f'filter[{filter}]': '{query}', 'include': f'{includes}'})
     r.raise_for_status()
     return r.json()
 
@@ -35,4 +35,4 @@ def get_coords(system):
             return sys['data'][0]['attributes']['coords']
         else:
             return {'x': 0, 'y': 0, 'z': 0, 'error': 'Not found'}
-    return {'x': 0, 'y': 0, 'z': 0, 'error': 'Not found'}
+    return {'x': 0, 'y': 0, 'z': 0, 'error': 'No system provided'}
