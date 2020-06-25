@@ -55,7 +55,6 @@ def process_eddn(session, data):
     if 'event' in data:
         if data['event'] in {'Docked', 'CarrierJump'} and data['StationType'] == 'FleetCarrier':
             try:
-                print(f"Dock event for {data['StationName']} in {data['StarSystem']}")
                 oldcarrier = session.query(Carrier).filter(Carrier.callsign == data['StationName'])
                 if oldcarrier:
                     oldcarrier.currentStarSystem = data['StarSystem']

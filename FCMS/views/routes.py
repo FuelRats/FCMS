@@ -6,6 +6,9 @@ from ..models import Route, Carrier, User, CarrierExtra
 from ..models.routes import RouteCalendar, Region
 from ..utils import util, menu, user as myuser
 from datetime import datetime, timedelta
+import logging
+
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='routes', renderer='../templates/routes.jinja2')
@@ -30,7 +33,6 @@ def routes_view(request):
                      'carrier_name': util.from_hex(cr.name),
                      'scheduled_departure': rc.scheduled_departure,
                      })
-    print(data)
     return {'routes': data, 'user': userdata, 'sidebar': mymenu}
 
 
@@ -61,5 +63,5 @@ def route_view(request):
         }
 
         return {'route': data, 'user': userdata, 'sidebar': mymenu}
-    print(f"Route not found? RID was {request.matchdict['rid']}")
+    log.error(f"Route not found? RID was {request.matchdict['rid']}")
     return {'error': 'Route not found', 'user': userdata, 'sidebar': mymenu}

@@ -3,6 +3,8 @@
 import json
 from datetime import datetime
 
+from sqlalchemy.orm.exc import MultipleResultsFound
+
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar, CarrierExtra, Route
 import pyramid.httpexceptions as exc
@@ -332,9 +334,13 @@ def populate_view(request, cid, user):
         'events': events,
         'calendar': True,
     }
-    row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
-    if row:
-        data['arrival'] = row.arrivalTime
+    try:
+        row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
+        if row:
+            data['arrival'] = row.arrivalTime
+    except MultipleResultsFound as e:
+        log.error(f"Found multiple rows of itinerary with no departure time for CID {mycarrier.id}. Oops: {e}")
+        data['arrival'] = '----'
     return data
 
 
@@ -468,8 +474,7 @@ def update_carrier(request, cid, user):
         if 'ships' in jcarrier:
             if jcarrier['ships']['shipyard_list']:
                 for item, it in jcarrier['ships']['shipyard_list'].items():
-                    print(item)
-                    print(it)
+
                     sp = Ship(carrier_id=mycarrier.id, name=it['name'],
                               ship_id=it['id'], basevalue=it['basevalue'],
                               stock=it['stock'])
@@ -477,7 +482,6 @@ def update_carrier(request, cid, user):
 
         request.dbsession.query(Module).filter(Module.carrier_id
                                                == mycarrier.id).delete()
-        print(jcarrier['modules'])
         if 'modules' in jcarrier:
             try:
                 for item, it in jcarrier['modules'].items():

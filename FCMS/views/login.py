@@ -21,10 +21,7 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='forgot-password', renderer='../templates/forgot_password.jinja2')
 def resetpass_view(request):
-    if request.POST:
-        print(f"Got a post: {request.POST}")
     if 'token' in request.POST:
-        print("Token in param.")
         if request.params['password'] != request.params['password_verify']:
             log.warning(f"Password reset attempt - passwords do not match.")
             return {'error': 'Passwords do not match!'}
@@ -51,13 +48,11 @@ def resetpass_view(request):
             log.error(f"Invalid token supplied by {request.client_addr}")
             return {'error': 'Invalid password reset token.'}
     elif 'request_token' in request.POST:
-        print("Got request_token")
         if 'email' not in request.POST or request.POST['email'] == '':
             return {'error': 'No email supplied'}
         myuser = request.dbsession.query(user.User).filter(user.User.username == request.POST['email']).one_or_none()
         if myuser:
             # Send email.
-            print("Got a valid email to send.")
             request.dbsession.query(ResetToken).filter(ResetToken.user_id == myuser.id).delete()
             token = hexlify(os.urandom(64)).decode()
             tc = ResetToken(user_id=myuser.id, token=token, expires_at=datetime.now() + timedelta(hours=1),
@@ -70,8 +65,7 @@ def resetpass_view(request):
                             f'Greetings CMDR!\n\nSomeone (hopefully you!) has requested a password reset for your '
                             f'account. You can reset your password by clicking the link below.\n\n{url}')
         else:
-            print("Invalid email, but ignore.")
-        return {'view': 'reset-password', 'email_sent': True}
+            return {'view': 'reset-password', 'email_sent': True}
     return {'project': 'Fleet Carrier Management System'}
 
 
@@ -141,7 +135,6 @@ def oauth_callback(request):
         return {'project': 'Error: You should be logged in before completing Oauth!'}
     state = request.params['state']
     token = capi.get_token(request.url, state=state)
-    print(token)
     user.access_token = str(dict(token))
     user.refresh_token = token['refresh_token']
     user.token_expiration = token['expires_at']
