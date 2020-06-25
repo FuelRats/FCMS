@@ -3,6 +3,8 @@
 import json
 from datetime import datetime
 
+from sqlalchemy.orm.exc import MultipleResultsFound
+
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar, CarrierExtra, Route
 import pyramid.httpexceptions as exc
@@ -332,9 +334,13 @@ def populate_view(request, cid, user):
         'events': events,
         'calendar': True,
     }
-    row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
-    if row:
-        data['arrival'] = row.arrivalTime
+    try:
+        row = itinerary.filter(Itinerary.departureTime == None).one_or_none()
+        if row:
+            data['arrival'] = row.arrivalTime
+    except MultipleResultsFound as e:
+        log.error(f"Found multiple rows of itinerary with no departure time for CID {mycarrier.id}. Oops: {e}")
+        data['arrival'] = '----'
     return data
 
 
