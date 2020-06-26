@@ -15,7 +15,7 @@ def query_sapi(endpoint, filter, query, includes):
     url = 'https://systems.api.fuelrats.com/api/'
     if endpoint not in ['systems', 'populated_systems']:
         return None
-    r = requests.get(urljoin(url, f"{endpoint}"), params={f'filter[{filter}]': '{query}', 'include': f'{includes}'})
+    r = requests.get(urljoin(url, f"{endpoint}"), params={f'filter[{filter}]': f'{query}', 'include': f'{includes}'})
     r.raise_for_status()
     return r.json()
 
