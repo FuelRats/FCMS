@@ -15,7 +15,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def send_webhook(hookurl, message=None, hooktype='generic', myembed=None):
+def send_webhook(hookurl, message=None, hooktype='generic', myembed=None, refresh=True):
     """
     Executes a webhook. Tries to send event to the specified hook URL.
     :param hooktype: Type of webhook (Discord webhook, generic event)
@@ -275,7 +275,7 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     if body:
         embed.add_embed_field(name='Orbiting ', value=body)
     embed.set_timestamp(datetime.utcnow().timestamp())
-    return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed)
+    return send_webhook(webhook_url, 'Carrier Jump scheduled', hooktype='discord', myembed=embed, refresh=False)
 
 
 def announce_route_jump(request, cid, rid, webhook_url):
@@ -301,9 +301,9 @@ def announce_route_jump(request, cid, rid, webhook_url):
     embed.add_embed_field(name="Servicing route", value=route.route_name)
     embed.add_embed_field(name="Start Region", value=sr.name)
     embed.add_embed_field(name="Destination Region", value=er.name)
-    embed.add_embed_field(name="Planned time on station", value=None)
+    embed.add_embed_field(name="Planned time on station", value='---')
     embed.set_timestamp(datetime.utcnow().timestamp())
-    return send_webhook(webhook_url, 'Carrier Jumping Route', hooktype='discord', myembed=embed)
+    return send_webhook(webhook_url, 'Carrier Jumping Route', hooktype='discord', myembed=embed, refresh=False)
 
 
 def cancel_jump(request, cid, webhook_url, override=False):
@@ -322,7 +322,7 @@ def cancel_jump(request, cid, webhook_url, override=False):
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
     embed.add_embed_field(name='Staying right here in ', value=mycarrier.currentStarSystem)
     embed.set_timestamp(datetime.utcnow().timestamp())
-    return send_webhook(webhook_url, 'Carrier Jump cancelled', hooktype='discord', myembed=embed)
+    return send_webhook(webhook_url, 'Carrier Jump cancelled', hooktype='discord', myembed=embed, refresh=False)
 
 
 def calendar_event(request, calendar_id, webhook_url):
