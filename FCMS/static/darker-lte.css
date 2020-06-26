@@ -553,6 +553,17 @@ body.landing .tt-query {
   border-color: rgba(43, 43, 43, 0.8);
 }
 
+/* JIRA issue collector button */
+body.landing .atlwdg-trigger.atlwdg-SUBTLE {
+  right: 8%;
+  background: rgba(26,26,26,0.4);
+  border: 1px solid rgba(43,43,43,1);
+  color: white !important;
+  border-bottom: none;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+  border-radius: 4px 4px 0 0;
+}
+
 @media screen and (max-width: 900px) {
   body.landing .landing-header {
     flex-flow: column;
