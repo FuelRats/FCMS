@@ -254,7 +254,7 @@ def announce_route_scheduled(request, cid, routeid, webhook_url):
     return send_webhook(webhook_url, 'Carrier Route announced', hooktype='discord', myembed=embed)
 
 
-def announce_jump(request, cid, target, webhook_url, body=None):
+def announce_jump(request, cid, target, webhook_url, body=None, source=None):
     mycarrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     extra = request.dbsession.query(CarrierExtra).filter(CarrierExtra.cid == cid).one_or_none()
     etl = datetime.utcnow() + timedelta(minutes=12)
@@ -268,7 +268,10 @@ def announce_jump(request, cid, target, webhook_url, body=None):
     else:
         embed.set_image(url='https://fleetcarrier.space/static/img/carrier_default.png')
     embed.set_footer(text='Fleetcarrier.space - Fleet Carrier Management System')
-    embed.add_embed_field(name='Departing from', value=mycarrier.currentStarSystem)
+    if source:
+        embed.add_embed_field(name='Departing from', value=source)
+    else:
+        embed.add_embed_field(name='Departing from', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Headed to', value=target)
     embed.add_embed_field(name='Estimated lockdown time', value=etl.strftime('%d-%m-%y %H:%M:%S'))
     embed.add_embed_field(name='Estimated jump time', value=etd.strftime('%d-%m-%y %H:%M:%S'))
