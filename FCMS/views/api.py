@@ -25,17 +25,17 @@ def api_view(request):
     pvars = request.json
     if not pvars:
         log.warning(f"API: Empty request from {request.client_addr}")
-        raise exc.HTTPBadRequest(detail='Invalid API request.')
+        raise exc.HTTPBadRequest(detail=f'Invalid API request from {request.client_addr}.')
     if 'user' not in pvars or 'key' not in pvars:
         log.warning(f"API: Missing user information from {request.client_addr}")
-        raise exc.HTTPBadRequest(detail='Invalid API request.')
-    user = request.dbsession.query(User).filter(User.username == pvars['user']).one_or_none()
+        raise exc.HTTPBadRequest(detail='Invalid API request. No user information submitted.')
+    user = request.dbsession.query(User).filter(User.username.lower() == pvars['user'].lower()).one_or_none()
     if not user:
         log.error(f"API: Invalid username from {request.client_addr}: {pvars['user']}")
-        raise exc.HTTPBadRequest(detail='Invalid API key.')
+        raise exc.HTTPBadRequest(detail='Invalid API credentials.')
     if pvars['key'] != user.apiKey:
         log.error(f"API: Invalid API key from {request.client_addr} for user {pvars['user']}")
-        raise exc.HTTPBadRequest(detail='Invalid API key.')
+        raise exc.HTTPBadRequest(detail='Invalid API credentials.')
     if pvars['cmdr'].lower() != user.cmdr_name.lower():
         log.error(f"API: CMDR name does not match for user {user.cmdr_name}: Got {pvars['user']}")
         raise exc.HTTPBadRequest(detail='Data not for correct CMDR.')
