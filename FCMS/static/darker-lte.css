@@ -554,7 +554,7 @@ body.landing .tt-query {
 }
 
 /* JIRA issue collector button */
-body.landing .atlwdg-trigger.atlwdg-SUBTLE {
+#atlwdg-trigger.atlwdg-trigger.atlwdg-SUBTLE {
   right: 8%;
   background: rgba(26,26,26,0.4);
   border: 1px solid rgba(43,43,43,1);
