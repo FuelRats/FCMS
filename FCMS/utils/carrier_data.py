@@ -474,11 +474,14 @@ def update_carrier(request, cid, user):
         if 'ships' in jcarrier:
             if jcarrier['ships']['shipyard_list']:
                 for item, it in jcarrier['ships']['shipyard_list'].items():
-
-                    sp = Ship(carrier_id=mycarrier.id, name=it['name'],
-                              ship_id=it['id'], basevalue=it['basevalue'],
-                              stock=it['stock'])
-                    request.dbsession.add(sp)
+                    try:
+                        sp = Ship(carrier_id=mycarrier.id, name=it['name'],
+                                  ship_id=it['id'], basevalue=it['basevalue'],
+                                  stock=it['stock'])
+                        request.dbsession.add(sp)
+                    except KeyError:
+                        log.warning(f"Shipyard entry without a stock column: {mycarrier.callsign} carries {it['name']} "
+                                    f"with no stock.")
 
         request.dbsession.query(Module).filter(Module.carrier_id
                                                == mycarrier.id).delete()
