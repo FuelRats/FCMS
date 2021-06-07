@@ -104,8 +104,9 @@
       <div class="col-lg-6">
             <div class="card">
               <div class="card-header border-0">
-                <h3 class="card-title">{{ current_view.title() }}</h3>
+                  <h3 class="card-title"><span class="float-right">{{ current_view.title() }}</span></h3>
                 <div class="card-tools">
+                    <span class="text-muted">Last updated: {{ last_updated }}</span>
                   <a href="#" class="btn btn-tool btn-sm">
                     <i class="fas fa-download"></i>
                   </a>

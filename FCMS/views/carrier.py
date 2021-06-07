@@ -54,6 +54,7 @@ def carrier_subview(request):
             'col2_header': headers['col2_header'],
             'col3_header': headers['col3_header'],
             'col4_header': headers['col4_header'],
+            'last_updated': cid.lastUpdated,
             'items': data,
             'events': events,
             'sidebar': mymenu}
