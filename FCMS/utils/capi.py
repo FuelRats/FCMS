@@ -26,7 +26,7 @@ def update_token(token, ref_token=None, user=None):
     client.token = token
     try:
         new_token = client.refresh_token(token_endpoint, ref_token)
-        if 'message' in new_token:
+        if 'message' in new_token or 'detail' in new_token and new_token['detail'] == 'Unprocessable Content':
             log.warning(f"Authlib refresh token Failed! {new_token}: Retrying with request.")
             data = {'grant_type': 'refresh_token', 'refresh_token': ref_token,
                     'client_id': client_id, }
@@ -91,14 +91,19 @@ def capi(endpoint, user):
             log.debug(f"Expired access token for {user.cmdr_name}!")
             newtoken = update_token(client.token, ref_token=refresh_token, user=user)
             client.token = newtoken
-            user.access_token = str(dict(client.token))
-            user.refresh_token = client.token['refresh_token']
-            if 'expires_in' not in client.token:
-                # No expiration time, so set it to a day
-                user.token_expiration = 14400
-            else:
-                user.token_expiration = client.token['expires_in']
-            log.debug(f"Updated token: {newtoken}")
+            try:
+                user.access_token = str(dict(client.token))
+                user.refresh_token = client.token['refresh_token']
+                if 'expires_in' not in client.token:
+                    # No expiration time, so set it to a day
+                    user.token_expiration = 14400
+                else:
+                    user.token_expiration = client.token['expires_in']
+                log.debug(f"Updated token: {newtoken}")
+            except UnsupportedTokenTypeError:
+                log.error("Unsupported token type from authlib.")
+                user.access_token = None
+                client.token = None
 
         try:
             res = client.get(urljoin(capiURL, endpoint))
