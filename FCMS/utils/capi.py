@@ -86,14 +86,18 @@ def capi(endpoint, user):
         user.access_token = None
         client.token = None
     if client.token:
-        log.debug(f"AT expiration: {client.token.is_expired()} and {client.token['expires_at']}")
+        log.debug(f"AT expiration: {client.token.is_expired()} and {client.token['expires_in']}")
         if client.token.is_expired():
             log.debug(f"Expired access token for {user.cmdr_name}!")
             newtoken = update_token(client.token, ref_token=refresh_token, user=user)
             client.token = newtoken
             user.access_token = str(dict(client.token))
             user.refresh_token = client.token['refresh_token']
-            user.token_expiration = client.token['expires_at']
+            if 'expires_in' not in client.token:
+                # No expiration time, so set it to a day
+                user.token_expiration = 14400
+            else:
+                user.token_expiration = client.token['expires_in']
             log.debug(f"Updated token: {newtoken}")
 
         try:
