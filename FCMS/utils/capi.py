@@ -3,7 +3,7 @@ import json
 from json import JSONDecodeError
 from urllib.parse import urljoin
 import requests
-from authlib.integrations.base_client import UnsupportedTokenTypeError
+from authlib.integrations.base_client import UnsupportedTokenTypeError, OAuthError
 from authlib.integrations.requests_client import OAuth2Session
 from pyramid import threadlocal
 import logging
@@ -59,7 +59,7 @@ def update_token(token, ref_token=None, user=None):
             new_token = r.json()
             log.info(f"Unsupported token type from authlib. Manual refresh: {new_token}")
             return new_token
-        
+
 
 client = OAuth2Session(client_id=client_id, client_secret=client_secret, scope='auth capi',
                        token_endpoint_auth_method='client_secret_post',
