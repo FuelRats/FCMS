@@ -50,7 +50,16 @@ def update_token(token, ref_token=None, user=None):
             new_token = r.json()
             log.info(f"Unsupported token type from authlib. Manual refresh: {new_token}")
             return new_token
-
+    except OAuthError as e:
+        log.error(f"Couldn't refresh authentication token for {user.username}. {e}")
+        data = {'grant_type': 'refresh_token', 'refresh_token': ref_token,
+                'client_id': client_id}
+        r = requests.post(urljoin(authURL, token_endpoint), data=data)
+        if r.status_code == requests.codes.ok:
+            new_token = r.json()
+            log.info(f"Unsupported token type from authlib. Manual refresh: {new_token}")
+            return new_token
+        
 
 client = OAuth2Session(client_id=client_id, client_secret=client_secret, scope='auth capi',
                        token_endpoint_auth_method='client_secret_post',
