@@ -90,7 +90,12 @@ def get_finances(request, cid):
             cdata = json.loads(carrier.cachedJson)
         data = {}
         for key, val in cdata['finance'].items():
-            data[key] = format_number(val)
+            if key in ['service_taxation', 'bartender']:
+                continue # Skip until we can figure out how to handle these
+            try:
+                data[key] = format_number(val)
+            except TypeError:
+                data[key] = val
         return data
     else:
         log.error("Attempt to get finances for non-existant carrier!")
