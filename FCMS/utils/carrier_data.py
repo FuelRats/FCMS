@@ -399,7 +399,14 @@ def update_carrier(request, cid, user):
                     ow = request.dbsession.query(User).filter(User.id == mycarrier.owner).one_or_none()
                     if ow:
                         if ow.id == mycarrier.owner:
-                            log.warning("Proceeding with update to carrier ID.")
+                            tc = request.dbsession.query(Carrier).filter(Carrier.callsign == jcarrier['name']['callsign']).one_or_none()
+                            if tc:
+                                log.error(f"The carrier returned by the refresh already exists! {tc.id}")
+                                raise exc.HTTPInternalServerError(detail="You have logged in to CAPI with a different"
+                                                                         "account, with a carrier that already exists!"
+                                                                         " Please log out and log in again with the "
+                                                                         "correct account for this carrier.")
+                            log.warning("No conflicting carrier, proceeding with update to carrier ID.")
                     else:
                         # What? HOW THE FUCK does this happen? Verily it does, though.
                         log.error("Owner ID does NOT match, something has gone wrong. Abort.")
