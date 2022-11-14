@@ -3,10 +3,8 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    Binary,
-    Boolean,
     DateTime,
-    ForeignKey, Float, BigInteger,
+    ForeignKey,
 )
 
 from .meta import Base
