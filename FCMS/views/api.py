@@ -36,7 +36,7 @@ def api_view(request):
     if pvars['key'] != user.apiKey:
         log.error(f"API: Invalid API key from {request.client_addr} for user {pvars['user']}")
         raise exc.HTTPBadRequest(detail='Invalid API key.')
-    if pvars['cmdr'].lower() != user.cmdr_name.lower():
+    if pvars['cmdr'].lower().strip() != user.cmdr_name.lower().strip():
         log.error(f"API: CMDR name does not match for user {user.cmdr_name}: Got {pvars['user']}")
         raise exc.HTTPBadRequest(detail='Data not for correct CMDR.')
     else:

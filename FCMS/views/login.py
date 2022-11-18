@@ -113,7 +113,7 @@ def register_view(request):
         cryptpass = pwd_context.hash(request.params['pass'])
         apikey = hexlify(os.urandom(64)).decode()
         newuser = user.User(username=request.params['email'], password=cryptpass, userlevel=1,
-                            cmdr_name=request.params['cmdr_name'], has_validated=False, public_carrier=True,
+                            cmdr_name=request.params['cmdr_name'].strip(), has_validated=False, public_carrier=True,
                             banned=False, apiKey=apikey)
         request.dbsession.add(newuser)
         log.info(f"Registered new user {request.params['email']} from {request.client_addr}.")
