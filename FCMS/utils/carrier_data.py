@@ -478,6 +478,8 @@ def update_carrier(request, cid, user):
             request.dbsession.flush()
         except DataError as e:
             log.error(f"Error loading cargo data from CAPI, value? {e.detail}")
+            request.dbsession.rollback()
+
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
         for item in jcarrier['market']['commodities']:
