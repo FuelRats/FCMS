@@ -3,7 +3,9 @@
 import json
 from datetime import datetime
 
+import sqlalchemy
 from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.exc import DataError
 
 from . import capi
 from ..models import Carrier, User, Itinerary, Market, Module, Ship, Cargo, Calendar, CarrierExtra, Route
@@ -134,30 +136,32 @@ def get_cargo(request, cid):
         clean_cargo = {}
         stolen_cargo = {}
         result = request.dbsession.query(Cargo).filter(Cargo.carrier_id == cid)
-        for cg in result:
-            if cg.stolen:
-                if cg.commodity in stolen_cargo.keys():
-                    stolen_cargo[cg.commodity]['quantity'] = stolen_cargo[cg.commodity]['quantity'] + cg.quantity
+        try:
+            for cg in result:
+                if cg.stolen:
+                    if cg.commodity in stolen_cargo.keys():
+                        stolen_cargo[cg.commodity]['quantity'] = stolen_cargo[cg.commodity]['quantity'] + cg.quantity
+                    else:
+                        stolen_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
+                                                      'quantity': cg.quantity,
+                                                      'value': format_number(cg.value),
+                                                      'stolen': cg.stolen,
+                                                      'locname': cg.locName
+                                                      }
                 else:
-                    stolen_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
-                                                  'quantity': cg.quantity,
-                                                  'value': format_number(cg.value),
-                                                  'stolen': cg.stolen,
-                                                  'locname': cg.locName
-                                                  }
-            else:
-                if cg.commodity in clean_cargo.keys():
-                    clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
-                else:
-                    clean_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
-                                                 'quantity': cg.quantity,
-                                                 'value': format_number(cg.value),
-                                                 'stolen': cg.stolen,
-                                                 'locname': cg.locName
-                                                 }
-        data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
-        return data
-
+                    if cg.commodity in clean_cargo.keys():
+                        clean_cargo[cg.commodity]['quantity'] = clean_cargo[cg.commodity]['quantity'] + cg.quantity
+                    else:
+                        clean_cargo[cg.commodity] = {'commodity': translation.localize_commodity(cg.commodity),
+                                                     'quantity': cg.quantity,
+                                                     'value': format_number(cg.value),
+                                                     'stolen': cg.stolen,
+                                                     'locname': cg.locName
+                                                     }
+            data = {'clean_cargo': clean_cargo, 'stolen_cargo': stolen_cargo}
+            return data
+        except DataError as e:
+            log.error(f"Unable to parse cargo from CAPI: {e.detail}")
 
 def get_market(request, cid):
     """

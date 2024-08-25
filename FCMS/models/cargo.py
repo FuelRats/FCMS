@@ -2,6 +2,7 @@ from sqlalchemy import (
     Column,
     Index,
     Integer,
+    BigInteger,
     Text, Boolean, DateTime,
 )
 
@@ -16,7 +17,7 @@ class Cargo(Base):
     locName = Column(Text)
     quantity = Column(Integer)
     stolen = Column(Boolean)
-    value = Column(Integer)
+    value = Column(BigInteger)
 
 
 Index('cargo_index', Cargo.id, unique=True)
