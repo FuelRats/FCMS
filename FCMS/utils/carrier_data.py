@@ -470,11 +470,14 @@ def update_carrier(request, cid, user):
 
         request.dbsession.query(Cargo).filter(Cargo.carrier_id
                                               == mycarrier.id).delete()
-        for item in jcarrier['cargo']:
-            cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
-                       quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
-            request.dbsession.add(cg)
-        request.dbsession.flush()
+        try:
+            for item in jcarrier['cargo']:
+                cg = Cargo(carrier_id=mycarrier.id, commodity=item['commodity'],
+                           quantity=item['qty'], stolen=item['stolen'], locName=item['locName'], value=item['value'])
+                request.dbsession.add(cg)
+            request.dbsession.flush()
+        except DataError as e:
+            log.error(f"Error loading cargo data from CAPI, value? {e.detail}")
         request.dbsession.query(Market).filter(Market.carrier_id
                                                == mycarrier.id).delete()
         for item in jcarrier['market']['commodities']:
