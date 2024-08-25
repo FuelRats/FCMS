@@ -326,7 +326,7 @@ def carrier_subview(request):
         data['current_view'] = 'routes'
         data['routes'] = populate_routes(request, mycarrier.id)
         data['schedules'] = populate_schedule(request, mycarrier.id)
-        print(data['routes'])
+        # print(data['routes'])
         data['formadvanced'] = True
         data['deform'] = True
         data['newrouteform'] = newrouteform.render()

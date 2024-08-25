@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def from_hex(mystr):
-    print(mystr)
+    #print(mystr)
     try:
         return bytes.fromhex(mystr).decode('utf-8')
     except TypeError:

@@ -27,7 +27,7 @@ def populate_calendar(request, cid):
     carrier = request.dbsession.query(Carrier).filter(Carrier.id == cid).one_or_none()
     if carrier:
         data = []
-        print(f"CID is {cid}")
+        # print(f"CID is {cid}")
         calendar = request.dbsession.query(Calendar).filter(Calendar.carrier_id == carrier.id).all()
         for event in calendar:
             print(f"Process Calendar ID {event.id}")
@@ -52,7 +52,7 @@ def populate_calendar(request, cid):
                              })
         calendar = request.dbsession.query(Calendar).filter(Calendar.is_global).all()
         for event in calendar:
-            print(f"Process Calendar ID {event.id}")
+            # print(f"Process Calendar ID {event.id}")
             if event.url:
                 data.append({'title': event.title,
                              'start': event.start,
