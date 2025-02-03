@@ -4,6 +4,7 @@ import smtplib
 import urllib
 from binascii import hexlify
 from datetime import datetime, timedelta
+from sqlalchemy import func
 from urllib.parse import urljoin
 
 from pyramid.view import view_config
@@ -74,7 +75,7 @@ def login_view(request):
     if 'test' not in request.session:
         request.session['test'] = True
     if 'email' in request.params:
-        res = request.dbsession.query(user.User).filter(user.User.username == request.params['email']).one_or_none()
+        res = request.dbsession.query(user.User).filter_by(func.lower(user.User.username) == func.lower(request.params['email'])).one_or_none()
         if res:
             if pwd_context.verify(request.params['pass'], res.password):
                 if 'remember' in request.params:
@@ -116,7 +117,7 @@ def register_view(request):
                             cmdr_name=request.params['cmdr_name'].strip(), has_validated=False, public_carrier=True,
                             banned=False, apiKey=apikey)
         request.dbsession.add(newuser)
-        log.info(f"Registered new user {request.params['email']} from {request.client_addr}.")
+        log.info(f"Registered new user: CMDR {request.params['cmdr_name'].strip()} ({request.params['email']}) from {request.client_addr}.")
         return exc.HTTPFound(location=request.route_url('login'))
     return {'project': 'Fleet Carrier Management System'}
 
@@ -172,7 +173,7 @@ def oauth_finalize(request):
                 log.debug("We have a carrier with a matching callsign.")
                 if oc.owner:
                     log.debug(f"Carrier {oc.callsign} already claimed by {oc.owner}!")
-                    return {'project': 'Error: Your carrier seems to already be claimed by another account! Please report this.',
+                    return {'project': 'Error: Your carrier seems to already be claimed by another account!',
                             'meta': {'refresh': True, 'target': request.route_url('my_carrier'), 'delay': 5}}
                 elif oc.trackedOnly:
                     log.debug("Carrier is a tracked only carrier with no owner. Claim it.")
