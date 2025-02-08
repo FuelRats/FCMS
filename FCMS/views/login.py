@@ -75,7 +75,7 @@ def login_view(request):
     if 'test' not in request.session:
         request.session['test'] = True
     if 'email' in request.params:
-        res = request.dbsession.query(user.User).filter_by(func.lower(user.User.username) == func.lower(request.params['email'])).one_or_none()
+        res = request.dbsession.query(user.User).filter(func.lower(user.User.username) == func.lower(request.params['email'])).one_or_none()
         if res:
             if pwd_context.verify(request.params['pass'], res.password):
                 if 'remember' in request.params:
