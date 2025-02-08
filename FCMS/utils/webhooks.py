@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 def send_webhook(hookurl, message=None, hooktype='generic', myembed=None, refresh=True):
     """
-    Executes a webhook. Tries to send event to the specified hook URL.
+    Executes a webhook. Tries to send event to the specified hook URL
     :param hooktype: Type of webhook (Discord webhook, generic event)
     :param myembed: If Discord, the embed to send to the webhook
     :param hookurl: The URL to send the webhook to
@@ -46,9 +46,10 @@ def populate_webhook(request, user):
     carrier = request.dbsession.query(Carrier).filter(Carrier.owner == 1).one_or_none()
     if user:
         return dict({'cmdr_name': user.cmdr_name, 'carrier_callsign': carrier.callsign, 'carrier_vanity_name':
-            carrier.name, 'docking_access': carrier.dockingAccess, 'current_starsystem': carrier.currentStarSystem,
-                     'notorious_access': carrier.notoriousAccess, 'taxation': carrier.taxation,
-                     'has_refuel': carrier.hasRefuel, 'has_repair': carrier.hasRepair, 'has_rearm': carrier.hasRearm})
+                     carrier.name, 'docking_access': carrier.dockingAccess,
+                     'current_starsystem': carrier.currentStarSystem, 'notorious_access': carrier.notoriousAccess,
+                     'taxation': carrier.taxation, 'has_refuel': carrier.hasRefuel, 'has_repair': carrier.hasRepair,
+                     'has_rearm': carrier.hasRearm})
 
 
 def calendar_generic(request, calendar_id, webhook_url):
@@ -72,12 +73,13 @@ def calendar_generic(request, calendar_id, webhook_url):
         myjson = json.dumps(indata)
         log.debug(str(indata))
         # send_webhook(webhook_url, myjson, hooktype='generic')
-    return myjson
+        return myjson
+    return None
 
 
 def schedule_jump(request, calendar_id, webhook_url):
     """
-    Fires a webhook for a jump calendar event.
+    Fires a webhook for a jump calendar event
     :param webhook_url: The webhook URL
     :param request: The request object
     :param calendar_id: Calendar ID for event
@@ -162,7 +164,8 @@ def market_update(request, cid, items, webhook_url, message=None):
             embed.add_embed_field(name='Quantity', value=format_number(item.demand))
     embed.add_embed_field(name='Current Location', value=mycarrier.currentStarSystem)
     embed.add_embed_field(name='Docking Access',
-                          value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends' else mycarrier.dockingAccess.title())
+                          value='Squadron and Friends' if mycarrier.dockingAccess == 'squadronfriends'
+                          else mycarrier.dockingAccess.title())
     embed.set_timestamp(datetime.utcnow().timestamp())
     if message:
         embed.add_embed_field(name='Message', value=message, inline=False)

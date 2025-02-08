@@ -49,8 +49,8 @@ def api_view(request):
                     log.debug(f"Process hook {hook['webhook_url']}")
                     if mycarrier.lastUpdated:
                         if mycarrier.lastUpdated < datetime.now() - timedelta(minutes=15):
-                            log.debug("Refreshing carrier data before sending webhook. (Temp. disabled)")
-                            # update_carrier(request, mycarrier.id, request.user)
+                            log.debug("Refreshing carrier data before sending webhook.")
+                            update_carrier(request, mycarrier.id, request.user)
                             request.dbsession.flush()
                             request.dbsession.refresh(mycarrier)
                     rc = request.dbsession.query(RouteCalendar).filter(RouteCalendar.carrier_id == mycarrier.id)
@@ -75,10 +75,10 @@ def api_view(request):
                     if hook['webhook_type'] == 'discord' and hook['jumpEvents']:
                         if 'Body' in data:
                             res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
-                                                         hook['webhook_url'], body=data['Body'], source=pvars['system'])
+                                                         hook['webhook_url'], body=data['Body'])
                         else:
                             res = webhooks.announce_jump(request, mycarrier.id, data['SystemName'],
-                                                         hook['webhook_url'], source=pvars['system'])
+                                                         hook['webhook_url'])
                         log.debug(f"Hook result: {res}")
 
         elif data['event'] == 'CarrierJumpCancelled':
