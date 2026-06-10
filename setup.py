@@ -36,7 +36,6 @@ requires = [
     'simplejson',
     'semver',
     'discord-webhook',
-    'dictalchemy',
 ]
 
 tests_require = [
