@@ -30,7 +30,6 @@ requires = [
     'requests',
     'authlib',
     'humanfriendly',
-    'numpy',
     'graypy',
     'zmq',
     'simplejson',

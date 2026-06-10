@@ -1,10 +1,8 @@
 import colander
-import numpy
+import math
 from deform import widget, Form
 from pyramid.view import view_config
-from pyramid.response import Response
 import pyramid.httpexceptions as exc
-from pyramid.security import remember, forget
 from sqlalchemy import text
 
 from ..models import user, carrier
@@ -15,6 +13,10 @@ import re
 import logging
 
 log = logging.getLogger(__name__)
+
+
+def distance(source, target):
+    return math.sqrt(sum((float(s) - float(t)) ** 2 for s, t in zip(source, target)))
 
 
 class Search(colander.MappingSchema):
@@ -28,9 +30,8 @@ def fill_data(candidates, source):
     for row in candidates:
         log.debug(f"Source is {source}")
         try:
-            if row.x and row.y and row.z:
-                target = numpy.array((row.x, row.y, row.z))
-                dist = numpy.linalg.norm(source - target)
+            if row.x is not None and row.y is not None and row.z is not None:
+                dist = distance(source, (row.x, row.y, row.z))
             else:
                 dist = 99999
             system = sapi.get_system_by_name(row.currentStarSystem)
@@ -114,7 +115,7 @@ def dssa_view(request):
     x = sys['x']
     y = sys['y']
     z = sys['z']
-    source = numpy.array((sys['x'], sys['y'], sys['z']))
+    source = (sys['x'], sys['y'], sys['z'])
     candidates = request.dbsession.query(carrier.Carrier).from_statement(
         text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
              f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -141,9 +142,9 @@ def system_view(request):
         searchform = Form(schema, buttons=('submit',), method='POST', action='/search/system')
         controls = request.POST.items()
         appstruct = searchform.validate(controls)
-        term = appstruct['system']
+        term = str(appstruct['system'])
     else:
-        term = request.params['term'] if 'term' in request.params else None
+        term = str(request.params['term']) if 'term' in request.params else ''
     if term:
         coords = sapi.get_coords(term)
         if 'error' in coords:
@@ -152,7 +153,7 @@ def system_view(request):
         x = coords['x']
         y = coords['y']
         z = coords['z']
-        source = numpy.array((x, y, z))
+        source = (x, y, z)
         cube = 5000
         if coords:
             cand = request.dbsession.query(carrier.Carrier).from_statement(
@@ -199,7 +200,7 @@ def closest_view(request):
     y = coords['y']
     z = coords['z']
     cube = 5000
-    source = numpy.array((x, y, z))
+    source = (x, y, z)
     candidates = request.dbsession.query(carrier.Carrier).from_statement(
         text(f"SELECT *, (sqrt((cast(carriers.x AS FLOAT) - {x}"
              f")^2 + (cast(carriers.y AS FLOAT) - {y}"
@@ -239,7 +240,7 @@ def search_view(request):
     items = []
     rs = '^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$'
     r = re.compile(rs)
-    if r.search(term):
+    if term and r.search(term):
         # Looks like a carrier ID, let's see if we have it.
         res = request.dbsession.query(carrier.Carrier).filter(carrier.Carrier.callsign == term.upper()).one_or_none()
         if res:
